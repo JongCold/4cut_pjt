@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI 4-CUT STUDIO | 모바일 사진 & 영상 다운로드</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="./style.css">
+  
+  <style>
+    body {
+      background-color: #F8FAFC;
+    }
+    .mobile-viewer-card {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background-color: #FFFFFF;
+      padding: 24px 20px 40px 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+    }
+    .header-logo {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+    .header-logo h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1F2937, #8B5CF6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .media-section {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .media-card {
+      background-color: #F1F5F9;
+      border-radius: 16px;
+      padding: 16px;
+      border: 1px solid #E2E8F0;
+    }
+    .media-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #1F2937;
+    }
+    .img-preview-box {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+      margin-bottom: 14px;
+      background-color: #FFFFFF;
+    }
+    .img-preview-box img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .video-preview-box {
+      width: 100%;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      background-color: #000000;
+    }
+    .video-preview-box video {
+      width: 100%;
+      display: block;
+    }
+    .privacy-notice {
+      background-color: #F5F3FF;
+      border: 1px solid #DDD6FE;
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 0.82rem;
+      color: #64748B;
+      line-height: 1.6;
+      margin-top: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-viewer-card">
+    <div class="header-logo">
+      <h2>✨ AI 4-CUT STUDIO</h2>
+      <p style="font-size: 0.85rem; color: #64748B; margin-top: 4px;">나만의 4컷 완성본 사진 및 비하인드 영상 다운로드</p>
+    </div>
+
+    <div class="media-section">
+      
+      <!-- 4컷 이미지 섹션 -->
+      <div class="media-card">
+        <div class="media-title">📸 완성본 4컷 사진</div>
+        <div class="img-preview-box">
+          <img id="display-image" src="" alt="4컷 완성 사진 로딩 중...">
+        </div>
+        <a id="btn-download-img" href="#" target="_blank" download="ai_4cut_photo.jpg" class="btn btn-primary btn-large w-full">
+          ⬇️ 4컷 사진 고화질 다운로드
+        </a>
+      </div>
+
+      <!-- 비하인드 동영상 섹션 -->
+      <div class="media-card">
+        <div class="media-title">🎥 전 과정 비하인드 영상</div>
+        <div class="video-preview-box">
+          <video id="display-video" controls loop playsinline poster="">
+            <source id="video-source" src="" type="video/webm">
+            브라우저가 동영상 재생을 지원하지 않습니다.
+          </video>
+        </div>
+        <a id="btn-download-vid" href="#" target="_blank" download="behind_video.webm" class="btn btn-secondary btn-large w-full">
+          ⬇️ 비하인드 캠 영상 다운로드
+        </a>
+      </div>
+
+    </div>
+
+    <div class="privacy-notice">
+      <strong style="color: #8B5CF6;">🔒 개인정보 보호 안내</strong><br>
+      본 서비스는 No-DB 아키텍처로 운영되며, 처리 목적 달성 및 개인정보보호법 제21조에 따라 업로드된 사진과 영상은 <strong>24시간 후 구글 드라이브 스토리지에서 자동 파기</strong>됩니다.
+    </div>
+  </div>
+
+  <script>
+    // URL Query Parameter 파싱 (?img=...&vid=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const imgId = urlParams.get('img');
+    const vidId = urlParams.get('vid');
+
+    const imgElem = document.getElementById('display-image');
+    const btnImg = document.getElementById('btn-download-img');
+    
+    const videoElem = document.getElementById('display-video');
+    const videoSource = document.getElementById('video-source');
+    const btnVid = document.getElementById('btn-download-vid');
+
+    // 구글 드라이브 / 로컬 URL 파싱 & 바인딩
+    if (imgId) {
+      let imgUrl = '';
+      let imgDirectLink = '';
+      if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')) {
+        imgUrl = `/uploads/${imgId}`;
+        imgDirectLink = imgUrl;
+      } else {
+        // 구글 드라이브 파일 ID 방식 (썸네일 API & direct 뷰 연동)
+        imgUrl = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1200`;
+        imgDirectLink = `https://drive.google.com/file/d/${imgId}/view?usp=sharing`;
+        
+        // 이미지 로딩 실패 시 fallback (lh3)
+        imgElem.onerror = () => {
+          imgElem.src = `https://lh3.googleusercontent.com/d/${imgId}`;
+        };
+      }
+      imgElem.src = imgUrl;
+      btnImg.href = imgDirectLink;
+    }
+
+    if (vidId) {
+      let vidUrl = '';
+      let vidDirectLink = '';
+      if (vidId.startsWith('behind_video_')) {
+        vidUrl = `/uploads/${vidId}`;
+        vidDirectLink = vidUrl;
+      } else {
+        // 구글 드라이브 파일 ID 방식
+        vidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
+        vidDirectLink = `https://drive.google.com/file/d/${vidId}/preview`;
+      }
+      videoSource.src = vidUrl;
+      videoElem.load();
+      btnVid.href = vidDirectLink;
+    }
+  </script>
+</body>
+</html>

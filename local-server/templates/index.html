@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI 4-CUT STUDIO | 인생 4컷 포토부스</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- CSS 스타일 가이드 연동 -->
+  <link rel="stylesheet" href="/templates/style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- 필터 미선택 경고 토스트 알림 -->
+    <div id="toast-alert" class="toast-alert">
+      <div class="toast-content">
+        <i>⚠️</i>
+        <span id="toast-message">필터를 선택해 주세요!</span>
+      </div>
+    </div>
+
+    <!-- AI 변환 로딩 오버레이 -->
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="loading-spinner-box">
+        <div class="quantum-spinner"></div>
+        <div class="loading-title">AI 4컷 이미지를 생성 중입니다</div>
+        <div class="loading-desc">오픈소스 Stable Diffusion 파이프라인으로 화질을 높이고 스타일을 전이하는 중...</div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         [화면 1] 홈 화면
+         ========================================== -->
+    <section id="screen-home" class="screen active">
+      <div class="hero-section">
+        <div class="logo-area">
+          <div class="logo-icon-wrap">
+            <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h1 class="brand-title">AI 4-CUT STUDIO</h1>
+          <p class="brand-subtitle">나만의 프롬프트로 완성하는 감성 인생 4컷 포토부스</p>
+        </div>
+
+        <div class="hero-visual">
+          <div class="placeholder-card">
+            <div class="preview-layout">
+              <div class="preview-box"></div>
+              <div class="preview-box"></div>
+              <div class="preview-box"></div>
+              <div class="preview-box"></div>
+            </div>
+            <div class="sparkle-group">
+              <div class="sparkle-dot"></div>
+              <div class="sparkle-dot"></div>
+              <div class="sparkle-dot"></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <button id="btn-start" class="btn btn-primary btn-large w-full">📸 촬영 시작하기</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         [화면 2] 스타일 필터 선택
+         ========================================== -->
+    <section id="screen-filter" class="screen">
+      <header class="fixed-header">
+        <div class="header-title">AI 스타일 선택</div>
+        <div class="header-desc">원하는 콘셉트 필터를 1개 선택해 주세요.</div>
+      </header>
+
+      <div class="screen-content">
+        <div class="filter-carousel-wrapper scrollable-content">
+          <div class="filter-carousel">
+            
+            <div class="filter-card selected" data-style="original">
+              <div class="filter-img-holder">
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #E2E8F0, #CBD5E1);display:flex;align-items:center;justify-content:center;font-size:2rem;">📷</div>
+              </div>
+              <div class="filter-name">오리지널 클래식</div>
+            </div>
+
+            <div class="filter-card" data-style="soft_cartoon">
+              <div class="filter-img-holder">
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #FED7AA, #FDBA74);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎨</div>
+              </div>
+              <div class="filter-name">소프트 카툰 (3D)</div>
+            </div>
+
+            <div class="filter-card" data-style="ghibli">
+              <div class="filter-img-holder">
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #BBF7D0, #86EFAC);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌿</div>
+              </div>
+              <div class="filter-name">지브리 수채화</div>
+            </div>
+
+            <div class="filter-card" data-style="neon_fantasy">
+              <div class="filter-img-holder">
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #F472B6, #C084FC);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌆</div>
+              </div>
+              <div class="filter-name">네온 판타지</div>
+            </div>
+
+            <div class="filter-card" data-style="bw_cinema">
+              <div class="filter-img-holder">
+                <div style="width:100%;height:100%;background:linear-gradient(135deg, #475569, #1E293B);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎬</div>
+              </div>
+              <div class="filter-name">흑백 시네마</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <footer class="fixed-footer">
+        <button id="btn-to-shoot" class="btn btn-primary btn-large w-full">다음 (촬영 준비) ➔</button>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         [화면 3] 사진 4컷 촬영 & 비하인드 녹화
+         ========================================== -->
+    <section id="screen-shoot" class="screen">
+      <header class="fixed-header">
+        <div class="header-title">사진 촬영</div>
+        <div class="header-desc">카메라를 보고 매 컷마다 멋진 포즈를 취해 보세요!</div>
+      </header>
+
+      <div class="screen-content flex-column-content">
+        <div class="timer-container">
+          <div class="shoot-timer-wrap">
+            <svg class="timer-svg" viewBox="0 0 100 100">
+              <circle class="timer-bg" cx="50" cy="50" r="42"></circle>
+              <circle id="timer-progress" class="timer-progress" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="0"></circle>
+            </svg>
+            <div id="timer-number" class="timer-number">5</div>
+          </div>
+          <div id="shoot-counter-badge" class="shoot-counter-badge">1 / 4 컷</div>
+        </div>
+
+        <div class="camera-viewport-container">
+          <div class="camera-viewport">
+            <video id="webcam-preview" autoplay playsinline muted></video>
+            <div id="flash-effect" class="flash-effect"></div>
+          </div>
+        </div>
+
+        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full">🚀 4컷 연사 시작</button>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         [화면 4] 촬영본 4컷 확인 및 AI 변환 요청
+         ========================================== -->
+    <section id="screen-select" class="screen">
+      <header class="fixed-header">
+        <div class="header-title">촬영본 확인</div>
+        <div class="header-desc">캡처된 4컷 사진을 확인하세요.</div>
+      </header>
+
+      <div class="screen-content scrollable-content select-content">
+        <div class="photos-grid">
+          <div class="photo-card selected">
+            <img id="captured-img-0" src="" alt="Shot 1">
+            <div class="photo-badge">1</div>
+          </div>
+          <div class="photo-card selected">
+            <img id="captured-img-1" src="" alt="Shot 2">
+            <div class="photo-badge">2</div>
+          </div>
+          <div class="photo-card selected">
+            <img id="captured-img-2" src="" alt="Shot 3">
+            <div class="photo-badge">3</div>
+          </div>
+          <div class="photo-card selected">
+            <img id="captured-img-3" src="" alt="Shot 4">
+            <div class="photo-badge">4</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="fixed-footer">
+        <div class="split-buttons">
+          <button id="btn-retake" class="btn btn-secondary">🔄 재촬영</button>
+          <button id="btn-transform" class="btn btn-primary">✨ AI 변환 생성</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         [화면 5/6] 생성 결과 비교 (AI vs 원본)
+         ========================================== -->
+    <section id="screen-result" class="screen">
+      <header class="fixed-header">
+        <div class="header-title">변환 완료</div>
+        <div class="header-desc">생성된 AI 4컷 프레임 결과를 확인해 보세요.</div>
+      </header>
+
+      <div class="screen-content scrollable-content side-by-side-content">
+        <div class="comparison-grid">
+          <div class="comparison-card selected" id="card-ai">
+            <div class="card-label">✨ AI 스타일 프레임</div>
+            <div class="four-cut-frame mini-frame">
+              <img id="ai-frame-preview" style="width:100%;height:100%;object-fit:contain;" src="" alt="AI 4컷">
+            </div>
+            <div class="selection-indicator">✓</div>
+          </div>
+
+          <div class="comparison-card" id="card-orig">
+            <div class="card-label">📷 원본 사진 프레임</div>
+            <div class="four-cut-frame mini-frame">
+              <img id="orig-frame-preview" style="width:100%;height:100%;object-fit:contain;" src="" alt="Original 4컷">
+            </div>
+            <div class="selection-indicator">✓</div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="fixed-footer">
+        <button id="btn-to-finish" class="btn btn-primary btn-large w-full">다음 (QR & 인화) ➔</button>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         [화면 7] 다운로드 QR & 인화 시뮬레이션
+         ========================================== -->
+    <section id="screen-finish" class="screen">
+      <header class="fixed-header">
+        <div class="header-title">스마트폰 저장 & 출력</div>
+        <div class="header-desc">QR 코드를 스캔하여 완성본과 비하인드 영상을 받으세요!</div>
+      </header>
+
+      <div class="screen-content center-content">
+        <div class="finish-panel">
+          <div class="qr-container-box">
+            <div class="qrcode-wrapper">
+              <img id="qr-code-img" width="180" height="180" src="" alt="QR Code">
+            </div>
+            <p class="qr-info-text">
+              스마트폰 카메라로 QR 코드를 스캔하면<br>
+              <strong>4컷 완성본 사진</strong>과 <strong>비하인드 캠 영상</strong>을<br>
+              개별 다운로드할 수 있습니다.<br>
+              <span style="font-size:0.78rem;color:#94A3B8;">(개인정보 보호법에 의거 24시간 후 자동 파기)</span>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer class="fixed-footer">
+        <div class="split-buttons">
+          <button id="btn-print-modal" class="btn btn-secondary">🖨️ 인화 출력</button>
+          <button id="btn-reset-home" class="btn btn-primary">🏠 처음으로</button>
+        </div>
+      </footer>
+    </section>
+
+    <!-- 프린터 시뮬레이션 모달 -->
+    <div id="modal-print" class="modal-overlay">
+      <div class="modal-card">
+        <button id="modal-close" class="modal-close-btn">✕</button>
+        <div class="modal-header">
+          <div class="print-animation">
+            <div class="printer-pulse">🖨️</div>
+          </div>
+          <h3>포토 프린터 인화 중</h3>
+        </div>
+        <div class="modal-body">
+          <div class="status-tracker">
+            <div class="status-step active" id="p-step-1">
+              <div class="step-indicator">1</div>
+              <span>고화질 4컷 이미지 데이터 전송</span>
+            </div>
+            <div class="status-step" id="p-step-2">
+              <div class="step-indicator">2</div>
+              <span>인화지 정렬 및 현색 작업</span>
+            </div>
+            <div class="status-step" id="p-step-3">
+              <div class="step-indicator">3</div>
+              <span>코팅 처리 및 사진 배출 완료</span>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <div class="sub-alert-text">
+            <i>ℹ️</i>
+            <span>인화 출력 시뮬레이션이 진행 중입니다. 출구가 차단되지 않았는지 확인해 주세요.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- JavaScript 연동 -->
+  <script>
+    // 전역 상태 변수
+    let currentScreen = 'screen-home';
+    let selectedStyle = 'original';
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let capturedBlobs = [];
+    let transformResult = null;
+
+    // DOM 요소
+    const screens = {
+      home: document.getElementById('screen-home'),
+      filter: document.getElementById('screen-filter'),
+      shoot: document.getElementById('screen-shoot'),
+      select: document.getElementById('screen-select'),
+      result: document.getElementById('screen-result'),
+      finish: document.getElementById('screen-finish')
+    };
+
+    // 화면 전환 함수
+    function navigateTo(screenId) {
+      Object.values(screens).forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(screenId);
+      if (target) {
+        target.classList.add('active');
+        currentScreen = screenId;
+      }
+    }
+
+    // 토스트 알림 표시
+    function showToast(msg) {
+      const toast = document.getElementById('toast-alert');
+      document.getElementById('toast-message').innerText = msg;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // 필터 카루셀 선택 처리
+    document.querySelectorAll('.filter-card').forEach(card => {
+      card.addEventListener('click', () => {
+        document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        selectedStyle = card.getAttribute('data-style');
+      });
+    });
+
+    // 1. 홈 -> 필터 선택
+    document.getElementById('btn-start').addEventListener('click', () => {
+      navigateTo('screen-filter');
+    });
+
+    // 2. 필터 -> 촬영 준비 (웹캠 활성화)
+    document.getElementById('btn-to-shoot').addEventListener('click', async () => {
+      if (!selectedStyle) {
+        showToast('AI 스타일을 먼저 선택해 주세요!');
+        return;
+      }
+      navigateTo('screen-shoot');
+      await initWebcam();
+    });
+
+    // 웹캠 및 MediaRecorder 초기화
+    async function initWebcam() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
+        const videoElem = document.getElementById('webcam-preview');
+        videoElem.srcObject = mediaStream;
+
+        // MediaRecorder 준비
+        recordedChunks = [];
+        try {
+          mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
+        } catch (e) {
+          mediaRecorder = new MediaRecorder(mediaStream);
+        }
+        mediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+      } catch (err) {
+        console.error('웹캠 연결 실패:', err);
+        showToast('웹캠을 연결할 수 없습니다.');
+      }
+    }
+
+    // 3. 4컷 연속 촬영 타이머 루틴
+    document.getElementById('btn-manual-trigger').addEventListener('click', () => {
+      document.getElementById('btn-manual-trigger').style.display = 'none';
+      startShootingSequence();
+    });
+
+    async function startShootingSequence() {
+      capturedBlobs = [];
+      if (mediaRecorder && mediaRecorder.state === 'inactive') {
+        mediaRecorder.start();
+      }
+
+      for (let cut = 1; cut <= 4; cut++) {
+        document.getElementById('shoot-counter-badge').innerText = `${cut} / 4 컷`;
+        await runCountdown(5);
+        captureCanvasShot();
+        // 셔터 플래시 효과
+        const flash = document.getElementById('flash-effect');
+        flash.classList.add('flash');
+        setTimeout(() => flash.classList.remove('flash'), 300);
+      }
+
+      // 녹화 종료
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+
+      // 웹캠 정지
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+
+      // 촬영본 확인 화면으로 이동
+      renderCapturedPreview();
+      navigateTo('screen-select');
+    }
+
+    function runCountdown(seconds) {
+      return new Promise(resolve => {
+        let count = seconds;
+        const timerNum = document.getElementById('timer-number');
+        const progressCircle = document.getElementById('timer-progress');
+        const totalLength = 264;
+
+        timerNum.innerText = count;
+        progressCircle.style.strokeDashoffset = 0;
+
+        const interval = setInterval(() => {
+          count--;
+          if (count > 0) {
+            timerNum.innerText = count;
+            const offset = totalLength * (1 - count / seconds);
+            progressCircle.style.strokeDashoffset = offset;
+          } else {
+            clearInterval(interval);
+            timerNum.innerText = '📸';
+            resolve();
+          }
+        }, 1000);
+      });
+    }
+
+    function captureCanvasShot() {
+      const video = document.getElementById('webcam-preview');
+      const canvas = document.createElement('canvas');
+      canvas.width = 640;
+      canvas.height = 800; // 4:5 비율
+      const ctx = canvas.getContext('2d');
+      
+      // 거울 반전 캡처
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      canvas.toBlob((blob) => {
+        capturedBlobs.push(blob);
+      }, 'image/jpeg', 0.92);
+    }
+
+    function renderCapturedPreview() {
+      capturedBlobs.forEach((blob, idx) => {
+        const url = URL.createObjectURL(blob);
+        document.getElementById(`captured-img-${idx}`).src = url;
+      });
+    }
+
+    // 재촬영 버튼
+    document.getElementById('btn-retake').addEventListener('click', async () => {
+      document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
+      navigateTo('screen-shoot');
+      await initWebcam();
+    });
+
+    // 4. AI 변환 생성 API 호출
+    document.getElementById('btn-transform').addEventListener('click', async () => {
+      if (capturedBlobs.length < 4) {
+        showToast('4컷 사진 촬영이 완료되지 않았습니다.');
+        return;
+      }
+
+      const overlay = document.getElementById('loading-overlay');
+      overlay.classList.add('active');
+
+      const formData = new FormData();
+      capturedBlobs.forEach((blob, index) => {
+        formData.append('photos', blob, `photo_${index}.jpg`);
+      });
+
+      if (recordedChunks.length > 0) {
+        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        formData.append('video', videoBlob, 'behind_video.webm');
+      }
+      formData.append('style', selectedStyle);
+
+      try {
+        const res = await fetch('/api/transform', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        
+        if (data.status === 'success') {
+          transformResult = data;
+          document.getElementById('ai-frame-preview').src = data.ai_frame_url;
+          document.getElementById('orig-frame-preview').src = data.orig_frame_url;
+          document.getElementById('qr-code-img').src = data.qr_code_base64;
+
+          overlay.classList.remove('active');
+          navigateTo('screen-result');
+        } else {
+          throw new Error('변환 실패');
+        }
+      } catch (err) {
+        console.error('AI 변환 오류:', err);
+        overlay.classList.remove('active');
+        showToast('AI 변환 중 오류가 발생했습니다.');
+      }
+    });
+
+    // 5. 결과 확인 -> Finish (QR)
+    document.getElementById('btn-to-finish').addEventListener('click', () => {
+      navigateTo('screen-finish');
+    });
+
+    // 인화 모달 열기 시뮬레이션
+    document.getElementById('btn-print-modal').addEventListener('click', () => {
+      const modal = document.getElementById('modal-print');
+      modal.classList.add('active');
+
+      // 인화 단계별 상태 전환 애니메이션
+      setTimeout(() => document.getElementById('p-step-1').classList.add('completed'), 1000);
+      setTimeout(() => document.getElementById('p-step-2').classList.add('active'), 1500);
+      setTimeout(() => document.getElementById('p-step-2').classList.add('completed'), 2500);
+      setTimeout(() => document.getElementById('p-step-3').classList.add('active'), 3000);
+      setTimeout(() => document.getElementById('p-step-3').classList.add('completed'), 4000);
+    });
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('modal-print').classList.remove('active');
+    });
+
+    // 처음으로 버튼 (상태 리셋)
+    document.getElementById('btn-reset-home').addEventListener('click', () => {
+      document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
+      navigateTo('screen-home');
+    });
+  </script>
+</body>
+</html>
