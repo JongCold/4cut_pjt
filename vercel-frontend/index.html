@@ -563,11 +563,9 @@
         if (data.status === 'success') {
           transformResult = data;
           
-          // 백엔드 상대경로인 경우 apiBaseUrl 추가
-          const formatUrl = (url) => url.startsWith('http') ? url : `${apiBaseUrl}${url}`;
-
-          document.getElementById('ai-frame-preview').src = formatUrl(data.ai_frame_url);
-          document.getElementById('orig-frame-preview').src = formatUrl(data.orig_frame_url);
+          // Base64 이미지가 있으면 ngrok 경고 페이지 우회하여 즉시 렌더링
+          document.getElementById('ai-frame-preview').src = data.ai_frame_base64 || formatUrl(data.ai_frame_url);
+          document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || formatUrl(data.orig_frame_url);
           document.getElementById('qr-code-img').src = data.qr_code_base64;
 
           overlay.classList.remove('active');

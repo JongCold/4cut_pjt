@@ -43,14 +43,14 @@ try:
         from googleapiclient.discovery import build
         from googleapiclient.http import MediaFileUpload
         
-        SCOPES = ["https://www.googleapis.com/auth/drive.file"]
+        SCOPES = ["https://www.googleapis.com/auth/drive"]
         creds = service_account.Credentials.from_service_account_file(GOOGLE_KEY_PATH, scopes=SCOPES)
         DRIVE_SERVICE = build("drive", "v3", credentials=creds)
-        print(f"[Google Drive API] 인증 성공! (사진 폴더: {GOOGLE_PHOTO_FOLDER_ID}, 영상 폴더: {GOOGLE_VIDEO_FOLDER_ID})")
+        print(f"[Google Drive API] ✅ 인증 성공! (사진 폴더: {GOOGLE_PHOTO_FOLDER_ID}, 영상 폴더: {GOOGLE_VIDEO_FOLDER_ID})")
     else:
-        print(f"[Google Drive API] '{GOOGLE_KEY_PATH}' 인증 파일이 존재하지 않아 로컬 Fallback 스토리지 모드로 동작합니다.")
+        print(f"[Google Drive API] ⚠️ '{GOOGLE_KEY_PATH}' 인증 파일이 존재하지 않습니다. 로컬 Fallback 모드로 동작하며 드라이브 업로드가 건너뛰어집니다.")
 except Exception as e:
-    print(f"[Google Drive API] 연동 초기화 오류 ({e}). 로컬 Fallback 스토리지 모드로 연동됩니다.")
+    print(f"[Google Drive API] ❌ 연동 초기화 오류 ({e}). 로컬 Fallback 스토리지 모드로 연동됩니다.")
 
 # FastAPI 앱 생성
 app = FastAPI(title="AI 4-Cut Studio Backend", version="1.0.0")
@@ -219,6 +219,15 @@ async def api_transform_four_cut(
         with open(video_path, "wb") as f:
             f.write(b"dummy_video_stream")
 
+    # Base64 이미지 데이터 생성 (ngrok 경고 페이지 우회 및 초고속 즉시 렌더링)
+    orig_buf = io.BytesIO()
+    orig_frame.save(orig_buf, format="JPEG", quality=90)
+    orig_frame_base64 = "data:image/jpeg;base64," + base64.b64encode(orig_buf.getvalue()).decode("utf-8")
+
+    ai_buf = io.BytesIO()
+    ai_frame.save(ai_buf, format="JPEG", quality=92)
+    ai_frame_base64 = "data:image/jpeg;base64," + base64.b64encode(ai_buf.getvalue()).decode("utf-8")
+
     # 5. 구글 드라이브 업로드 (사진/영상 저장소 분리 지정)
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/webm", folder_id=GOOGLE_VIDEO_FOLDER_ID)
@@ -250,11 +259,14 @@ async def api_transform_four_cut(
         "style": style,
         "ai_frame_url": f"/uploads/{ai_frame_filename}",
         "orig_frame_url": f"/uploads/{orig_frame_filename}",
+        "ai_frame_base64": ai_frame_base64,
+        "orig_frame_base64": orig_frame_base64,
         "video_url": f"/uploads/{video_filename}",
         "image_file_id": img_param,
         "video_file_id": vid_param,
         "download_url": download_url,
         "local_download_url": local_download_url,
         "qr_code_base64": qr_base64,
-        "drive_upload_success": img_drive_id is not None and vid_drive_id is not None
+        "drive_upload_success": img_drive_id is not None and vid_drive_id is not None,
+        "drive_status_msg": "구글 드라이브 업로드 완료" if (img_drive_id and vid_drive_id) else "google-key.json 미등록 또는 권한 부족으로 로컬 저장됨"
     }

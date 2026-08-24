@@ -516,8 +516,8 @@
         
         if (data.status === 'success') {
           transformResult = data;
-          document.getElementById('ai-frame-preview').src = data.ai_frame_url;
-          document.getElementById('orig-frame-preview').src = data.orig_frame_url;
+          document.getElementById('ai-frame-preview').src = data.ai_frame_base64 || data.ai_frame_url;
+          document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || data.orig_frame_url;
           document.getElementById('qr-code-img').src = data.qr_code_base64;
 
           overlay.classList.remove('active');
