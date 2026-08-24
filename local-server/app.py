@@ -11,7 +11,7 @@ import base64
 from typing import List, Optional
 from datetime import datetime, timedelta
 
-from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
@@ -170,6 +170,7 @@ async def serve_download_viewer():
 
 @app.post("/api/transform")
 async def api_transform_four_cut(
+    request: Request,
     photos: List[UploadFile] = File(...),
     video: Optional[UploadFile] = File(None),
     style: str = Form("original")
@@ -177,7 +178,7 @@ async def api_transform_four_cut(
     """
     4컷 사진 + 비하인드 동영상 수신 후:
     1. AI Img2Img 변환 & 4컷 합성 프레임 생성
-    2. Google Drive API 업로드 (Folder ID: 214b2f3af4bc7874128d146f3b51b7a021d19594)
+    2. Google Drive API 업로드
     3. No-DB 모바일 뷰어 다운로드 QR 생성 및 반환
     """
     if len(photos) < 4:
@@ -226,14 +227,14 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성
-    base_host = "https://ai-4cut-studio.vercel.app"
+    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성 (사용자 실제 Vercel 주소 매핑)
+    base_host = "https://4cut-pjt.vercel.app"
     download_url = f"{base_host}/download.html?img={img_param}&vid={vid_param}"
     
     # 로컬 서빙 뷰어 URL 생성 (테스트용)
     local_download_url = f"http://localhost:8000/download.html?img={img_param}&vid={vid_param}"
     
-    # QR 코드 생성 (기본 Vercel 배포 URL로 QR 스캔 가능하도록 설정)
+    # QR 코드 생성 (이용자가 스캔할 Vercel URL 매핑)
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
     qr.add_data(download_url)
     qr.make(fit=True)
@@ -254,5 +255,6 @@ async def api_transform_four_cut(
         "video_file_id": vid_param,
         "download_url": download_url,
         "local_download_url": local_download_url,
-        "qr_code_base64": qr_base64
+        "qr_code_base64": qr_base64,
+        "drive_upload_success": img_drive_id is not None and vid_drive_id is not None
     }

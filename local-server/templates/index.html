@@ -405,7 +405,7 @@
       for (let cut = 1; cut <= 4; cut++) {
         document.getElementById('shoot-counter-badge').innerText = `${cut} / 4 컷`;
         await runCountdown(5);
-        captureCanvasShot();
+        await captureCanvasShot();
         // 셔터 플래시 효과
         const flash = document.getElementById('flash-effect');
         flash.classList.add('flash');
@@ -453,20 +453,23 @@
     }
 
     function captureCanvasShot() {
-      const video = document.getElementById('webcam-preview');
-      const canvas = document.createElement('canvas');
-      canvas.width = 640;
-      canvas.height = 800; // 4:5 비율
-      const ctx = canvas.getContext('2d');
-      
-      // 거울 반전 캡처
-      ctx.translate(canvas.width, 0);
-      ctx.scale(-1, 1);
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      return new Promise((resolve) => {
+        const video = document.getElementById('webcam-preview');
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 800; // 4:5 비율
+        const ctx = canvas.getContext('2d');
+        
+        // 거울 반전 캡처
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      canvas.toBlob((blob) => {
-        capturedBlobs.push(blob);
-      }, 'image/jpeg', 0.92);
+        canvas.toBlob((blob) => {
+          capturedBlobs.push(blob);
+          resolve(blob);
+        }, 'image/jpeg', 0.92);
+      });
     }
 
     function renderCapturedPreview() {
