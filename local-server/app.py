@@ -219,28 +219,42 @@ async def serve_download_viewer():
 
 def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
     """
-    webm 비디오 파일을 읽어서 2배속(프레임 건너뛰기)으로 mp4 비디오(H.264, iOS 호환)로 변환 및 저장
+    webm 비디오 파일을 읽어서 2배속(속도 2배 빠르게, 재생시간 절반 감축)으로 MP4(H.264, iOS 호환)로 고속 변환 및 압축 저장
     """
-    import imageio
+    import subprocess
+    import imageio_ffmpeg
     try:
-        reader = imageio.get_reader(input_path)
-        fps = reader.get_meta_data().get('fps', 30)
-        
-        # 2배속: 2프레임마다 1프레임만 기록하여 전체 재생시간을 절반으로 감축
-        # libx264와 yuv420p 픽셀포맷을 사용하여 iOS Safari 및 Android Chrome 브라우저에 완벽 호환 보장
-        writer = imageio.get_writer(output_path, fps=fps, codec='libx264', pixelformat='yuv420p')
-        
-        for idx, frame in enumerate(reader):
-            if idx % 2 == 0:  # 2프레임 중 1개만 샘플링하여 2배속 속도로 기록
-                writer.append_data(frame)
-                
-        reader.close()
-        writer.close()
-        print(f"[Video Process] ✅ 비디오 2배속 변환 및 H.264 MP4 인코딩 성공: {output_path}")
+        ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+        cmd = [
+            ffmpeg_exe,
+            '-y',
+            '-i', input_path,
+            '-filter:v', 'setpts=0.5*PTS',
+            '-c:v', 'libx264',
+            '-pix_fmt', 'yuv420p',
+            '-preset', 'fast',
+            '-crf', '24',
+            '-an',
+            output_path
+        ]
+        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        print(f"[Video Process] ✅ 비디오 2배속(빠르게) 변환 및 H.264 MP4 고속 인코딩 성공: {output_path}")
         return True
     except Exception as e:
-        print(f"[Video Process Error] 비디오 변환 실패 ({e}). Fallback으로 일반 복사 처리합니다.")
-        return False
+        print(f"[Video Process Error] ffmpeg 2배속 변환 실패 ({e}). Fallback 처리합니다.")
+        try:
+            import imageio
+            reader = imageio.get_reader(input_path)
+            fps = reader.get_meta_data().get('fps', 30) or 30
+            writer = imageio.get_writer(output_path, fps=fps * 2, codec='libx264', pixelformat='yuv420p')
+            for frame in reader:
+                writer.append_data(frame)
+            reader.close()
+            writer.close()
+            return True
+        except Exception as ex:
+            print(f"[Video Process Fallback Error] {ex}")
+            return False
 
 
 @app.post("/api/transform")
@@ -338,6 +352,9 @@ async def api_transform_four_cut(
     upload_to_google_drive(orig_frame_path, orig_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/mp4", folder_id=GOOGLE_VIDEO_FOLDER_ID)
+    
+    img_param = img_drive_id if img_drive_id else ai_frame_filename
+    vid_param = vid_drive_id if vid_drive_id else video_filename
     
     # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (구글 로그인/계정선택/점3개 메뉴 완전 우회)
     base_host = "https://4cut-pjt.vercel.app"
