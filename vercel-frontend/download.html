@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 4-CUT STUDIO | 모바일 사진 & 영상 다운로드</title>
   
   <!-- Google Fonts -->
@@ -13,27 +13,39 @@
   <link rel="stylesheet" href="./style.css">
   
   <style>
+    /* 모바일 전체 스크롤 차단 해제 및 터치 스크롤 강제 보장 */
+    html, body {
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      height: auto !important;
+      min-height: 100vh !important;
+      touch-action: pan-y !important;
+      -webkit-overflow-scrolling: touch !important;
+      background-color: #F8FAFC !important;
+      font-family: 'Pretendard', sans-serif;
+      color: #1F2937;
+    }
+    
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
-    body {
-      background-color: #F8FAFC;
-      font-family: 'Pretendard', sans-serif;
-      color: #1F2937;
-    }
+    
     .mobile-viewer-card {
       width: 100%;
       max-width: 480px;
       margin: 0 auto;
-      min-height: 100vh;
+      height: auto !important;
+      min-height: 100vh !important;
+      overflow: visible !important;
       background-color: #FFFFFF;
-      padding: 20px 16px 32px 16px;
+      padding: 20px 16px 40px 16px;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 30px rgba(0,0,0,0.06);
     }
+    
     .header-logo {
       text-align: center;
       margin-bottom: 16px;
@@ -151,22 +163,24 @@
     .btn-toggle-all {
       background: none;
       border: none;
-      color: #64748B;
-      font-size: 0.85rem;
-      font-weight: 600;
+      color: #8B5CF6;
+      font-size: 0.9rem;
+      font-weight: 700;
       text-decoration: underline;
       cursor: pointer;
+      padding: 8px 16px;
     }
 
     .privacy-notice {
       background-color: #F5F3FF;
       border: 1px solid #DDD6FE;
       border-radius: 14px;
-      padding: 14px;
-      font-size: 0.82rem;
+      padding: 16px;
+      font-size: 0.83rem;
       color: #64748B;
-      line-height: 1.6;
-      margin-top: auto;
+      line-height: 1.65;
+      margin-top: 24px;
+      margin-bottom: 24px;
     }
   </style>
 </head>
@@ -203,7 +217,7 @@
 
     <!-- 탭 2: 전 과정 비하인드 동영상 섹션 -->
     <div id="tab-video-content" class="media-content">
-      <div class="media-card">
+      <div class="media-card" id="video-card-anchor">
         <div class="media-title">🎥 전 과정 비하인드 영상</div>
         <div class="video-preview-box">
           <video id="display-video" controls loop playsinline webkit-playsinline preload="metadata">
@@ -219,13 +233,13 @@
 
     <!-- 전체 펼쳐보기 옵션 -->
     <div class="view-all-toggle">
-      <button class="btn-toggle-all" onclick="showAllMedia()">📄 사진과 영상 모두 한 번에 보기</button>
+      <button class="btn-toggle-all" onclick="showAllMedia()">📄 사진과 영상 모두 한 번에 펼쳐보기</button>
     </div>
 
-    <div class="privacy-notice">
-      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 저장 안내</strong><br>
-      본 서비스는 No-DB 아키텍처로 운영되며, 수집된 사진과 영상은 처리 목적 달성 및 개인정보보호법에 따라 <strong>24시간 후 자동 파기</strong>됩니다.<br>
-      (스토리지: 구글 드라이브 & 로컬 백엔드 세션)
+    <div class="privacy-notice" id="privacy-notice-box">
+      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 자동 파기 안내</strong><br>
+      본 서비스는 No-DB 아키텍처로 운영되며, 수집된 사진과 영상은 처리 목적 달성 및 개인정보보호법에 따라 <strong>24시간 후 자동 영구 파기</strong>됩니다.<br>
+      (저장소: 구글 드라이브 & 로컬 백엔드 세션)
     </div>
   </div>
 
@@ -262,7 +276,6 @@
         videoContent.classList.add('active');
         photoContent.classList.remove('active');
         
-        // 동영상 탭 전환 시 동영상 로드 및 플레이어 새로고침
         if (videoElem && videoElem.paused && videoElem.src) {
           videoElem.load();
         }
@@ -274,6 +287,14 @@
       document.getElementById('tab-video-content').classList.add('active');
       document.querySelector('.tab-container').style.display = 'none';
       document.querySelector('.view-all-toggle').style.display = 'none';
+      
+      // 영상 카드로 자연스럽게 스크롤 이동
+      setTimeout(() => {
+        const videoAnchor = document.getElementById('video-card-anchor');
+        if (videoAnchor) {
+          videoAnchor.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
     }
 
     // 1. 완성본 4컷 사진 로딩 & 다운로드 설정
@@ -301,7 +322,6 @@
           btnImg.href = targetUrl;
         }
       } else {
-        // 구글 드라이브 ID 활용 방식
         const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
         imgElem.src = gdriveCdnUrl;
         imgElem.onerror = () => {

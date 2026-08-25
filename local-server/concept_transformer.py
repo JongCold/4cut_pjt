@@ -1,7 +1,7 @@
 """
 concept_transformer.py
 High-Performance AI Model & Img2Img Transformation Module for RTX GPUs (8GB VRAM)
-DreamShaper v8 & Realistic Vision v5.1 기반 인물 얼굴 보존 고화질 AI 스타일링 모듈
+DreamShaper v8 & Realistic Vision v5.1 기반 인물 얼굴 고스트/겹침 방지 및 1인 단일 인물 보존 모듈
 """
 
 import os
@@ -43,42 +43,50 @@ MODEL_REGISTRY = {
 }
 
 
+# 공통 강력한 얼굴 겹침/고스트/다중 인물 방지 네거티브 프롬프트
+STRICT_NEGATIVE_PROMPT = (
+    "multiple faces, double face, extra face, ghosting, overlapping faces, female face overlay, "
+    "extra eyes, deformed iris, distorted eyes, bad face, deformed face, mutated face, "
+    "ugly, blurry, extra limbs, bad anatomy, low resolution, noise, artifacts, distorted features"
+)
+
+
 # 스타일 필터별 최적 모델, 프롬프트, Strength 파라미터 매핑
 STYLE_CONFIGS = {
     "original": {
         "model_type": "realistic",
-        "strength": 0.28,
+        "strength": 0.25,
         "guidance_scale": 7.0,
-        "positive": "masterpiece, 8k uhd, ultra-realistic portrait photo of the exact same person, crystal clear skin texture, sharp detailed eyes, natural studio lighting, photorealistic, 8k",
-        "negative": "blurry, ugly, distorted eyes, bad iris, extra limbs, bad anatomy, deformed face, altered identity, noise, artifacts"
+        "positive": "masterpiece, 8k uhd, ultra-realistic portrait photo of the single person, crystal clear skin texture, sharp detailed eyes, natural studio lighting, photorealistic, 8k",
+        "negative": STRICT_NEGATIVE_PROMPT
     },
     "soft_cartoon": {
         "model_type": "dreamshaper",
-        "strength": 0.38,
+        "strength": 0.32,
         "guidance_scale": 7.5,
-        "positive": "3d pixar disney animation style portrait of the exact same person, high quality 3d character rendering, cute facial features, smooth skin shading, vibrant warm colors, sharp detailed eyes, masterpiece",
-        "negative": "ugly, deformed face, changed identity, distorted eyes, blurry, low resolution, noise, artifacts, dark"
+        "positive": "3d pixar disney animation style portrait of the single person, high quality 3d character rendering, cute male facial features, smooth skin shading, vibrant warm colors, sharp detailed eyes, masterpiece",
+        "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
     },
     "ghibli": {
         "model_type": "dreamshaper",
-        "strength": 0.38,
+        "strength": 0.32,
         "guidance_scale": 7.5,
-        "positive": "studio ghibli anime portrait of the exact same person, beautiful hand drawn anime illustration style, soft watercolor textures, warm anime lighting, detailed facial features, masterpiece",
-        "negative": "ugly, deformed face, changed identity, 3d render, distorted eyes, blurry, noisy, extra eyes"
+        "positive": "studio ghibli anime portrait of the single person, hand drawn anime illustration style, soft watercolor textures, warm anime lighting, detailed male facial features, masterpiece",
+        "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
     },
     "neon_fantasy": {
         "model_type": "realistic",
-        "strength": 0.35,
+        "strength": 0.30,
         "guidance_scale": 7.5,
-        "positive": "cyberpunk neon fantasy portrait of the exact same person, glowing cyan and magenta rim light, futuristic cinematic lighting, sharp detailed face, crystal clear eyes, masterpiece",
-        "negative": "ugly, deformed face, changed identity, dark dull, washed out, blurry, bad anatomy"
+        "positive": "cyberpunk neon fantasy portrait of the single person, glowing cyan and magenta rim light, futuristic cinematic lighting, sharp detailed face, crystal clear eyes, masterpiece",
+        "negative": STRICT_NEGATIVE_PROMPT
     },
     "bw_cinema": {
         "model_type": "realistic",
-        "strength": 0.30,
+        "strength": 0.28,
         "guidance_scale": 7.0,
-        "positive": "black and white 35mm film noir portrait of the exact same person, elegant studio shadows, high contrast monochrome, sharp focus on eyes and face, masterpiece",
-        "negative": "color, ugly, deformed face, changed identity, blurry, bad anatomy, noise"
+        "positive": "black and white 35mm film noir portrait of the single person, elegant studio shadows, high contrast monochrome, sharp focus on eyes and face, masterpiece",
+        "negative": STRICT_NEGATIVE_PROMPT
     }
 }
 
@@ -104,7 +112,6 @@ def get_sd_pipeline(model_key: str = "dreamshaper"):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     dtype = torch.float16 if device == "cuda" else torch.float32
 
-    # 모델 시도 목록 (고성능 모델 -> 기본 모델 fallback)
     try_models = [primary_id, fallback_id]
     
     for model_id in try_models:
@@ -118,11 +125,10 @@ def get_sd_pipeline(model_key: str = "dreamshaper"):
             pipe = pipe.to(device)
             
             if device == "cuda":
-                # VRAM 메모리 슬라이싱으로 8GB VRAM 안전 구동
                 pipe.enable_attention_slicing()
                 
             PIPELINES_CACHE[model_key] = pipe
-            print(f"[AI Engine] ✅ 모델 '{model_id}' 로딩 완료! (캐시에 등록됨)")
+            print(f"[AI Engine] ✅ 모델 '{model_id}' 로딩 완료!")
             return pipe
         except Exception as e:
             print(f"[AI Engine] ⚠️ 모델 '{model_id}' 로딩 실패 ({e}). 다음 파이프라인 전환 시도...")
@@ -176,7 +182,7 @@ def apply_style_fallback(image: Image.Image, style: str) -> Image.Image:
 
 def transform_single_image(image: Image.Image, style: str) -> Image.Image:
     """
-    단일 이미지 AI 변환 (얼굴 깨짐 방지 & 768x960 해상도 고화질 변환)
+    단일 이미지 AI 변환 (고스트/얼굴 겹침 현상 완전히 제거된 깨끗한 1인 스타일 변환)
     """
     if style == "original":
         return apply_style_fallback(image, "original")
@@ -188,10 +194,10 @@ def transform_single_image(image: Image.Image, style: str) -> Image.Image:
     
     if pipe is not None:
         try:
-            # 8GB VRAM 대응: 고화질 768x960 해상도로 확장하여 얼굴 선명도 확보 (512x640 대비 2.25배 해상도)
+            # 768x960 고해상도 리사이즈
             init_img = image.convert("RGB").resize((768, 960), Image.Resampling.LANCZOS)
             
-            # AI 스타일 변환 실행
+            # AI 스타일 변환 실행 (중복 얼굴 생성 방지를 위해 strength=0.30~0.32로 정밀 제어)
             res = pipe(
                 prompt=cfg["positive"],
                 negative_prompt=cfg["negative"],
@@ -201,9 +207,9 @@ def transform_single_image(image: Image.Image, style: str) -> Image.Image:
                 num_inference_steps=22
             ).images[0]
             
-            # 원본 인물 이목구비 정밀 보존을 위한 미세 알파 블렌딩 (82% AI 스타일 + 18% 원본 디테일)
-            blended = Image.blend(init_img, res, alpha=0.82)
-            return blended
+            # 주의: 전체 캔버스 Image.blend()는 두 얼굴이 반투명하게 겹치는 잔상(고스트)을 유발하므로 
+            # AI 변환 결과물(res)을 단일 이미지로 직접 반환하여 깨끗한 1인 인물 이미지를 보장함.
+            return res
         except Exception as e:
             print(f"[AI Transform Error] SD 변환 중 오류 ({e}). Fallback 엔진으로 전환.")
             return apply_style_fallback(image, style)
@@ -254,14 +260,12 @@ def create_4cut_frame(images: List[Image.Image], brand_title: str = "AI 4-CUT ST
         pos = positions[idx]
         frame.paste(img_resized, pos)
         
-        # 슬롯 외곽 테두리
         draw.rectangle(
             [pos[0], pos[1], pos[0] + slot_w, pos[1] + slot_h],
             outline=(220, 225, 230),
             width=2
         )
         
-    # 하단 브랜드 메타데이터 영역
     brand_font = None
     sub_font = None
     try:
