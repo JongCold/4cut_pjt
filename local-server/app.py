@@ -236,14 +236,24 @@ async def api_transform_four_cut(
     session_id = uuid.uuid4().hex[:8]
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # 1. 캡처된 사진 4장 읽기
+    # 1. 캡처된 사진 4장 읽기 및 개별 원본 이미지 저장
     original_pil_images = []
-    for photo in photos[:4]:
+    single_orig_filenames = []
+    single_orig_paths = []
+    
+    for idx, photo in enumerate(photos[:4]):
         contents = await photo.read()
         pil_img = Image.open(io.BytesIO(contents))
         original_pil_images.append(pil_img)
         
-    # 2. 원본 4컷 프레임 생성
+        # 개별 원본 컷 이미지 로컬 저장 (24시간 자동 파기 대상)
+        single_filename = f"orig_single_{idx+1}_{session_id}.jpg"
+        single_path = os.path.join(UPLOAD_DIR, single_filename)
+        pil_img.save(single_path, format="JPEG", quality=95)
+        single_orig_filenames.append(single_filename)
+        single_orig_paths.append(single_path)
+        
+    # 2. 원본 4컷 프레임 합성 및 저장
     orig_frame = create_4cut_frame(original_pil_images, brand_title="AI 4-CUT STUDIO (ORIGINAL)")
     orig_frame_filename = f"orig_frame_{session_id}.jpg"
     orig_frame_path = os.path.join(UPLOAD_DIR, orig_frame_filename)
@@ -277,7 +287,11 @@ async def api_transform_four_cut(
     ai_frame.save(ai_buf, format="JPEG", quality=92)
     ai_frame_base64 = "data:image/jpeg;base64," + base64.b64encode(ai_buf.getvalue()).decode("utf-8")
 
-    # 5. 구글 드라이브 업로드 (사진/영상 저장소 분리 지정)
+    # 5. 구글 드라이브 업로드 (개별 원본 4장 + 원본 4컷 프레임 + AI 4컷 프레임 + 비하인드 동영상)
+    for idx, s_path in enumerate(single_orig_paths):
+        upload_to_google_drive(s_path, single_orig_filenames[idx], "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+
+    upload_to_google_drive(orig_frame_path, orig_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/webm", folder_id=GOOGLE_VIDEO_FOLDER_ID)
     
@@ -285,7 +299,7 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성 (사용자 실제 Vercel 주소 및 서버 주소 동적 바인딩)
+    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성
     base_host = "https://4cut-pjt.vercel.app"
     server_origin = str(request.base_url).rstrip("/")
     download_url = f"{base_host}/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
@@ -293,7 +307,7 @@ async def api_transform_four_cut(
     # 로컬 서빙 뷰어 URL 생성 (테스트용)
     local_download_url = f"http://localhost:8000/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
     
-    # QR 코드 생성 (이용자가 스캔할 Vercel URL 매핑)
+    # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
     qr.add_data(download_url)
     qr.make(fit=True)
@@ -309,6 +323,7 @@ async def api_transform_four_cut(
         "style": style,
         "ai_frame_url": f"/uploads/{ai_frame_filename}",
         "orig_frame_url": f"/uploads/{orig_frame_filename}",
+        "single_orig_urls": [f"/uploads/{fn}" for fn in single_orig_filenames],
         "ai_frame_base64": ai_frame_base64,
         "orig_frame_base64": orig_frame_base64,
         "video_url": f"/uploads/{video_filename}",
@@ -318,5 +333,5 @@ async def api_transform_four_cut(
         "local_download_url": local_download_url,
         "qr_code_base64": qr_base64,
         "drive_upload_success": img_drive_id is not None and vid_drive_id is not None,
-        "drive_status_msg": "구글 드라이브 업로드 완료" if (img_drive_id and vid_drive_id) else "google-key.json 미등록 또는 권한 부족으로 로컬 저장됨"
+        "drive_status_msg": "구글 드라이브 업로드 완료 (개별 원본 4장 포함)" if (img_drive_id and vid_drive_id) else "로컬 스토리지 저장 완료 (24시간 자동 파기 대상)"
     }
