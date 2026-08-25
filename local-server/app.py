@@ -217,6 +217,32 @@ async def serve_download_viewer():
     return HTMLResponse("<h1>AI 4-Cut Studio Download Viewer</h1>")
 
 
+def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
+    """
+    webm 비디오 파일을 읽어서 2배속(프레임 건너뛰기)으로 mp4 비디오(H.264, iOS 호환)로 변환 및 저장
+    """
+    import imageio
+    try:
+        reader = imageio.get_reader(input_path)
+        fps = reader.get_meta_data().get('fps', 30)
+        
+        # 2배속: 2프레임마다 1프레임만 기록하여 전체 재생시간을 절반으로 감축
+        # libx264와 yuv420p 픽셀포맷을 사용하여 iOS Safari 및 Android Chrome 브라우저에 완벽 호환 보장
+        writer = imageio.get_writer(output_path, fps=fps, codec='libx264', pixelformat='yuv420p')
+        
+        for idx, frame in enumerate(reader):
+            if idx % 2 == 0:  # 2프레임 중 1개만 샘플링하여 2배속 속도로 기록
+                writer.append_data(frame)
+                
+        reader.close()
+        writer.close()
+        print(f"[Video Process] ✅ 비디오 2배속 변환 및 H.264 MP4 인코딩 성공: {output_path}")
+        return True
+    except Exception as e:
+        print(f"[Video Process Error] 비디오 변환 실패 ({e}). Fallback으로 일반 복사 처리합니다.")
+        return False
+
+
 @app.post("/api/transform")
 async def api_transform_four_cut(
     request: Request,
@@ -266,13 +292,31 @@ async def api_transform_four_cut(
     ai_frame_path = os.path.join(UPLOAD_DIR, ai_frame_filename)
     ai_frame.save(ai_frame_path, format="JPEG", quality=95)
     
-    # 4. 비하인드 동영상 저장
-    video_filename = f"behind_video_{session_id}.webm"
+    # 4. 비하인드 동영상 저장 (2배속 인코딩 및 H.264 MP4로 변환)
+    video_filename = f"behind_video_{session_id}.mp4"
     video_path = os.path.join(UPLOAD_DIR, video_filename)
     if video:
         v_contents = await video.read()
-        with open(video_path, "wb") as f:
+        temp_webm_path = os.path.join(UPLOAD_DIR, f"temp_{session_id}.webm")
+        with open(temp_webm_path, "wb") as f:
             f.write(v_contents)
+        
+        # 2배속 MP4 변환 실행
+        success = False
+        if os.path.exists(temp_webm_path) and os.path.getsize(temp_webm_path) > 0:
+            success = process_video_to_2x_mp4(temp_webm_path, video_path)
+            
+        # 임시 webm 파일 제거
+        try:
+            if os.path.exists(temp_webm_path):
+                os.remove(temp_webm_path)
+        except Exception:
+            pass
+            
+        if not success:
+            # 변환 실패 시 fallback으로 원본 그대로 저장
+            with open(video_path, "wb") as f:
+                f.write(v_contents)
     else:
         # 더미 파일 생성
         with open(video_path, "wb") as f:
@@ -293,7 +337,7 @@ async def api_transform_four_cut(
 
     upload_to_google_drive(orig_frame_path, orig_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
-    vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/webm", folder_id=GOOGLE_VIDEO_FOLDER_ID)
+    vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/mp4", folder_id=GOOGLE_VIDEO_FOLDER_ID)
     
     # Drive ID가 없는 경우 로컬 파일명 활용
     img_param = img_drive_id if img_drive_id else ai_frame_filename

@@ -221,11 +221,11 @@
         <div class="media-title">🎥 전 과정 비하인드 영상</div>
         <div class="video-preview-box">
           <video id="display-video" controls loop playsinline webkit-playsinline preload="metadata">
-            <source id="video-source" src="" type="video/webm">
+            <source id="video-source" src="" type="video/mp4">
             브라우저가 동영상 재생을 지원하지 않습니다.
           </video>
         </div>
-        <a id="btn-download-vid" href="#" download="behind_video.webm" class="btn btn-secondary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
+        <a id="btn-download-vid" href="#" download="behind_video.mp4" class="btn btn-secondary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
           ⬇️ 비하인드 영상 다운로드
         </a>
       </div>
@@ -353,7 +353,7 @@
           videoElem.load();
           
           btnVid.href = videoBlobUrl;
-          btnVid.download = `${vidId}.webm`;
+          btnVid.download = vidId; // behind_video_sessionid.mp4로 자동 설정
           btnVid.removeAttribute('target');
         } catch (err) {
           console.error('동영상 로딩 실패:', err);
@@ -369,7 +369,7 @@
         videoElem.load();
         
         btnVid.href = gdriveVidUrl;
-        btnVid.download = `behind_video_${vidId}.webm`;
+        btnVid.download = `behind_video_${vidId}.mp4`;
       }
     }
 
