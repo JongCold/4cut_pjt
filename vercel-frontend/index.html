@@ -266,36 +266,49 @@
     </section>
 
     <!-- ==========================================
-         [화면 5/6] 생성 결과 비교 (AI vs 원본)
+         [화면 5/6] 변환 완료 상세 뷰 (AI vs 원본 대형 개별 탭 뷰)
          ========================================== -->
     <section id="screen-result" class="screen">
       <header class="fixed-header">
         <div class="header-title">변환 완료</div>
-        <div class="header-desc">생성된 AI 4컷 프레임 결과를 확인해 보세요.</div>
+        <div class="header-desc">AI 스타일 및 원본 4컷을 큰 화면으로 확인하고 선택하세요.</div>
       </header>
 
-      <div class="screen-content scrollable-content side-by-side-content">
-        <div class="comparison-grid">
-          <div class="comparison-card selected" id="card-ai">
-            <div class="card-label">✨ AI 스타일 프레임</div>
-            <div class="four-cut-frame mini-frame">
-              <img id="ai-frame-preview" style="width:100%;height:100%;object-fit:contain;" src="" alt="AI 4컷">
+      <div class="screen-content scrollable-content result-large-content">
+        <!-- 상단 탭 스위처 (개별 페이지 전환) -->
+        <div class="result-tab-bar">
+          <button id="tab-ai-frame" class="result-tab-btn active">
+            <span>✨ AI 스타일 4컷</span>
+          </button>
+          <button id="tab-orig-frame" class="result-tab-btn">
+            <span>📷 원본 촬영 4컷</span>
+          </button>
+        </div>
+
+        <!-- 대형 프레임 뷰어 컨테이너 -->
+        <div class="large-frame-viewport">
+          <!-- 1. AI 스타일 대형 프레임 -->
+          <div id="view-ai-frame" class="large-frame-card active">
+            <div class="frame-tag-badge">✨ AI 스타일 프레임 (선택됨)</div>
+            <div class="four-cut-frame-large">
+              <img id="ai-frame-preview" src="" alt="AI 4컷 대형 프레임">
             </div>
-            <div class="selection-indicator">✓</div>
+            <div class="frame-choice-status">✓ 최종 다운로드 및 인화 대상</div>
           </div>
 
-          <div class="comparison-card" id="card-orig">
-            <div class="card-label">📷 원본 사진 프레임</div>
-            <div class="four-cut-frame mini-frame">
-              <img id="orig-frame-preview" style="width:100%;height:100%;object-fit:contain;" src="" alt="Original 4컷">
+          <!-- 2. 원본 사진 대형 프레임 -->
+          <div id="view-orig-frame" class="large-frame-card">
+            <div class="frame-tag-badge" style="color: #64748B; background: #F1F5F9; border-color: #CBD5E1;">📷 원본 사진 프레임 (선택됨)</div>
+            <div class="four-cut-frame-large">
+              <img id="orig-frame-preview" src="" alt="Original 4컷 대형 프레임">
             </div>
-            <div class="selection-indicator">✓</div>
+            <div class="frame-choice-status" style="color: #64748B; background: #F8FAFC; border-color: #E2E8F0;">✓ 원본 사진으로 저장하기</div>
           </div>
         </div>
       </div>
 
       <footer class="fixed-footer">
-        <button id="btn-to-finish" class="btn btn-primary btn-large w-full">다음 (QR & 인화) ➔</button>
+        <button id="btn-to-finish" class="btn btn-primary btn-large w-full">선택 완료 (QR & 인화) ➔</button>
       </footer>
     </section>
 
@@ -581,6 +594,25 @@
         overlay.classList.remove('active');
         showToast('AI 변환 중 오류가 발생했습니다. 백엔드 URL 설정을 확인하세요.');
       }
+    });
+
+    // 4.5 탭 전환 이벤트 리스너 (대형 개별 탭 뷰)
+    let selectedFrameChoice = 'ai'; // 'ai' or 'orig'
+
+    document.getElementById('tab-ai-frame').addEventListener('click', () => {
+      selectedFrameChoice = 'ai';
+      document.getElementById('tab-ai-frame').classList.add('active');
+      document.getElementById('tab-orig-frame').classList.remove('active');
+      document.getElementById('view-ai-frame').classList.add('active');
+      document.getElementById('view-orig-frame').classList.remove('active');
+    });
+
+    document.getElementById('tab-orig-frame').addEventListener('click', () => {
+      selectedFrameChoice = 'orig';
+      document.getElementById('tab-orig-frame').classList.add('active');
+      document.getElementById('tab-ai-frame').classList.remove('active');
+      document.getElementById('view-orig-frame').classList.add('active');
+      document.getElementById('view-ai-frame').classList.remove('active');
     });
 
     // 5. Finish (QR)

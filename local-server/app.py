@@ -236,12 +236,13 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성 (사용자 실제 Vercel 주소 매핑)
+    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성 (사용자 실제 Vercel 주소 및 서버 주소 동적 바인딩)
     base_host = "https://4cut-pjt.vercel.app"
-    download_url = f"{base_host}/download.html?img={img_param}&vid={vid_param}"
+    server_origin = str(request.base_url).rstrip("/")
+    download_url = f"{base_host}/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
     
     # 로컬 서빙 뷰어 URL 생성 (테스트용)
-    local_download_url = f"http://localhost:8000/download.html?img={img_param}&vid={vid_param}"
+    local_download_url = f"http://localhost:8000/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
     
     # QR 코드 생성 (이용자가 스캔할 Vercel URL 매핑)
     qr = qrcode.QRCode(version=1, box_size=8, border=2)

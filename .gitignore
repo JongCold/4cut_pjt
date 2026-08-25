@@ -1,0 +1,15 @@
+# Google API Keys and secrets
+*google-key.json
+*.json.secret
+*.env
+
+# Python Cache & uploads
+__pycache__/
+*.py[cod]
+local-server/uploads/*
+!local-server/uploads/.gitkeep
+
+# Temporary tests
+local-server/test_frame_*.jpg
+local-server/test_dummy_video.webm
+local-server/test_gdrive_upload.py

@@ -683,7 +683,114 @@ body {
   padding-bottom: 2%;
 }
 
-/* [화면 6] 변환 완료 2 (비교 선택) */
+/* [화면 6] 변환 완료 (대형 개별 탭 뷰 & 고화질 프레임) */
+.result-large-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 85px 16px 110px 16px;
+  overflow-y: auto;
+}
+
+.result-tab-bar {
+  display: flex;
+  width: 100%;
+  max-width: 380px;
+  background: #E2E8F0;
+  border-radius: 16px;
+  padding: 4px;
+  margin-bottom: 16px;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.result-tab-btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 0;
+  font-family: var(--font-family-base);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #64748B;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.result-tab-btn.active {
+  background: #FFFFFF;
+  color: var(--color-active);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.large-frame-viewport {
+  width: 100%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.large-frame-card {
+  display: none;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  animation: fadeIn 0.3s ease;
+}
+
+.large-frame-card.active {
+  display: flex;
+}
+
+.frame-tag-badge {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--color-active);
+  background: #F5F3FF;
+  border: 1px solid #DDD6FE;
+  padding: 6px 14px;
+  border-radius: 20px;
+  margin-bottom: 12px;
+}
+
+.four-cut-frame-large {
+  width: 100%;
+  max-width: 360px;
+  aspect-ratio: 3 / 4;
+  background: #FFFFFF;
+  border-radius: 16px;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+  border: 1px solid #E2E8F0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+}
+
+.four-cut-frame-large img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 10px;
+}
+
+.frame-choice-status {
+  margin-top: 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #10B981;
+  background: #ECFDF5;
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid #A7F3D0;
+}
+
 .side-by-side-content {
   padding-bottom: 110px;
 }

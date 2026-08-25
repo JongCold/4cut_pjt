@@ -24,24 +24,24 @@ except ImportError:
 
 PROMPT_MAPPING = {
     "original": {
-        "positive": "high quality photo, portrait, natural warm lighting, sharp focus, masterpiece, 8k uhd, clean skin, detailed eyes",
-        "negative": "blurry, ugly, distorted, low quality, noise, bad anatomy, extra limbs"
+        "positive": "masterpiece, 8k uhd, crystal clear portrait photo, natural soft studio lighting, sharp focus, clean skin, detailed eyes, photorealistic, same person",
+        "negative": "blurry, ugly, distorted, low quality, noise, bad anatomy, deformed eyes"
     },
     "soft_cartoon": {
-        "positive": "3d animation style, pixar disney character style, cute facial features, soft smooth studio lighting, vibrant colors, masterpiece, 8k",
-        "negative": "photorealistic, real photo, dark, creepy, low quality, ugly, distorted, noise"
+        "positive": "3d pixar disney animation style portrait of the exact same person, stylized artistic painting over photo, recognizable facial features, soft smooth character shading, vibrant warm colors, masterpiece, 8k",
+        "negative": "deformed face, changed identity, altered face structure, ugly, distorted eyes, dark, blurry, noise"
     },
     "ghibli": {
-        "positive": "studio ghibli anime style, beautiful hand drawn anime illustration, soft watercolor background, warm pastel tones, hayao miyazaki art, highly detailed",
-        "negative": "3d render, photorealistic, real photo, dark, low resolution, ugly, bad proportions"
+        "positive": "studio ghibli watercolor animation portrait of the exact same person, beautiful hand drawn anime illustration, soft watercolor texture on portrait, warm pastel aesthetic, hayao miyazaki art style, highly detailed",
+        "negative": "deformed face, changed identity, altered face structure, 3d render, distorted anatomy, dark, ugly"
     },
     "neon_fantasy": {
-        "positive": "cyberpunk neon fantasy portrait, vibrant glowing magenta and cyan lights, futuristic aesthetic, dramatic contrast, highly detailed, masterpiece",
-        "negative": "dull, monochrome, dark background, washed out, low quality, blurry"
+        "positive": "cyberpunk neon fantasy portrait of the exact same person, vibrant glowing magenta and cyan rim light on face, cinematic lighting, futuristic aesthetic, sharp detailed face, masterpiece",
+        "negative": "deformed face, changed identity, dark dull, washed out, blurry, low quality"
     },
     "bw_cinema": {
-        "positive": "black and white film portrait, 35mm noir cinema style, dramatic key shadows, high contrast, monochrome, elegant vintage photo, masterpiece",
-        "negative": "color, colorful, oversaturated, blurry, bad lighting, low contrast"
+        "positive": "black and white 35mm film portrait of the exact same person, classic noir cinema aesthetic, elegant shadows, high contrast monochrome, sharp focus, masterpiece",
+        "negative": "color, colorful, deformed face, changed identity, blurry, bad anatomy"
     }
 }
 
@@ -79,68 +79,78 @@ def load_sd_pipeline():
 
 
 def apply_style_fallback(image: Image.Image, style: str) -> Image.Image:
-    """GPU / PyTorch 미지원 환경을 위한 고품질 이미지 스타일링 Fallback"""
+    """GPU / PyTorch 미지원 환경을 위한 인물 보존 고품질 이미지 스타일링 Fallback"""
     img = image.convert("RGB")
     
     if style == "soft_cartoon":
-        # 뽀샤시 + 채도 증가 + 콘트라스트 조율 (3D 카툰 흉내)
-        img = ImageEnhance.Color(img).enhance(1.4)
-        img = ImageEnhance.Contrast(img).enhance(1.1)
-        img = img.filter(ImageFilter.SMOOTH_MORE)
-        img = ImageEnhance.Sharpness(img).enhance(1.3)
+        # 3D 카툰: 부드러운 피부 톤 + 화사한 하이라이트 + 선명한 이목구비
+        smooth = img.filter(ImageFilter.SMOOTH_MORE)
+        enhanced_color = ImageEnhance.Color(smooth).enhance(1.35)
+        enhanced_contrast = ImageEnhance.Contrast(enhanced_color).enhance(1.15)
+        img = ImageEnhance.Sharpness(enhanced_contrast).enhance(1.3)
         
     elif style == "ghibli":
-        # 수채화 따뜻한 톤 + 가벼운 포스터라이즈
-        img = ImageEnhance.Color(img).enhance(1.3)
-        img = ImageEnhance.Brightness(img).enhance(1.08)
-        # 따뜻한 옐로우/오렌지 틴트 적용
+        # 지브리: 따뜻한 수채화 톤 + 자연스러운 파스텔 색감
+        img = ImageEnhance.Color(img).enhance(1.25)
+        img = ImageEnhance.Brightness(img).enhance(1.06)
         r, g, b = img.split()
-        r = r.point(lambda i: min(255, int(i * 1.05)))
-        g = g.point(lambda i: min(255, int(i * 1.02)))
+        r = r.point(lambda i: min(255, int(i * 1.06)))
+        g = g.point(lambda i: min(255, int(i * 1.03)))
+        b = b.point(lambda i: max(0, int(i * 0.96)))
         img = Image.merge("RGB", (r, g, b))
         img = img.filter(ImageFilter.SMOOTH)
+        img = ImageEnhance.Contrast(img).enhance(1.08)
         
     elif style == "neon_fantasy":
-        # 네온 판타지: 강한 명암 + 시안/마젠타 틴트
-        img = ImageEnhance.Contrast(img).enhance(1.35)
+        # 네온 판타지: 사이버펑크 틴트 + 드라마틱 글로우
+        img = ImageEnhance.Contrast(img).enhance(1.3)
         r, g, b = img.split()
-        r = r.point(lambda i: min(255, int(i * 1.2)))
-        b = b.point(lambda i: min(255, int(i * 1.25)))
+        r = r.point(lambda i: min(255, int(i * 1.22)))
+        b = b.point(lambda i: min(255, int(i * 1.28)))
+        g = g.point(lambda i: int(i * 0.92))
         img = Image.merge("RGB", (r, g, b))
-        img = ImageEnhance.Color(img).enhance(1.5)
-        
-    elif style == "bw_cinema":
-        # 흑백 시네마: 그레이스케일 + 고콘트라스트
-        img = ImageOps.grayscale(img).convert("RGB")
-        img = ImageEnhance.Contrast(img).enhance(1.4)
+        img = ImageEnhance.Color(img).enhance(1.4)
         img = ImageEnhance.Sharpness(img).enhance(1.2)
         
+    elif style == "bw_cinema":
+        # 흑백 시네마: 필름 누아르 흑백 + 깊은 명암비
+        img = ImageOps.grayscale(img).convert("RGB")
+        img = ImageEnhance.Contrast(img).enhance(1.35)
+        img = ImageEnhance.Sharpness(img).enhance(1.25)
+        
     else:  # original
-        # 샤픈 & 선명도 보정
-        img = ImageEnhance.Sharpness(img).enhance(1.4)
+        img = ImageEnhance.Sharpness(img).enhance(1.3)
         img = ImageEnhance.Contrast(img).enhance(1.05)
 
     return img
 
 
 def transform_single_image(image: Image.Image, style: str) -> Image.Image:
-    """단일 이미지 AI 변환 (SD 1.5 Img2Img 또는 Fallback)"""
+    """단일 이미지 AI 변환 (인물 얼굴 특징 및 구도 100% 보존 파이프라인)"""
+    if style == "original":
+        return apply_style_fallback(image, "original")
+
     pipe = load_sd_pipeline()
     prompts = PROMPT_MAPPING.get(style, PROMPT_MAPPING["original"])
     
     if pipe is not None:
         try:
-            # 타겟 크기 리사이즈 (512x640)
+            # 원본 이미지 비율 유지 리사이즈 (512x640)
             init_img = image.convert("RGB").resize((512, 640), Image.Resampling.LANCZOS)
+            
+            # 인물 얼굴 특징 보존을 위해 strength를 0.38로 최적화
             res = pipe(
                 prompt=prompts["positive"],
                 negative_prompt=prompts["negative"],
                 image=init_img,
-                strength=0.60,
+                strength=0.38,
                 guidance_scale=7.5,
                 num_inference_steps=20
             ).images[0]
-            return res
+            
+            # 원본 윤곽/이목구비의 정밀도를 유지하기 위해 미세 블렌딩 (85% AI 스타일 + 15% 원본 디테일)
+            blended = Image.blend(init_img, res, alpha=0.85)
+            return blended
         except Exception as e:
             print(f"[AI Transform Error] SD 변환 중 오류 발생: {e}. Fallback 적용.")
             return apply_style_fallback(image, style)

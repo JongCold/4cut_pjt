@@ -139,10 +139,11 @@
   </div>
 
   <script>
-    // URL Query Parameter 파싱 (?img=...&vid=...)
+    // URL Query Parameter 파싱 (?img=...&vid=...&srv=...)
     const urlParams = new URLSearchParams(window.location.search);
     const imgId = urlParams.get('img');
     const vidId = urlParams.get('vid');
+    const serverOrigin = urlParams.get('srv') || '';
 
     const imgElem = document.getElementById('display-image');
     const btnImg = document.getElementById('btn-download-img');
@@ -151,37 +152,44 @@
     const videoSource = document.getElementById('video-source');
     const btnVid = document.getElementById('btn-download-vid');
 
-    // 구글 드라이브 / 로컬 URL 파싱 & 바인딩
+    // 1. 완성본 4컷 사진 바인딩
     if (imgId) {
       let imgUrl = '';
       let imgDirectLink = '';
+      
       if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')) {
-        imgUrl = `/uploads/${imgId}`;
+        // 백엔드 직접 서빙 방식
+        const baseUrl = serverOrigin ? serverOrigin : '';
+        imgUrl = `${baseUrl}/uploads/${imgId}`;
         imgDirectLink = imgUrl;
       } else {
-        // 구글 드라이브 파일 ID 방식 (썸네일 API & direct 뷰 연동)
-        imgUrl = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1200`;
+        // 구글 드라이브 클라우드 파일 ID 방식 (LH3 고화질 CDN & 썸네일 API)
+        imgUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
         imgDirectLink = `https://drive.google.com/file/d/${imgId}/view?usp=sharing`;
         
-        // 이미지 로딩 실패 시 fallback (lh3)
+        // 이미지 로딩 실패 시 2차 썸네일 Fallback
         imgElem.onerror = () => {
-          imgElem.src = `https://lh3.googleusercontent.com/d/${imgId}`;
+          imgElem.src = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1600`;
         };
       }
       imgElem.src = imgUrl;
       btnImg.href = imgDirectLink;
     }
 
+    // 2. 전 과정 비하인드 동영상 바인딩
     if (vidId) {
       let vidUrl = '';
       let vidDirectLink = '';
+      
       if (vidId.startsWith('behind_video_')) {
-        vidUrl = `/uploads/${vidId}`;
+        // 백엔드 직접 서빙 방식
+        const baseUrl = serverOrigin ? serverOrigin : '';
+        vidUrl = `${baseUrl}/uploads/${vidId}`;
         vidDirectLink = vidUrl;
       } else {
-        // 구글 드라이브 파일 ID 방식
+        // 구글 드라이브 비디오 스트리밍 & 다운로드
         vidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
-        vidDirectLink = `https://drive.google.com/file/d/${vidId}/preview`;
+        vidDirectLink = `https://drive.google.com/file/d/${vidId}/view?usp=sharing`;
       }
       videoSource.src = vidUrl;
       videoElem.load();
