@@ -339,17 +339,13 @@ async def api_transform_four_cut(
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/mp4", folder_id=GOOGLE_VIDEO_FOLDER_ID)
     
-    # Drive ID가 없는 경우 로컬 파일명 활용
-    img_param = img_drive_id if img_drive_id else ai_frame_filename
-    vid_param = vid_drive_id if vid_drive_id else video_filename
-    
-    # 6. No-DB 모바일 다운로드 URL 및 Dynamic QR 생성
+    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (구글 로그인/계정선택/점3개 메뉴 완전 우회)
     base_host = "https://4cut-pjt.vercel.app"
     server_origin = str(request.base_url).rstrip("/")
-    download_url = f"{base_host}/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
+    download_url = f"{base_host}/download.html?img={ai_frame_filename}&vid={video_filename}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
     
     # 로컬 서빙 뷰어 URL 생성 (테스트용)
-    local_download_url = f"http://localhost:8000/download.html?img={img_param}&vid={vid_param}&srv={server_origin}"
+    local_download_url = f"http://localhost:8000/download.html?img={ai_frame_filename}&vid={video_filename}&srv={server_origin}"
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)

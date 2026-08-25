@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 4-CUT STUDIO | 모바일 사진 & 영상 다운로드</title>
+  <title>AI 4-CUT STUDIO | 모바일 사진 & 영상 즉시 다운로드</title>
   
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,7 +13,7 @@
   <link rel="stylesheet" href="./style.css">
   
   <style>
-    /* 모바일 전체 스크롤 차단 해제 및 터치 스크롤 강제 보장 */
+    /* 모바일 전체 스크롤 보장 및 1-클릭 다운로드 최적화 */
     html, body {
       overflow-x: hidden !important;
       overflow-y: auto !important;
@@ -116,9 +116,18 @@
       margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
       color: #1F2937;
     }
+    .badge-speed {
+      font-size: 0.75rem;
+      background: #EDE9FE;
+      color: #7C3AED;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+    }
+    
     .img-preview-box {
       width: 100%;
       border-radius: 12px;
@@ -155,6 +164,43 @@
       object-fit: contain;
     }
     
+    /* 1-클릭 다이렉트 다운로드 버튼 */
+    .btn-direct-download {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 16px 0;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      background: linear-gradient(135deg, #7C3AED, #6366F1);
+      border: none;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+      transition: transform 0.15s ease, opacity 0.2s ease;
+      text-decoration: none;
+      user-select: none;
+    }
+    .btn-direct-download:active {
+      transform: scale(0.98);
+      opacity: 0.9;
+    }
+    .btn-video-download {
+      background: linear-gradient(135deg, #0F172A, #334155);
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
+    }
+    
+    .download-tip {
+      font-size: 0.78rem;
+      color: #64748B;
+      text-align: center;
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+
     /* 하단 안내 및 전체보기 옵션 */
     .view-all-toggle {
       text-align: center;
@@ -189,7 +235,7 @@
   <div class="mobile-viewer-card">
     <div class="header-logo">
       <h2>✨ AI 4-CUT STUDIO</h2>
-      <p style="font-size: 0.83rem; color: #64748B; margin-top: 4px;">나만의 4컷 사진 & 비하인드 영상 모바일 다운로드</p>
+      <p style="font-size: 0.83rem; color: #64748B; margin-top: 4px;">로그인 없이 1초 만에 바로 저장되는 모바일 뷰어</p>
     </div>
 
     <!-- 탭 이동 컨트롤 -->
@@ -198,36 +244,44 @@
         📸 4컷 사진
       </button>
       <button class="tab-btn" id="tab-video-btn" onclick="switchTab('video')">
-        🎥 비하인드 영상
+        🎥 2배속 비하인드 영상
       </button>
     </div>
 
     <!-- 탭 1: 완성본 4컷 사진 섹션 -->
     <div id="tab-photo-content" class="media-content active">
       <div class="media-card">
-        <div class="media-title">📸 완성본 4컷 사진</div>
+        <div class="media-title">
+          <span>📸 완성본 4컷 사진</span>
+          <span class="badge-speed">고화질 원본</span>
+        </div>
         <div class="img-preview-box">
           <img id="display-image" src="" alt="4컷 사진을 불러오는 중입니다...">
         </div>
-        <a id="btn-download-img" href="#" download="ai_4cut_photo.jpg" class="btn btn-primary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
-          ⬇️ 고화질 사진 다운로드
-        </a>
+        <button id="btn-download-img" onclick="downloadMedia('photo')" class="btn-direct-download">
+          ⬇️ 4컷 사진 즉시 저장 (1-Click)
+        </button>
+        <p class="download-tip">💡 터치 시 구글 로그인/계정 선택 없이 기기에 즉시 다운로드됩니다.</p>
       </div>
     </div>
 
     <!-- 탭 2: 전 과정 비하인드 동영상 섹션 -->
     <div id="tab-video-content" class="media-content">
       <div class="media-card" id="video-card-anchor">
-        <div class="media-title">🎥 전 과정 비하인드 영상</div>
+        <div class="media-title">
+          <span>🎥 전 과정 비하인드 영상</span>
+          <span class="badge-speed">⚡ 2배속 고속 모드</span>
+        </div>
         <div class="video-preview-box">
           <video id="display-video" controls loop playsinline webkit-playsinline preload="metadata">
             <source id="video-source" src="" type="video/mp4">
             브라우저가 동영상 재생을 지원하지 않습니다.
           </video>
         </div>
-        <a id="btn-download-vid" href="#" download="behind_video.mp4" class="btn btn-secondary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
-          ⬇️ 비하인드 영상 다운로드
-        </a>
+        <button id="btn-download-vid" onclick="downloadMedia('video')" class="btn-direct-download btn-video-download">
+          ⬇️ 2배속 비하인드 영상 즉시 저장 (1-Click)
+        </button>
+        <p class="download-tip">💡 터치 시 스마트폰 갤러리/다운로드 폴더에 바로 저장됩니다.</p>
       </div>
     </div>
 
@@ -250,14 +304,13 @@
     const serverOrigin = urlParams.get('srv') || '';
 
     const imgElem = document.getElementById('display-image');
-    const btnImg = document.getElementById('btn-download-img');
-    
     const videoElem = document.getElementById('display-video');
     const videoSource = document.getElementById('video-source');
-    const btnVid = document.getElementById('btn-download-vid');
 
     let imageBlobUrl = null;
     let videoBlobUrl = null;
+    let imageFileName = 'ai_4cut_photo.jpg';
+    let videoFileName = 'behind_video.mp4';
 
     function switchTab(tabName) {
       const photoBtn = document.getElementById('tab-photo-btn');
@@ -288,7 +341,6 @@
       document.querySelector('.tab-container').style.display = 'none';
       document.querySelector('.view-all-toggle').style.display = 'none';
       
-      // 영상 카드로 자연스럽게 스크롤 이동
       setTimeout(() => {
         const videoAnchor = document.getElementById('video-card-anchor');
         if (videoAnchor) {
@@ -297,11 +349,42 @@
       }, 100);
     }
 
-    // 1. 완성본 4컷 사진 로딩 & 다운로드 설정
+    // 1-Click 다이렉트 즉시 저장 함수 (구글 로그인/계정 선택/점 3개 메뉴 완전 우회)
+    function downloadMedia(type) {
+      if (type === 'photo') {
+        if (!imageBlobUrl) {
+          alert('사진을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+          return;
+        }
+        triggerInstantDownload(imageBlobUrl, imageFileName);
+      } else if (type === 'video') {
+        if (!videoBlobUrl) {
+          alert('동영상을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
+          return;
+        }
+        triggerInstantDownload(videoBlobUrl, videoFileName);
+      }
+    }
+
+    function triggerInstantDownload(blobUrl, filename) {
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = filename;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 500);
+    }
+
+    // 1. 완성본 4컷 사진 로딩 (Blob 메모리 로딩)
     async function loadPhoto() {
       if (!imgId) return;
+      imageFileName = imgId.endsWith('.jpg') ? imgId : `${imgId}.jpg`;
 
-      if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')) {
+      if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_') || imgId.endsWith('.jpg')) {
         const baseUrl = serverOrigin ? serverOrigin : '';
         const targetUrl = `${baseUrl}/uploads/${imgId}`;
         
@@ -312,32 +395,29 @@
           const blob = await response.blob();
           imageBlobUrl = URL.createObjectURL(blob);
           imgElem.src = imageBlobUrl;
-          
-          btnImg.href = imageBlobUrl;
-          btnImg.download = `${imgId}.jpg`;
-          btnImg.removeAttribute('target');
         } catch (err) {
           console.error('사진 로딩 실패:', err);
           imgElem.src = targetUrl;
-          btnImg.href = targetUrl;
+          imageBlobUrl = targetUrl;
         }
       } else {
+        // 구글 드라이브 ID 방식인 경우에도 다이렉트 썸네일 스트림 수신
         const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
         imgElem.src = gdriveCdnUrl;
+        imageBlobUrl = gdriveCdnUrl;
         imgElem.onerror = () => {
           imgElem.src = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1600`;
+          imageBlobUrl = imgElem.src;
         };
-
-        btnImg.href = `https://drive.google.com/uc?export=download&id=${imgId}`;
-        btnImg.download = `ai_4cut_${imgId}.jpg`;
       }
     }
 
-    // 2. 전 과정 비하인드 동영상 로딩 & 다운로드 설정
+    // 2. 전 과정 비하인드 동영상 로딩 (Blob 메모리 로딩)
     async function loadVideo() {
       if (!vidId) return;
+      videoFileName = vidId.endsWith('.mp4') ? vidId : `${vidId}.mp4`;
 
-      if (vidId.startsWith('behind_video_')) {
+      if (vidId.startsWith('behind_video_') || vidId.endsWith('.mp4') || vidId.endsWith('.webm')) {
         const baseUrl = serverOrigin ? serverOrigin : '';
         const targetUrl = `${baseUrl}/uploads/${vidId}`;
 
@@ -351,35 +431,21 @@
           videoElem.src = videoBlobUrl;
           videoSource.src = videoBlobUrl;
           videoElem.load();
-          
-          btnVid.href = videoBlobUrl;
-          btnVid.download = vidId; // behind_video_sessionid.mp4로 자동 설정
-          btnVid.removeAttribute('target');
         } catch (err) {
           console.error('동영상 로딩 실패:', err);
           videoElem.src = targetUrl;
           videoSource.src = targetUrl;
+          videoBlobUrl = targetUrl;
           videoElem.load();
-          btnVid.href = targetUrl;
         }
       } else {
         const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
         videoElem.src = gdriveVidUrl;
         videoSource.src = gdriveVidUrl;
+        videoBlobUrl = gdriveVidUrl;
         videoElem.load();
-        
-        btnVid.href = gdriveVidUrl;
-        btnVid.download = `behind_video_${vidId}.mp4`;
       }
     }
-
-    // 비하인드 동영상 2배속 (2.0x Speed) 자동 적용
-    videoElem.addEventListener('play', () => {
-      videoElem.playbackRate = 2.0;
-    });
-    videoElem.addEventListener('loadedmetadata', () => {
-      videoElem.playbackRate = 2.0;
-    });
 
     loadPhoto();
     loadVideo();
