@@ -33,6 +33,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 GOOGLE_PHOTO_FOLDER_ID = "13KXZ_W7vurFPHbC_1tImac7ZLBlRuS3Q"
 GOOGLE_VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8NfnaQ_dU"
 GOOGLE_KEY_PATH = os.path.join(BASE_DIR, "google-key.json")
+GAS_WEBHOOK_URL = os.environ.get("GAS_WEBHOOK_URL", "")  # Google Apps Script Webhook URL
 
 DRIVE_SERVICE = None
 
@@ -71,37 +72,70 @@ if os.path.exists(VERCEL_DIR):
 
 
 def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder_id: str = None) -> Optional[str]:
-    """구글 드라이브 API 파일 업로드 및 공개 접근 권한 설정"""
-    if DRIVE_SERVICE is None:
-        return None
+    """구글 드라이브 파일 업로드 (GAS Webhook 또는 Service Account 지원)"""
+    import urllib.request
+    import json
     
-    target_folder_id = folder_id if folder_id else GOOGLE_PHOTO_FOLDER_ID
-    try:
-        from googleapiclient.http import MediaFileUpload
-        file_metadata = {
-            "name": filename,
-            "parents": [target_folder_id]
-        }
-        media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
-        file_obj = DRIVE_SERVICE.files().create(
-            body=file_metadata,
-            media_body=media,
-            fields="id, webViewLink, webContentLink"
-        ).execute()
-        
-        file_id = file_obj.get("id")
-        
-        # 누구나 읽기 권한 설정 (Public Reader)
-        DRIVE_SERVICE.permissions().create(
-            fileId=file_id,
-            body={"role": "reader", "type": "anyone"}
-        ).execute()
-        
-        print(f"[Google Drive API] 성공적으로 업로드됨: {filename} (ID: {file_id}, Target Folder: {target_folder_id})")
-        return file_id
-    except Exception as e:
-        print(f"[Google Drive API] 업로드 에러: {e}")
-        return None
+    folder_type = "video" if folder_id == GOOGLE_VIDEO_FOLDER_ID else "photo"
+
+    # 1. Google Apps Script (GAS) Webhook 방식 우선 (사용자 5TB 할당량 사용)
+    if GAS_WEBHOOK_URL:
+        try:
+            with open(file_path, "rb") as f:
+                b64_content = base64.b64encode(f.read()).decode("utf-8")
+            
+            payload = json.dumps({
+                "filename": filename,
+                "mimeType": mime_type,
+                "base64Data": b64_content,
+                "folderType": folder_type
+            }).encode("utf-8")
+            
+            req = urllib.request.Request(
+                GAS_WEBHOOK_URL,
+                data=payload,
+                headers={"Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as response:
+                res_data = json.loads(response.read().decode("utf-8"))
+                if res_data.get("status") == "success":
+                    file_id = res_data.get("fileId")
+                    print(f"[Google Drive GAS] ✅ 구글 드라이브 업로드 성공! ID: {file_id}")
+                    return file_id
+        except Exception as ex:
+            print(f"[Google Drive GAS Error] GAS 업로드 실패: {ex}")
+
+    # 2. Service Account API 방식
+    if DRIVE_SERVICE is not None:
+        target_folder_id = folder_id if folder_id else GOOGLE_PHOTO_FOLDER_ID
+        try:
+            from googleapiclient.http import MediaFileUpload
+            file_metadata = {
+                "name": filename,
+                "parents": [target_folder_id]
+            }
+            media = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
+            file_obj = DRIVE_SERVICE.files().create(
+                body=file_metadata,
+                media_body=media,
+                fields="id, webViewLink, webContentLink",
+                supportsAllDrives=True
+            ).execute()
+            
+            file_id = file_obj.get("id")
+            DRIVE_SERVICE.permissions().create(
+                fileId=file_id,
+                body={"role": "reader", "type": "anyone"},
+                supportsAllDrives=True
+            ).execute()
+            
+            print(f"[Google Drive API] ✅ 서비스계정 업로드 성공: {filename} (ID: {file_id})")
+            return file_id
+        except Exception as e:
+            print(f"[Google Drive API] ⚠️ 업로드 실패 (Service Account Quota 정책 제한): {e}")
+            return None
+    
+    return None
 
 
 def cleanup_expired_files():

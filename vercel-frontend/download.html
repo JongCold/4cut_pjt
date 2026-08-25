@@ -152,49 +152,89 @@
     const videoSource = document.getElementById('video-source');
     const btnVid = document.getElementById('btn-download-vid');
 
-    // 1. 완성본 4컷 사진 바인딩
-    if (imgId) {
-      let imgUrl = '';
-      let imgDirectLink = '';
-      
+    let imageBlobUrl = null;
+    let videoBlobUrl = null;
+
+    // 1. 완성본 4컷 사진 로딩 & 1-클릭 즉시 다운로드 설정
+    async function loadPhoto() {
+      if (!imgId) return;
+
       if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')) {
-        // 백엔드 직접 서빙 방식
         const baseUrl = serverOrigin ? serverOrigin : '';
-        imgUrl = `${baseUrl}/uploads/${imgId}`;
-        imgDirectLink = imgUrl;
-      } else {
-        // 구글 드라이브 클라우드 파일 ID 방식 (LH3 고화질 CDN & 썸네일 API)
-        imgUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
-        imgDirectLink = `https://drive.google.com/file/d/${imgId}/view?usp=sharing`;
+        const targetUrl = `${baseUrl}/uploads/${imgId}`;
         
-        // 이미지 로딩 실패 시 2차 썸네일 Fallback
+        try {
+          // ngrok 경고 페이지를 우회하여 이미지 바이너리 Blob 직접 수신
+          const response = await fetch(targetUrl, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+          const blob = await response.blob();
+          imageBlobUrl = URL.createObjectURL(blob);
+          imgElem.src = imageBlobUrl;
+          
+          btnImg.href = imageBlobUrl;
+          btnImg.download = `${imgId}.jpg`;
+          btnImg.removeAttribute('target'); // 새 창 열기 방지 (페이지 내 즉시 다운로드)
+        } catch (err) {
+          console.error('사진 로딩 실패:', err);
+          imgElem.src = targetUrl;
+          btnImg.href = targetUrl;
+        }
+      } else {
+        // 구글 드라이브 클라우드 파일 ID 방식
+        const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
+        imgElem.src = gdriveCdnUrl;
         imgElem.onerror = () => {
           imgElem.src = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1600`;
         };
+
+        btnImg.href = `https://drive.google.com/uc?export=download&id=${imgId}`;
+        btnImg.download = `ai_4cut_${imgId}.jpg`;
       }
-      imgElem.src = imgUrl;
-      btnImg.href = imgDirectLink;
     }
 
-    // 2. 전 과정 비하인드 동영상 바인딩
-    if (vidId) {
-      let vidUrl = '';
-      let vidDirectLink = '';
-      
+    // 2. 전 과정 비하인드 동영상 로딩 & 1-클릭 즉시 다운로드 설정
+    async function loadVideo() {
+      if (!vidId) return;
+
       if (vidId.startsWith('behind_video_')) {
-        // 백엔드 직접 서빙 방식
         const baseUrl = serverOrigin ? serverOrigin : '';
-        vidUrl = `${baseUrl}/uploads/${vidId}`;
-        vidDirectLink = vidUrl;
+        const targetUrl = `${baseUrl}/uploads/${vidId}`;
+
+        try {
+          // ngrok 경고 페이지를 우회하여 비디오 바이너리 Blob 직접 수신
+          const response = await fetch(targetUrl, {
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+          const blob = await response.blob();
+          videoBlobUrl = URL.createObjectURL(blob);
+          
+          videoElem.src = videoBlobUrl;
+          videoElem.load();
+          
+          btnVid.href = videoBlobUrl;
+          btnVid.download = `${vidId}.webm`;
+          btnVid.removeAttribute('target'); // 새 창 열기 방지 (페이지 내 즉시 다운로드)
+        } catch (err) {
+          console.error('동영상 로딩 실패:', err);
+          videoSource.src = targetUrl;
+          videoElem.load();
+          btnVid.href = targetUrl;
+        }
       } else {
-        // 구글 드라이브 비디오 스트리밍 & 다운로드
-        vidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
-        vidDirectLink = `https://drive.google.com/file/d/${vidId}/view?usp=sharing`;
+        // 구글 드라이브 클라우드 동영상 스트리밍 & 다운로드
+        const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
+        videoSource.src = gdriveVidUrl;
+        videoElem.load();
+        
+        btnVid.href = gdriveVidUrl;
+        btnVid.download = `behind_video_${vidId}.webm`;
       }
-      videoSource.src = vidUrl;
-      videoElem.load();
-      btnVid.href = vidDirectLink;
     }
+
+    // 초기화 실행
+    loadPhoto();
+    loadVideo();
   </script>
 </body>
 </html>
