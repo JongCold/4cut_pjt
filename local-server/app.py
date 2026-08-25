@@ -33,7 +33,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 GOOGLE_PHOTO_FOLDER_ID = "13KXZ_W7vurFPHbC_1tImac7ZLBlRuS3Q"
 GOOGLE_VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8NfnaQ_dU"
 GOOGLE_KEY_PATH = os.path.join(BASE_DIR, "google-key.json")
-GAS_WEBHOOK_URL = os.environ.get("GAS_WEBHOOK_URL", "https://script.google.com/macros/s/AKfycbx9zbMu9ihELvQGEIEn6uAVUqVvooTzgXblN4zPXfGTDO6Vo-KlRZB0nEGQU6ZSzR_X/exec")  # Google Apps Script Webhook URL
+GAS_WEBHOOK_URL = os.environ.get("GAS_WEBHOOK_URL", "https://script.google.com/macros/s/AKfycbw1b3onN_ZUkYEI816LMT8XGV-Dl9EpHkZEjkplPaIA6L-YZSGTuGmYBcEitU6yK5N1/exec")  # Google Apps Script Webhook URL
 
 DRIVE_SERVICE = None
 

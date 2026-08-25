@@ -373,6 +373,14 @@
       }
     }
 
+    // 비하인드 동영상 2배속 (2.0x Speed) 자동 적용
+    videoElem.addEventListener('play', () => {
+      videoElem.playbackRate = 2.0;
+    });
+    videoElem.addEventListener('loadedmetadata', () => {
+      videoElem.playbackRate = 2.0;
+    });
+
     loadPhoto();
     loadVideo();
   </script>
