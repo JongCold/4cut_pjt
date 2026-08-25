@@ -33,7 +33,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 GOOGLE_PHOTO_FOLDER_ID = "13KXZ_W7vurFPHbC_1tImac7ZLBlRuS3Q"
 GOOGLE_VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8NfnaQ_dU"
 GOOGLE_KEY_PATH = os.path.join(BASE_DIR, "google-key.json")
-GAS_WEBHOOK_URL = os.environ.get("GAS_WEBHOOK_URL", "")  # Google Apps Script Webhook URL
+GAS_WEBHOOK_URL = os.environ.get("GAS_WEBHOOK_URL", "https://script.google.com/macros/s/AKfycbx9zbMu9ihELvQGEIEn6uAVUqVvooTzgXblN4zPXfGTDO6Vo-KlRZB0nEGQU6ZSzR_X/exec")  # Google Apps Script Webhook URL
 
 DRIVE_SERVICE = None
 
@@ -81,29 +81,38 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
     # 1. Google Apps Script (GAS) Webhook 방식 우선 (사용자 5TB 할당량 사용)
     if GAS_WEBHOOK_URL:
         try:
+            import requests
             with open(file_path, "rb") as f:
                 b64_content = base64.b64encode(f.read()).decode("utf-8")
             
-            payload = json.dumps({
+            payload = {
                 "filename": filename,
                 "mimeType": mime_type,
                 "base64Data": b64_content,
                 "folderType": folder_type
-            }).encode("utf-8")
+            }
             
-            req = urllib.request.Request(
-                GAS_WEBHOOK_URL,
-                data=payload,
-                headers={"Content-Type": "application/json"}
-            )
-            with urllib.request.urlopen(req, timeout=30) as response:
-                res_data = json.loads(response.read().decode("utf-8"))
-                if res_data.get("status") == "success":
-                    file_id = res_data.get("fileId")
-                    print(f"[Google Drive GAS] ✅ 구글 드라이브 업로드 성공! ID: {file_id}")
-                    return file_id
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Content-Type": "application/json"
+            }
+            
+            res = requests.post(GAS_WEBHOOK_URL, json=payload, headers=headers, timeout=60)
+            if res.status_code == 200:
+                try:
+                    res_data = res.json()
+                    if res_data.get("status") == "success":
+                        file_id = res_data.get("fileId")
+                        print(f"[Google Drive GAS] ✅ 구글 드라이브 업로드 성공! ID: {file_id}")
+                        return file_id
+                    else:
+                        print(f"[Google Drive GAS Error] 스크립트 오류: {res_data.get('message')}")
+                except Exception as parse_err:
+                    print(f"[Google Drive GAS Error] 응답 파싱 실패 ({parse_err}). GAS 배포 설정을 '모든 사용자(Anyone)'로 지정했는지 확인하세요.")
+            else:
+                print(f"[Google Drive GAS Error] GAS 업로드 실패 (HTTP {res.status_code}). GAS 앱스 스크립트 배포 시 액세스 권한을 '모든 사용자(Anyone)'로 설정했는지 확인하세요.")
         except Exception as ex:
-            print(f"[Google Drive GAS Error] GAS 업로드 실패: {ex}")
+            print(f"[Google Drive GAS Error] GAS 연동 예외: {ex}")
 
     # 2. Service Account API 방식
     if DRIVE_SERVICE is not None:
@@ -176,10 +185,16 @@ def cleanup_expired_files():
                 print(f"[Auto Cleanup Error] 구글 드라이브 조회 실패 (Folder: {folder_id}): {e}")
 
 
-# APScheduler 가동 (15분마다 검사)
+# APScheduler 가동 (15분마다 검사 및 서버 시작 시 즉시 실행)
 scheduler = BackgroundScheduler()
 scheduler.add_job(cleanup_expired_files, "interval", minutes=15)
 scheduler.start()
+
+# 서버 시작 시 24시간 지난 만료 파일 즉시 파기 실행
+try:
+    cleanup_expired_files()
+except Exception as e:
+    print(f"[Auto Cleanup] 초기 파기 실패: {e}")
 
 
 @app.get("/", response_class=HTMLResponse)

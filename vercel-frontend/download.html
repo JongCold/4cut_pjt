@@ -13,8 +13,15 @@
   <link rel="stylesheet" href="./style.css">
   
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
     body {
       background-color: #F8FAFC;
+      font-family: 'Pretendard', sans-serif;
+      color: #1F2937;
     }
     .mobile-viewer-card {
       width: 100%;
@@ -22,36 +29,77 @@
       margin: 0 auto;
       min-height: 100vh;
       background-color: #FFFFFF;
-      padding: 24px 20px 40px 20px;
+      padding: 20px 16px 32px 16px;
       display: flex;
       flex-direction: column;
       box-shadow: 0 8px 30px rgba(0,0,0,0.06);
     }
     .header-logo {
       text-align: center;
-      margin-bottom: 24px;
+      margin-bottom: 16px;
     }
     .header-logo h2 {
-      font-size: 1.4rem;
+      font-size: 1.35rem;
       font-weight: 800;
       background: linear-gradient(135deg, #1F2937, #8B5CF6);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
     }
-    .media-section {
+    
+    /* 탭 컨트롤러 */
+    .tab-container {
       display: flex;
-      flex-direction: column;
-      gap: 24px;
-      margin-bottom: 30px;
-    }
-    .media-card {
       background-color: #F1F5F9;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      gap: 4px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 8px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #64748B;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .tab-btn.active {
+      background-color: #FFFFFF;
+      color: #8B5CF6;
+      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+    }
+    
+    /* 미디어 섹션 */
+    .media-content {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    .media-content.active {
+      display: flex;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .media-card {
+      background-color: #F8FAFC;
       border-radius: 16px;
       padding: 16px;
       border: 1px solid #E2E8F0;
     }
     .media-title {
-      font-size: 1rem;
+      font-size: 0.98rem;
       font-weight: 700;
       margin-bottom: 12px;
       display: flex;
@@ -66,6 +114,10 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.08);
       margin-bottom: 14px;
       background-color: #FFFFFF;
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .img-preview-box img {
       width: 100%;
@@ -78,16 +130,39 @@
       overflow: hidden;
       margin-bottom: 14px;
       background-color: #000000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      min-height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .video-preview-box video {
       width: 100%;
+      max-height: 60vh;
       display: block;
+      object-fit: contain;
     }
+    
+    /* 하단 안내 및 전체보기 옵션 */
+    .view-all-toggle {
+      text-align: center;
+      margin: 16px 0;
+    }
+    .btn-toggle-all {
+      background: none;
+      border: none;
+      color: #64748B;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
     .privacy-notice {
       background-color: #F5F3FF;
       border: 1px solid #DDD6FE;
       border-radius: 14px;
-      padding: 16px;
+      padding: 14px;
       font-size: 0.82rem;
       color: #64748B;
       line-height: 1.6;
@@ -100,46 +175,61 @@
   <div class="mobile-viewer-card">
     <div class="header-logo">
       <h2>✨ AI 4-CUT STUDIO</h2>
-      <p style="font-size: 0.85rem; color: #64748B; margin-top: 4px;">나만의 4컷 완성본 사진 및 비하인드 영상 다운로드</p>
+      <p style="font-size: 0.83rem; color: #64748B; margin-top: 4px;">나만의 4컷 사진 & 비하인드 영상 모바일 다운로드</p>
     </div>
 
-    <div class="media-section">
-      
-      <!-- 4컷 이미지 섹션 -->
+    <!-- 탭 이동 컨트롤 -->
+    <div class="tab-container">
+      <button class="tab-btn active" id="tab-photo-btn" onclick="switchTab('photo')">
+        📸 4컷 사진
+      </button>
+      <button class="tab-btn" id="tab-video-btn" onclick="switchTab('video')">
+        🎥 비하인드 영상
+      </button>
+    </div>
+
+    <!-- 탭 1: 완성본 4컷 사진 섹션 -->
+    <div id="tab-photo-content" class="media-content active">
       <div class="media-card">
         <div class="media-title">📸 완성본 4컷 사진</div>
         <div class="img-preview-box">
-          <img id="display-image" src="" alt="4컷 완성 사진 로딩 중...">
+          <img id="display-image" src="" alt="4컷 사진을 불러오는 중입니다...">
         </div>
-        <a id="btn-download-img" href="#" target="_blank" download="ai_4cut_photo.jpg" class="btn btn-primary btn-large w-full">
-          ⬇️ 4컷 사진 고화질 다운로드
+        <a id="btn-download-img" href="#" download="ai_4cut_photo.jpg" class="btn btn-primary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
+          ⬇️ 고화질 사진 다운로드
         </a>
       </div>
+    </div>
 
-      <!-- 비하인드 동영상 섹션 -->
+    <!-- 탭 2: 전 과정 비하인드 동영상 섹션 -->
+    <div id="tab-video-content" class="media-content">
       <div class="media-card">
         <div class="media-title">🎥 전 과정 비하인드 영상</div>
         <div class="video-preview-box">
-          <video id="display-video" controls loop playsinline poster="">
+          <video id="display-video" controls loop playsinline webkit-playsinline preload="metadata">
             <source id="video-source" src="" type="video/webm">
             브라우저가 동영상 재생을 지원하지 않습니다.
           </video>
         </div>
-        <a id="btn-download-vid" href="#" target="_blank" download="behind_video.webm" class="btn btn-secondary btn-large w-full">
-          ⬇️ 비하인드 캠 영상 다운로드
+        <a id="btn-download-vid" href="#" download="behind_video.webm" class="btn btn-secondary btn-large w-full" style="text-align: center; text-decoration: none; display: block; padding: 14px 0;">
+          ⬇️ 비하인드 영상 다운로드
         </a>
       </div>
+    </div>
 
+    <!-- 전체 펼쳐보기 옵션 -->
+    <div class="view-all-toggle">
+      <button class="btn-toggle-all" onclick="showAllMedia()">📄 사진과 영상 모두 한 번에 보기</button>
     </div>
 
     <div class="privacy-notice">
-      <strong style="color: #8B5CF6;">🔒 개인정보 보호 안내</strong><br>
-      본 서비스는 No-DB 아키텍처로 운영되며, 처리 목적 달성 및 개인정보보호법 제21조에 따라 업로드된 사진과 영상은 <strong>24시간 후 구글 드라이브 스토리지에서 자동 파기</strong>됩니다.
+      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 저장 안내</strong><br>
+      본 서비스는 No-DB 아키텍처로 운영되며, 수집된 사진과 영상은 처리 목적 달성 및 개인정보보호법에 따라 <strong>24시간 후 자동 파기</strong>됩니다.<br>
+      (스토리지: 구글 드라이브 & 로컬 백엔드 세션)
     </div>
   </div>
 
   <script>
-    // URL Query Parameter 파싱 (?img=...&vid=...&srv=...)
     const urlParams = new URLSearchParams(window.location.search);
     const imgId = urlParams.get('img');
     const vidId = urlParams.get('vid');
@@ -155,7 +245,38 @@
     let imageBlobUrl = null;
     let videoBlobUrl = null;
 
-    // 1. 완성본 4컷 사진 로딩 & 1-클릭 즉시 다운로드 설정
+    function switchTab(tabName) {
+      const photoBtn = document.getElementById('tab-photo-btn');
+      const videoBtn = document.getElementById('tab-video-btn');
+      const photoContent = document.getElementById('tab-photo-content');
+      const videoContent = document.getElementById('tab-video-content');
+
+      if (tabName === 'photo') {
+        photoBtn.classList.add('active');
+        videoBtn.classList.remove('active');
+        photoContent.classList.add('active');
+        videoContent.classList.remove('active');
+      } else {
+        videoBtn.classList.add('active');
+        photoBtn.classList.remove('active');
+        videoContent.classList.add('active');
+        photoContent.classList.remove('active');
+        
+        // 동영상 탭 전환 시 동영상 로드 및 플레이어 새로고침
+        if (videoElem && videoElem.paused && videoElem.src) {
+          videoElem.load();
+        }
+      }
+    }
+
+    function showAllMedia() {
+      document.getElementById('tab-photo-content').classList.add('active');
+      document.getElementById('tab-video-content').classList.add('active');
+      document.querySelector('.tab-container').style.display = 'none';
+      document.querySelector('.view-all-toggle').style.display = 'none';
+    }
+
+    // 1. 완성본 4컷 사진 로딩 & 다운로드 설정
     async function loadPhoto() {
       if (!imgId) return;
 
@@ -164,7 +285,6 @@
         const targetUrl = `${baseUrl}/uploads/${imgId}`;
         
         try {
-          // ngrok 경고 페이지를 우회하여 이미지 바이너리 Blob 직접 수신
           const response = await fetch(targetUrl, {
             headers: { 'ngrok-skip-browser-warning': 'true' }
           });
@@ -174,14 +294,14 @@
           
           btnImg.href = imageBlobUrl;
           btnImg.download = `${imgId}.jpg`;
-          btnImg.removeAttribute('target'); // 새 창 열기 방지 (페이지 내 즉시 다운로드)
+          btnImg.removeAttribute('target');
         } catch (err) {
           console.error('사진 로딩 실패:', err);
           imgElem.src = targetUrl;
           btnImg.href = targetUrl;
         }
       } else {
-        // 구글 드라이브 클라우드 파일 ID 방식
+        // 구글 드라이브 ID 활용 방식
         const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
         imgElem.src = gdriveCdnUrl;
         imgElem.onerror = () => {
@@ -193,7 +313,7 @@
       }
     }
 
-    // 2. 전 과정 비하인드 동영상 로딩 & 1-클릭 즉시 다운로드 설정
+    // 2. 전 과정 비하인드 동영상 로딩 & 다운로드 설정
     async function loadVideo() {
       if (!vidId) return;
 
@@ -202,7 +322,6 @@
         const targetUrl = `${baseUrl}/uploads/${vidId}`;
 
         try {
-          // ngrok 경고 페이지를 우회하여 비디오 바이너리 Blob 직접 수신
           const response = await fetch(targetUrl, {
             headers: { 'ngrok-skip-browser-warning': 'true' }
           });
@@ -210,20 +329,22 @@
           videoBlobUrl = URL.createObjectURL(blob);
           
           videoElem.src = videoBlobUrl;
+          videoSource.src = videoBlobUrl;
           videoElem.load();
           
           btnVid.href = videoBlobUrl;
           btnVid.download = `${vidId}.webm`;
-          btnVid.removeAttribute('target'); // 새 창 열기 방지 (페이지 내 즉시 다운로드)
+          btnVid.removeAttribute('target');
         } catch (err) {
           console.error('동영상 로딩 실패:', err);
+          videoElem.src = targetUrl;
           videoSource.src = targetUrl;
           videoElem.load();
           btnVid.href = targetUrl;
         }
       } else {
-        // 구글 드라이브 클라우드 동영상 스트리밍 & 다운로드
         const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
+        videoElem.src = gdriveVidUrl;
         videoSource.src = gdriveVidUrl;
         videoElem.load();
         
@@ -232,7 +353,6 @@
       }
     }
 
-    // 초기화 실행
     loadPhoto();
     loadVideo();
   </script>
