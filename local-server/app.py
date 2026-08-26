@@ -114,7 +114,7 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
         except Exception as ex:
             print(f"[Google Drive GAS Error] GAS 연동 예외: {ex}")
 
-    # 2. Service Account API 방식
+    # 2. Service Account API 방식 Fallback
     if DRIVE_SERVICE is not None:
         target_folder_id = folder_id if folder_id else GOOGLE_PHOTO_FOLDER_ID
         try:
@@ -141,7 +141,10 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
             print(f"[Google Drive API] ✅ 서비스계정 업로드 성공: {filename} (ID: {file_id})")
             return file_id
         except Exception as e:
-            print(f"[Google Drive API] ⚠️ 업로드 실패 (Service Account Quota 정책 제한): {e}")
+            if "storageQuotaExceeded" in str(e) or "quota" in str(e).lower():
+                print(f"[Google Drive] ℹ️ 서비스 계정 저장공간(0MB Quota) 정책 제한: GAS Webhook 설정을 확인해주세요. (파일은 로컬 'uploads/'에 안전하게 보관되어 모바일 즉시 다운로드 가능)")
+            else:
+                print(f"[Google Drive API] ⚠️ 업로드 실패: {e}")
             return None
     
     return None
@@ -153,7 +156,8 @@ def cleanup_expired_files():
     now = time.time()
     retention_period = 24 * 3600  # 24시간 (초)
     
-    # 1. 로컬 UPLOAD_DIR 파일 검사
+    # 1. 로컬 UPLOAD_DIR 파일 검사 및 영구 삭제
+    local_deleted = 0
     for fname in os.listdir(UPLOAD_DIR):
         fpath = os.path.join(UPLOAD_DIR, fname)
         if os.path.isfile(fpath):
@@ -161,11 +165,25 @@ def cleanup_expired_files():
             if file_age > retention_period:
                 try:
                     os.remove(fpath)
+                    local_deleted += 1
                     print(f"[Auto Cleanup] 만료된 로컬 파일 영구 파기: {fname}")
                 except Exception as e:
                     print(f"[Auto Cleanup Error] 로컬 파일 삭제 실패 ({fname}): {e}")
+    if local_deleted > 0:
+        print(f"[Auto Cleanup] ✅ 로컬 만료 파일 {local_deleted}개 영구 파기 완료")
 
-    # 2. 구글 드라이브 파일 검사 (사진 및 영상 폴더 모두 검사)
+    # 2. GAS Webhook을 통한 구글 드라이브 24시간 만료 파일 자동 파기 원격 호출
+    if GAS_WEBHOOK_URL:
+        try:
+            import requests
+            cleanup_payload = {"action": "cleanup"}
+            res = requests.post(GAS_WEBHOOK_URL, json=cleanup_payload, timeout=30)
+            if res.status_code == 200:
+                print(f"[Auto Cleanup] ✅ Google Apps Script 클라우드 24시간 만료 파일 파기 동기화 완료")
+        except Exception as ex:
+            pass
+
+    # 3. 서비스 계정이 직접 생성한 구글 드라이브 파일 검사 (Service Account 소유 파일 대상)
     if DRIVE_SERVICE is not None:
         cutoff_time = (datetime.utcnow() - timedelta(hours=24)).isoformat() + "Z"
         target_folders = [GOOGLE_PHOTO_FOLDER_ID, GOOGLE_VIDEO_FOLDER_ID]
@@ -180,9 +198,13 @@ def cleanup_expired_files():
                         DRIVE_SERVICE.files().delete(fileId=f["id"]).execute()
                         print(f"[Auto Cleanup] 구글 드라이브 만료 파일 삭제 완료: {f['name']} (ID: {f['id']})")
                     except Exception as ex:
-                        print(f"[Auto Cleanup Error] 구글 드라이브 파일 삭제 실패 ({f['id']}): {ex}")
+                        if "insufficientFilePermissions" in str(ex):
+                            # GAS(사용자 개인 계정)로 업로드된 파일은 서비스 계정에 삭제 권한이 없으므로 GAS 트리거가 전담 삭제함
+                            pass
+                        else:
+                            print(f"[Auto Cleanup Error] 구글 드라이브 파일 삭제 실패 ({f['id']}): {ex}")
             except Exception as e:
-                print(f"[Auto Cleanup Error] 구글 드라이브 조회 실패 (Folder: {folder_id}): {e}")
+                pass
 
 
 # APScheduler 가동 (15분마다 검사 및 서버 시작 시 즉시 실행)

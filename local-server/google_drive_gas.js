@@ -1,5 +1,5 @@
 /**
- * Google Apps Script (GAS) - AI 4컷 포토부스 구글 드라이브 업로더 (v2.1)
+ * Google Apps Script (GAS) - AI 4컷 포토부스 구글 드라이브 업로더 & 자동 파기 (v2.2)
  * 
  * [배포 방법 - 1분 소요]:
  * 1. https://script.google.com 접속 -> 기존 프로젝트 열기 (또는 '새 프로젝트')
@@ -21,7 +21,7 @@
  */
 
 const PHOTO_FOLDER_ID = "13KXZ_W7vurFPHbC_1tImac7ZLBlRuS3Q";
-const VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8YfnaQ_dU";
+const VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8NfnaQ_dU";
 
 // GET 요청 헬스체크 및 302 리디렉션 응답 보장
 function doGet(e) {
@@ -31,7 +31,7 @@ function doGet(e) {
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
-// POST 요청 처리 (사진 및 영상 구글 드라이브 자동 저장)
+// POST 요청 처리 (사진 및 영상 구글 드라이브 자동 저장 & 자동 파기 명령)
 function doPost(e) {
   try {
     if (!e || !e.postData || !e.postData.contents) {
@@ -42,6 +42,18 @@ function doPost(e) {
     }
 
     const data = JSON.parse(e.postData.contents);
+    
+    // 1. 백엔드에서 자동 파기 트리거 호출 시
+    if (data.action === "cleanup") {
+      const cleanupResult = cleanupOldFiles();
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "Cleanup completed",
+        result: cleanupResult
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    // 2. 사진/영상 파일 업로드 처리
     const filename = data.filename || "upload_file";
     const mimeType = data.mimeType || "image/jpeg";
     const base64Data = data.base64Data;
@@ -91,6 +103,7 @@ function doPost(e) {
 function cleanupOldFiles() {
   const targetFolders = [PHOTO_FOLDER_ID, VIDEO_FOLDER_ID];
   const cutoffTime = new Date(Date.now() - 24 * 60 * 60 * 1000); // 현재 시간 기준 24시간 전
+  let totalDeleted = 0;
   
   targetFolders.forEach(function(folderId) {
     try {
@@ -102,13 +115,16 @@ function cleanupOldFiles() {
         const file = files.next();
         // 파일 생성 날짜가 24시간 이전인 경우
         if (file.getDateCreated() < cutoffTime) {
-          file.setTrashed(true); // 휴지통으로 보냄 (휴지통은 일정 기간 후 구글 정책에 따라 자동 영구 삭제됨)
+          file.setTrashed(true); // 휴지통으로 이동 (소유자 계정 권한으로 안전하게 삭제)
           count++;
+          totalDeleted++;
         }
       }
-      Logger.log("[Auto Cleanup] Folder ID " + folderId + ": Deleted " + count + " expired files.");
+      Logger.log("[Auto Cleanup] Folder ID " + folderId + ": Trashed " + count + " expired files.");
     } catch (e) {
       Logger.log("[Auto Cleanup Error] Folder ID " + folderId + " failed: " + e.toString());
     }
   });
+  
+  return { totalDeleted: totalDeleted };
 }
