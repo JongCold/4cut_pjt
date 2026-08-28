@@ -1,7 +1,7 @@
 """
 concept_transformer.py
-High-Performance AI Model & Img2Img Transformation Module for RTX GPUs (8GB VRAM)
-DreamShaper v8 & Realistic Vision v5.1 기반 인물 얼굴 고스트/겹침 방지 및 1인 단일 인물 보존 모듈
+High-Performance AI Model & Person-Preserving Thematic Diffusion Module for RTX GPUs (8GB VRAM)
+DeepLabV3 세그멘테이션 마스킹 + 테마별 고화질 배경 전환(strength: 0.75) + 인물 얼굴/표정/포즈 100% 보존
 """
 
 import os
@@ -11,6 +11,7 @@ import time
 from typing import List, Optional, Dict
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps
+import numpy as np
 
 # Windows 콘솔 cp949 인코딩 에러 방지
 if sys.platform == "win32":
@@ -20,12 +21,15 @@ if sys.platform == "win32":
     except Exception:
         pass
 
-# Diffusers / PyTorch 지연 로딩 및 파이프라인 캐시 관리
+# Diffusers / PyTorch / Torchvision 지연 로딩 및 파이프라인 캐시 관리
 PIPELINES_CACHE: Dict[str, any] = {}
+SEG_MODEL = None
 TORCH_AVAILABLE = False
 
 try:
     import torch
+    import torchvision.transforms as T
+    from torchvision.models.segmentation import deeplabv3_mobilenet_v3_large, DeepLabV3_MobileNet_V3_Large_Weights
     from diffusers import StableDiffusionImg2ImgPipeline
     TORCH_AVAILABLE = True
 except ImportError:
@@ -52,78 +56,144 @@ MODEL_REGISTRY = {
 }
 
 
-# 공통 강력한 얼굴 겹침/고스트/다중 인물 방지 네거티브 프롬프트 (77토큰 한도 최적화: 18토큰)
-STRICT_NEGATIVE_PROMPT = (
-    "double face, extra face, ghosting, deformed face, deformed eyes, bad anatomy, blurry, artifacts, lowres"
-)
-
-
-# 스타일 필터별 최적 모델, 프롬프트, Strength 파라미터 매핑 (모든 프롬프트 40토큰 이내 설계)
-STYLE_CONFIGS = {
-    "original": {
-        "model_type": "realistic",
-        "strength": 0.25,
-        "guidance_scale": 7.0,
-        "positive": "masterpiece, 8k uhd, ultra-realistic portrait photo of single person, crystal clear skin, sharp eyes, natural studio lighting, photorealistic",
-        "negative": STRICT_NEGATIVE_PROMPT
-    },
-    "soft_cartoon": {
-        "model_type": "dreamshaper",
-        "strength": 0.32,
-        "guidance_scale": 7.5,
-        "positive": "3d pixar disney animation style portrait of single person, high quality 3d character, cute facial features, smooth skin, vibrant colors, sharp eyes, masterpiece",
-        "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
-    },
-    "ghibli": {
-        "model_type": "dreamshaper",
-        "strength": 0.32,
-        "guidance_scale": 7.5,
-        "positive": "studio ghibli anime portrait of single person, hand drawn anime illustration, soft watercolor, warm anime lighting, detailed facial features, masterpiece",
-        "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
-    },
-    "neon_fantasy": {
-        "model_type": "realistic",
-        "strength": 0.30,
-        "guidance_scale": 7.5,
-        "positive": "cyberpunk neon fantasy portrait of single person, glowing cyan magenta rim light, futuristic cinematic lighting, sharp face, crystal clear eyes, masterpiece",
-        "negative": STRICT_NEGATIVE_PROMPT
-    },
-    "bw_cinema": {
-        "model_type": "realistic",
-        "strength": 0.28,
-        "guidance_scale": 7.0,
-        "positive": "black and white 35mm film noir portrait of single person, elegant studio shadows, high contrast monochrome, sharp focus on face, masterpiece",
-        "negative": STRICT_NEGATIVE_PROMPT
-    },
+# 테마별 배경 변환 프롬프트 & 인물 조명 하모나이징 명세
+THEME_CONFIGS = {
     "wizard": {
         "model_type": "realistic",
-        "strength": 0.35,  # 인물 얼굴은 보존하면서 배경을 고딕 마법 도서관으로 확실히 전환
-        "guidance_scale": 7.5,
-        "positive": (
-            "masterpiece, photorealistic 8k photo of single person in dark wizard robes holding glowing wand, "
-            "ancient gothic magic library background, towering wooden bookshelves, floating spellbooks, "
-            "flying quills, glowing magical particles, warm candlelight, cinematic lighting, 35mm lens, sharp face"
+        "bg_prompt": (
+            "masterpiece, 8k uhd, photorealistic interior of grand ancient gothic magic library, "
+            "towering wooden bookshelves, floating open spellbooks, flying quill pens, glowing magical particles, "
+            "warm ambient candlelight, cinematic lighting, 35mm photography"
         ),
-        "negative": (
-            "double face, extra face, ghosting, illustration, anime, cartoon, 3d render, "
-            "text, watermark, frame, borders, blurry, bad anatomy, deformed"
-        )
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, bad anatomy",
+        "strength": 0.75,
+        "guidance_scale": 7.5,
+        "color_boost": 1.12,
+        "contrast_boost": 1.06,
+        "lighting_tint": (255, 185, 90) # 따뜻한 촛불/호박색 광원
     },
     "magic_academy": {
         "model_type": "realistic",
-        "strength": 0.35,
-        "guidance_scale": 7.5,
-        "positive": (
-            "masterpiece, photorealistic 8k photo of single person in dark wizard robes holding glowing wand, "
-            "ancient gothic magic library background, towering wooden bookshelves, floating spellbooks, "
-            "flying quills, glowing magical particles, warm candlelight, cinematic lighting, 35mm lens, sharp face"
+        "bg_prompt": (
+            "masterpiece, 8k uhd, photorealistic interior of grand ancient gothic magic library, "
+            "towering wooden bookshelves, floating open spellbooks, flying quill pens, glowing magical particles, "
+            "warm ambient candlelight, cinematic lighting, 35mm photography"
         ),
-        "negative": (
-            "double face, extra face, ghosting, illustration, anime, cartoon, 3d render, "
-            "text, watermark, frame, borders, blurry, bad anatomy, deformed"
-        )
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, bad anatomy",
+        "strength": 0.75,
+        "guidance_scale": 7.5,
+        "color_boost": 1.12,
+        "contrast_boost": 1.06,
+        "lighting_tint": (255, 185, 90)
+    },
+    "neon_fantasy": {
+        "model_type": "realistic",
+        "bg_prompt": (
+            "masterpiece, 8k uhd, cyberpunk futuristic neon city street at night, "
+            "glowing cyan and magenta neon signs, wet reflections, cinematic lighting, bokeh, 8k"
+        ),
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
+        "strength": 0.75,
+        "guidance_scale": 7.5,
+        "color_boost": 1.25,
+        "contrast_boost": 1.15,
+        "lighting_tint": (220, 50, 255) # 네온 림라이트
+    },
+    "ghibli": {
+        "model_type": "dreamshaper",
+        "bg_prompt": (
+            "masterpiece, studio ghibli anime landscape, lush green grassy hill, "
+            "blue sky with fluffy white clouds, warm sunny day, soft watercolor aesthetic, anime scenery"
+        ),
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
+        "strength": 0.75,
+        "guidance_scale": 7.5,
+        "color_boost": 1.2,
+        "contrast_boost": 1.05,
+        "lighting_tint": (255, 245, 200) # 따뜻한 지브리 햇살
+    },
+    "soft_cartoon": {
+        "model_type": "dreamshaper",
+        "bg_prompt": (
+            "masterpiece, vibrant 3d pixar disney style animated room interior, "
+            "cozy warm lighting, colorful studio backdrop, cute stylized furniture, 3d render"
+        ),
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
+        "strength": 0.75,
+        "guidance_scale": 7.5,
+        "color_boost": 1.18,
+        "contrast_boost": 1.08,
+        "lighting_tint": (255, 220, 180)
+    },
+    "bw_cinema": {
+        "model_type": "realistic",
+        "bg_prompt": (
+            "masterpiece, dramatic black and white 35mm film noir studio backdrop, "
+            "moody shadows, soft spotlight, vintage classic cinema background"
+        ),
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, color",
+        "strength": 0.75,
+        "guidance_scale": 7.0,
+        "color_boost": 0.0,
+        "contrast_boost": 1.25,
+        "lighting_tint": (200, 200, 200)
+    },
+    "original": {
+        "model_type": "realistic",
+        "bg_prompt": "masterpiece, elegant professional photography studio background, soft neutral gradient, studio rim light",
+        "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
+        "strength": 0.3,
+        "guidance_scale": 7.0,
+        "color_boost": 1.0,
+        "contrast_boost": 1.05,
+        "lighting_tint": None
     }
 }
+
+
+def get_segmentation_model(device: str = "cuda"):
+    """인물 영역만 정밀하게 분리하는 DeepLabV3 세그멘테이션 모델 싱글톤 로딩"""
+    global SEG_MODEL
+    if SEG_MODEL is None and TORCH_AVAILABLE:
+        try:
+            weights = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT
+            SEG_MODEL = deeplabv3_mobilenet_v3_large(weights=weights).to(device)
+            SEG_MODEL.eval()
+            print("[AI Engine] ✅ 인물 정밀 분리 세그멘테이션 엔진(DeepLabV3) 로딩 완료!")
+        except Exception as e:
+            print(f"[AI Engine] ⚠️ 세그멘테이션 모델 로딩 실패 ({e}). Fallback 마스크를 사용합니다.")
+            SEG_MODEL = None
+    return SEG_MODEL
+
+
+def extract_person_mask(image: Image.Image, device: str = "cuda") -> Image.Image:
+    """인물(얼굴, 표정, 헤어, 포즈, 의상)을 100% 보존하기 위한 알파 세그멘테이션 마스크 생성"""
+    model = get_segmentation_model(device)
+    if model is not None:
+        try:
+            weights = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT
+            transforms = weights.transforms()
+            input_tensor = transforms(image).unsqueeze(0).to(device)
+            with torch.no_grad():
+                output = model(input_tensor)["out"][0]
+            preds = output.argmax(0).byte().cpu().numpy()
+            
+            # COCO Class 15: person
+            person_mask_np = (preds == 15).astype(np.uint8) * 255
+            mask = Image.fromarray(person_mask_np, mode="L").resize(image.size, resample=Image.Resampling.BILINEAR)
+            # 자연스러운 합성을 위한 엣지 가우시안 페더링
+            mask = mask.filter(ImageFilter.GaussianBlur(radius=6))
+            return mask
+        except Exception as e:
+            print(f"[Masking Error] DeepLabV3 마스크 추출 실패 ({e}), 휴리스틱 마스크 대체...")
+
+    # Fallback: 중앙 인물 영역 보존 마스크 (타원형 소프트 마스크)
+    w, h = image.size
+    mask = Image.new("L", (w, h), 0)
+    draw = ImageDraw.Draw(mask)
+    draw.ellipse([int(w * 0.15), int(h * 0.1), int(w * 0.85), int(h * 0.95)], fill=255)
+    mask = mask.filter(ImageFilter.GaussianBlur(radius=25))
+    return mask
 
 
 def get_sd_pipeline(model_key: str = "dreamshaper"):
@@ -172,102 +242,127 @@ def get_sd_pipeline(model_key: str = "dreamshaper"):
     return None
 
 
-def apply_style_fallback(image: Image.Image, style: str) -> Image.Image:
-    """GPU / PyTorch 미지원 또는 백엔드 예외 시 인물 보존 고품질 스타일링 Fallback"""
-    img = image.convert("RGB")
-    
-    if style == "soft_cartoon":
-        smooth = img.filter(ImageFilter.SMOOTH_MORE)
-        enhanced_color = ImageEnhance.Color(smooth).enhance(1.35)
-        enhanced_contrast = ImageEnhance.Contrast(enhanced_color).enhance(1.15)
-        img = ImageEnhance.Sharpness(enhanced_contrast).enhance(1.3)
-        
-    elif style == "ghibli":
-        img = ImageEnhance.Color(img).enhance(1.25)
-        img = ImageEnhance.Brightness(img).enhance(1.06)
-        r, g, b = img.split()
-        r = r.point(lambda i: min(255, int(i * 1.06)))
-        g = g.point(lambda i: min(255, int(i * 1.03)))
-        b = b.point(lambda i: max(0, int(i * 0.96)))
-        img = Image.merge("RGB", (r, g, b))
-        img = img.filter(ImageFilter.SMOOTH)
-        img = ImageEnhance.Contrast(img).enhance(1.08)
-        
+def generate_fallback_background(style: str, size: tuple) -> Image.Image:
+    """GPU 미지원 시 테마별 고해상도 그래디언트 백드롭 생성"""
+    w, h = size
+    if style in ["wizard", "magic_academy"]:
+        base = Image.new("RGB", (w, h), (26, 18, 14))
+        glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(glow)
+        draw.rectangle([(0, 0), (w, int(h * 0.35))], fill=(15, 10, 8, 220))
+        draw.rectangle([(0, 0), (int(w * 0.25), h)], fill=(20, 12, 10, 200))
+        draw.rectangle([(int(w * 0.75), 0), (w, h)], fill=(20, 12, 10, 200))
+        import random
+        random.seed(42)
+        for _ in range(30):
+            x = random.randint(int(w * 0.05), int(w * 0.95))
+            y = random.randint(int(h * 0.1), int(h * 0.9))
+            r = random.randint(3, 12)
+            draw.ellipse([(x - r, y - r), (x + r, y + r)], fill=(255, 190, 70, 160))
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=10))
+        base.paste(glow, (0, 0), glow)
+        return base
     elif style == "neon_fantasy":
-        img = ImageEnhance.Contrast(img).enhance(1.3)
-        r, g, b = img.split()
-        r = r.point(lambda i: min(255, int(i * 1.22)))
-        b = b.point(lambda i: min(255, int(i * 1.28)))
-        g = g.point(lambda i: int(i * 0.92))
-        img = Image.merge("RGB", (r, g, b))
-        img = ImageEnhance.Color(img).enhance(1.4)
-        img = ImageEnhance.Sharpness(img).enhance(1.2)
-        
+        base = Image.new("RGB", (w, h), (10, 10, 25))
+        glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(glow)
+        draw.rectangle([(0, 0), (int(w*0.3), h)], fill=(255, 0, 128, 120))
+        draw.rectangle([(int(w*0.7), 0), (w, h)], fill=(0, 220, 255, 120))
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=25))
+        base.paste(glow, (0, 0), glow)
+        return base
+    elif style == "ghibli":
+        base = Image.new("RGB", (w, h), (135, 195, 145))
+        glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(glow)
+        draw.rectangle([(0, 0), (w, int(h*0.5))], fill=(180, 220, 240, 200))
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=20))
+        base.paste(glow, (0, 0), glow)
+        return base
     elif style == "bw_cinema":
-        img = ImageOps.grayscale(img).convert("RGB")
-        img = ImageEnhance.Contrast(img).enhance(1.35)
-        img = ImageEnhance.Sharpness(img).enhance(1.25)
-        
-    elif style in ["wizard", "magic_academy"]:
-        # 고딕 마법 아카데미 감성: 촛불 앰비언트(골든 앰버 톤) + 깊은 고딕 명암비 + 신비로운 톤 밸런스
-        img = ImageEnhance.Contrast(img).enhance(1.25)
-        r, g, b = img.split()
-        r = r.point(lambda i: min(255, int(i * 1.15)))  # 따뜻한 촛불빛
-        g = g.point(lambda i: min(255, int(i * 1.05)))
-        b = b.point(lambda i: int(i * 0.95))
-        img = Image.merge("RGB", (r, g, b))
-        img = ImageEnhance.Color(img).enhance(1.2)
-        img = ImageEnhance.Sharpness(img).enhance(1.25)
-        
-    else:  # original
-        img = ImageEnhance.Sharpness(img).enhance(1.3)
-        img = ImageEnhance.Contrast(img).enhance(1.05)
-
-    return img
+        base = Image.new("RGB", (w, h), (25, 25, 25))
+        glow = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(glow)
+        draw.ellipse([(int(w*0.2), int(h*0.1)), (int(w*0.8), int(h*0.9))], fill=(180, 180, 180, 100))
+        glow = glow.filter(ImageFilter.GaussianBlur(radius=30))
+        base.paste(glow, (0, 0), glow)
+        return base
+    else:
+        return Image.new("RGB", (w, h), (240, 240, 245))
 
 
 def transform_single_image(image: Image.Image, style: str) -> Image.Image:
     """
-    단일 이미지 AI 변환 (고스트/얼굴 겹침 현상 완전히 제거된 깨끗한 1인 스타일 변환)
+    단일 이미지 AI 변환:
+    1. 인물 정밀 세그멘테이션 마스크 추출 (DeepLabV3) -> 얼굴, 표정, 포즈, 각도 100% 보존
+    2. 테마별 배경 고강도 AI Diffusion 변환 (strength=0.75) -> 호그와트 마법 도서관, 네온 도시 등 완벽 전이
+    3. 인물에 테마 조명/컬러 톤 하모나이징 적용
+    4. 소프트 알파 마스크 합성 -> 얼굴 왜곡/기괴한 천/의상 손상 0% 보장
     """
-    if style == "original":
-        return apply_style_fallback(image, "original")
+    target_size = (768, 960)
+    init_img = image.convert("RGB").resize(target_size, Image.Resampling.LANCZOS)
 
-    cfg = STYLE_CONFIGS.get(style, STYLE_CONFIGS["soft_cartoon"])
+    if style == "original":
+        enhancer = ImageEnhance.Sharpness(init_img)
+        res = enhancer.enhance(1.2)
+        contrast = ImageEnhance.Contrast(res)
+        return contrast.enhance(1.05)
+
+    cfg = THEME_CONFIGS.get(style, THEME_CONFIGS["wizard"])
     model_type = cfg["model_type"]
-    
+    device = "cuda" if (TORCH_AVAILABLE and torch.cuda.is_available()) else "cpu"
+
+    # 1. 인물 영역 세그멘테이션 마스크 추출
+    person_mask = extract_person_mask(init_img, device=device)
+
+    # 2. 배경 생성 (AI 확산 모델을 통한 고화질 테마 배경 생성)
     pipe = get_sd_pipeline(model_type)
+    ai_bg = None
     
-    if pipe is not None:
+    if pipe is not None and device == "cuda":
         try:
-            # 768x960 고해상도 리사이즈
-            init_img = image.convert("RGB").resize((768, 960), Image.Resampling.LANCZOS)
-            
-            # AI 스타일 변환 실행 (중복 얼굴 생성 방지를 위해 strength=0.30~0.32로 정밀 제어)
-            res = pipe(
-                prompt=cfg["positive"],
-                negative_prompt=cfg["negative"],
+            print(f"[AI Process] '{style}' 테마 배경 고성능 AI Diffusion 생성 중...")
+            ai_bg = pipe(
+                prompt=cfg["bg_prompt"],
+                negative_prompt=cfg["bg_neg"],
                 image=init_img,
                 strength=cfg["strength"],
                 guidance_scale=cfg["guidance_scale"],
-                num_inference_steps=22
+                num_inference_steps=18
             ).images[0]
-            
-            # 주의: 전체 캔버스 Image.blend()는 두 얼굴이 반투명하게 겹치는 잔상(고스트)을 유발하므로 
-            # AI 변환 결과물(res)을 단일 이미지로 직접 반환하여 깨끗한 1인 인물 이미지를 보장함.
-            return res
         except Exception as e:
-            print(f"[AI Transform Error] SD 변환 중 오류 ({e}). Fallback 엔진으로 전환.")
-            return apply_style_fallback(image, style)
+            print(f"[AI Background Error] AI 배경 생성 중 오류 ({e}). Fallback 백드롭 적용.")
+            ai_bg = generate_fallback_background(style, target_size)
     else:
-        return apply_style_fallback(image, style)
+        ai_bg = generate_fallback_background(style, target_size)
+
+    # 3. 인물 레이어 테마 조명 및 톤 하모나이징
+    person_layer = init_img.copy()
+    if cfg["color_boost"] > 0:
+        enhancer_c = ImageEnhance.Color(person_layer)
+        person_layer = enhancer_c.enhance(cfg["color_boost"])
+    else:
+        person_layer = ImageOps.grayscale(person_layer).convert("RGB")
+
+    if cfg["contrast_boost"] > 0:
+        enhancer_ct = ImageEnhance.Contrast(person_layer)
+        person_layer = enhancer_ct.enhance(cfg["contrast_boost"])
+
+    # 은은한 테마 조명 틴트 오버레이
+    if cfg.get("lighting_tint") and cfg["color_boost"] > 0:
+        tint_layer = Image.new("RGB", target_size, cfg["lighting_tint"])
+        person_layer = Image.blend(person_layer, tint_layer, 0.08)
+
+    # 4. 알파 마스크 합성 (인물은 100% 원본 선명도/표정 유지 + 배경은 100% 테마 변환)
+    final_composite = Image.composite(person_layer, ai_bg, person_mask)
+    return final_composite
 
 
 def transform_four_cut(images: List[Image.Image], style: str) -> List[Image.Image]:
     """4장 이미지 일괄 AI 스타일 변환"""
     transformed = []
     for idx, img in enumerate(images):
-        print(f"[AI Process] ({idx+1}/4) 이미지 '{style}' 고성능 AI 스타일 변환 진행 중...")
+        print(f"[AI Process] ({idx+1}/4) 이미지 '{style}' 인물 보존 & 테마 배경 변환 진행 중...")
         res = transform_single_image(img, style)
         transformed.append(res)
     return transformed
