@@ -4,7 +4,16 @@ concept_transformer.py 모듈의 이미지 변환 및 4컷 프레임 합성 단�
 """
 
 import os
+import sys
 from PIL import Image, ImageDraw
+
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
+
 from concept_transformer import transform_four_cut, create_4cut_frame
 
 def run_test():
@@ -18,8 +27,8 @@ def run_test():
         d.text((150, 230), f"Sample {i+1}", fill=(50, 50, 50))
         dummy_images.append(img)
         
-    print("[Test] 5개 필터 스타일 변환 테스트 시작...")
-    styles = ["original", "soft_cartoon", "ghibli", "neon_fantasy", "bw_cinema"]
+    print("[Test] 6개 필터 스타일 변환 테스트 시작...")
+    styles = ["original", "soft_cartoon", "ghibli", "neon_fantasy", "bw_cinema", "wizard"]
     
     for style in styles:
         print(f"[Test] '{style}' 스타일 변환 및 프레임 합성 테스트 중...")

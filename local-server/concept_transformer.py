@@ -6,10 +6,19 @@ DreamShaper v8 & Realistic Vision v5.1 기반 인물 얼굴 고스트/겹침 방
 
 import os
 import io
+import sys
 import time
 from typing import List, Optional, Dict
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps
+
+# Windows 콘솔 cp949 인코딩 에러 방지
+if sys.platform == "win32":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8")
+        sys.stderr.reconfigure(encoding="utf-8")
+    except Exception:
+        pass
 
 # Diffusers / PyTorch 지연 로딩 및 파이프라인 캐시 관리
 PIPELINES_CACHE: Dict[str, any] = {}
@@ -87,6 +96,38 @@ STYLE_CONFIGS = {
         "guidance_scale": 7.0,
         "positive": "black and white 35mm film noir portrait of the single person, elegant studio shadows, high contrast monochrome, sharp focus on eyes and face, masterpiece",
         "negative": STRICT_NEGATIVE_PROMPT
+    },
+    "wizard": {
+        "model_type": "realistic",
+        "strength": 0.30,
+        "guidance_scale": 7.5,
+        "positive": (
+            "masterpiece, 8k uhd portrait photo of single person as magic academy student, "
+            "wearing dark wizard robes over vintage uniform, holding glowing wooden wand, "
+            "grand ancient gothic library, towering wooden bookshelves, floating spellbooks, "
+            "flying quill pens, glowing magical particles, mysterious mood, warm candlelight and wand glow, "
+            "cinematic lighting, photorealistic, shot on 35mm lens, sharp facial features, real photography"
+        ),
+        "negative": (
+            STRICT_NEGATIVE_PROMPT + ", illustration, anime, drawing, painting, cartoon, 3d render, "
+            "text, watermark, logo, frame, borders, margins, extra wands, deformed hands"
+        )
+    },
+    "magic_academy": {
+        "model_type": "realistic",
+        "strength": 0.30,
+        "guidance_scale": 7.5,
+        "positive": (
+            "masterpiece, 8k uhd portrait photo of single person as magic academy student, "
+            "wearing dark wizard robes over vintage uniform, holding glowing wooden wand, "
+            "grand ancient gothic library, towering wooden bookshelves, floating spellbooks, "
+            "flying quill pens, glowing magical particles, mysterious mood, warm candlelight and wand glow, "
+            "cinematic lighting, photorealistic, shot on 35mm lens, sharp facial features, real photography"
+        ),
+        "negative": (
+            STRICT_NEGATIVE_PROMPT + ", illustration, anime, drawing, painting, cartoon, 3d render, "
+            "text, watermark, logo, frame, borders, margins, extra wands, deformed hands"
+        )
     }
 }
 
@@ -171,6 +212,17 @@ def apply_style_fallback(image: Image.Image, style: str) -> Image.Image:
     elif style == "bw_cinema":
         img = ImageOps.grayscale(img).convert("RGB")
         img = ImageEnhance.Contrast(img).enhance(1.35)
+        img = ImageEnhance.Sharpness(img).enhance(1.25)
+        
+    elif style in ["wizard", "magic_academy"]:
+        # 고딕 마법 아카데미 감성: 촛불 앰비언트(골든 앰버 톤) + 깊은 고딕 명암비 + 신비로운 톤 밸런스
+        img = ImageEnhance.Contrast(img).enhance(1.25)
+        r, g, b = img.split()
+        r = r.point(lambda i: min(255, int(i * 1.15)))  # 따뜻한 촛불빛
+        g = g.point(lambda i: min(255, int(i * 1.05)))
+        b = b.point(lambda i: int(i * 0.95))
+        img = Image.merge("RGB", (r, g, b))
+        img = ImageEnhance.Color(img).enhance(1.2)
         img = ImageEnhance.Sharpness(img).enhance(1.25)
         
     else:  # original
