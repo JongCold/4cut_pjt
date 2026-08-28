@@ -291,9 +291,9 @@
     </div>
 
     <div class="privacy-notice" id="privacy-notice-box">
-      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 자동 파기 안내</strong><br>
-      본 서비스는 No-DB 아키텍처로 운영되며, 수집된 사진과 영상은 처리 목적 달성 및 개인정보보호법에 따라 <strong>24시간 후 자동 영구 파기</strong>됩니다.<br>
-      (저장소: 구글 드라이브 & 로컬 백엔드 세션)
+      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 자동 파기 알고리즘</strong><br>
+      본 서비스는 No-DB 아키텍처로 운영되며, QR 접속 후 <strong>다운로드 완료 시 60초 이내 즉시 파기</strong>되거나 미다운로드 시에도 <strong>24시간 후 영구 자동 삭제</strong>됩니다.<br>
+      (서버 캐시 및 클라우드 스토리지에 사용자 데이터가 영구 보관되지 않습니다.)
     </div>
   </div>
 
@@ -301,6 +301,7 @@
     const urlParams = new URLSearchParams(window.location.search);
     const imgId = urlParams.get('img');
     const vidId = urlParams.get('vid');
+    const sessionIdParam = urlParams.get('sid');
     const serverOrigin = urlParams.get('srv') || '';
 
     const imgElem = document.getElementById('display-image');
@@ -311,6 +312,43 @@
     let videoBlobUrl = null;
     let imageFileName = 'ai_4cut_photo.jpg';
     let videoFileName = 'behind_video.mp4';
+    let cleanupScheduled = false;
+
+    // 다운로드 완료 시 서버 세션 파일 자동 파기 요청 (사진과 영상 둘 다 받을 수 있도록 60초 유예 후 삭제)
+    function scheduleDownloadCleanup() {
+      if (cleanupScheduled) return;
+      cleanupScheduled = true;
+
+      const sid = sessionIdParam || 
+                  (imgId ? imgId.match(/([a-f0-9]{8})/)?.[1] : null) || 
+                  (vidId ? vidId.match(/([a-f0-9]{8})/)?.[1] : null);
+                  
+      const baseUrl = serverOrigin ? serverOrigin : '';
+      if (sid && baseUrl) {
+        const cleanupUrl = `${baseUrl}/api/cleanup-session`;
+        const payload = JSON.stringify({
+          session_id: sid,
+          files: [imgId, vidId].filter(Boolean),
+          delay_seconds: 60
+        });
+
+        try {
+          if (navigator.sendBeacon) {
+            const blob = new Blob([payload], { type: 'application/json' });
+            navigator.sendBeacon(cleanupUrl, blob);
+          } else {
+            fetch(cleanupUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+              body: payload,
+              keepalive: true
+            }).catch(() => {});
+          }
+        } catch (e) {
+          console.warn('Cleanup trigger error:', e);
+        }
+      }
+    }
 
     function switchTab(tabName) {
       const photoBtn = document.getElementById('tab-photo-btn');
@@ -357,12 +395,14 @@
           return;
         }
         triggerInstantDownload(imageBlobUrl, imageFileName);
+        scheduleDownloadCleanup();
       } else if (type === 'video') {
         if (!videoBlobUrl) {
           alert('동영상을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
           return;
         }
         triggerInstantDownload(videoBlobUrl, videoFileName);
+        scheduleDownloadCleanup();
       }
     }
 

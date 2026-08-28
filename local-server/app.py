@@ -5,12 +5,15 @@ AI 4컷 포토부스 통합 FastAPI 백엔드 & Google Drive 연동 & APSchedule
 
 import os
 import io
+import re
 import time
 import uuid
 import base64
+import threading
 from typing import List, Optional
 from datetime import datetime, timedelta
 
+from pydantic import BaseModel
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -150,25 +153,68 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
     return None
 
 
+def delete_session_files_after_delay(session_id: str, delay_seconds: int = 60):
+    """
+    모바일 다운로드 완료 알림 수신 시,
+    사용자가 사진과 동영상을 모두 다운로드할 수 있도록 짧은 유예 시간(기본 60초) 후
+    해당 세션과 관련된 로컬 uploads/ 내의 모든 파일(사진 4장, 원본 프레임, AI 프레임, 비디오)을 영구 삭제합니다.
+    """
+    def _worker():
+        if delay_seconds > 0:
+            time.sleep(delay_seconds)
+        
+        deleted_count = 0
+        try:
+            if not os.path.exists(UPLOAD_DIR):
+                return
+            for fname in os.listdir(UPLOAD_DIR):
+                if session_id in fname:
+                    fpath = os.path.join(UPLOAD_DIR, fname)
+                    if os.path.isfile(fpath):
+                        try:
+                            os.remove(fpath)
+                            deleted_count += 1
+                            print(f"[Instant Cleanup] 다운로드 완료에 따른 세션 파일 영구 파기: {fname}")
+                        except Exception as e:
+                            print(f"[Instant Cleanup Error] 파일 삭제 실패 ({fname}): {e}")
+            if deleted_count > 0:
+                print(f"[Instant Cleanup] ✅ 세션 '{session_id}' 파일 총 {deleted_count}개 영구 파기 완료")
+        except Exception as ex:
+            print(f"[Instant Cleanup Error] 세션 정리 오류: {ex}")
+
+    t = threading.Thread(target=_worker, daemon=True)
+    t.start()
+
+
+class CleanupSessionRequest(BaseModel):
+    session_id: Optional[str] = None
+    files: Optional[List[str]] = None
+    delay_seconds: Optional[int] = 60
+    immediate: Optional[bool] = False
+
+
 def cleanup_expired_files():
     """24시간 이상 경과한 로컬 및 구글 드라이브 파일 자동 파기 (개인정보 보호 준수)"""
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 24시간 만료 데이터 자동 파기 검사 스케줄러 실행 중...")
     now = time.time()
     retention_period = 24 * 3600  # 24시간 (초)
+    temp_retention_period = 1800  # 임시 파일 30분 초과 시 삭제
     
     # 1. 로컬 UPLOAD_DIR 파일 검사 및 영구 삭제
     local_deleted = 0
-    for fname in os.listdir(UPLOAD_DIR):
-        fpath = os.path.join(UPLOAD_DIR, fname)
-        if os.path.isfile(fpath):
-            file_age = now - os.path.getmtime(fpath)
-            if file_age > retention_period:
-                try:
-                    os.remove(fpath)
-                    local_deleted += 1
-                    print(f"[Auto Cleanup] 만료된 로컬 파일 영구 파기: {fname}")
-                except Exception as e:
-                    print(f"[Auto Cleanup Error] 로컬 파일 삭제 실패 ({fname}): {e}")
+    if os.path.exists(UPLOAD_DIR):
+        for fname in os.listdir(UPLOAD_DIR):
+            fpath = os.path.join(UPLOAD_DIR, fname)
+            if os.path.isfile(fpath):
+                file_age = now - os.path.getmtime(fpath)
+                # 24시간 지난 모든 파일 또는 30분 지난 임시(temp_) 파일 파기
+                if file_age > retention_period or (fname.startswith("temp_") and file_age > temp_retention_period):
+                    try:
+                        os.remove(fpath)
+                        local_deleted += 1
+                        print(f"[Auto Cleanup] 만료된 로컬 파일 영구 파기: {fname}")
+                    except Exception as e:
+                        print(f"[Auto Cleanup Error] 로컬 파일 삭제 실패 ({fname}): {e}")
     if local_deleted > 0:
         print(f"[Auto Cleanup] ✅ 로컬 만료 파일 {local_deleted}개 영구 파기 완료")
 
@@ -199,7 +245,6 @@ def cleanup_expired_files():
                         print(f"[Auto Cleanup] 구글 드라이브 만료 파일 삭제 완료: {f['name']} (ID: {f['id']})")
                     except Exception as ex:
                         if "insufficientFilePermissions" in str(ex):
-                            # GAS(사용자 개인 계정)로 업로드된 파일은 서비스 계정에 삭제 권한이 없으므로 GAS 트리거가 전담 삭제함
                             pass
                         else:
                             print(f"[Auto Cleanup Error] 구글 드라이브 파일 삭제 실패 ({f['id']}): {ex}")
@@ -217,6 +262,35 @@ try:
     cleanup_expired_files()
 except Exception as e:
     print(f"[Auto Cleanup] 초기 파기 실패: {e}")
+
+
+@app.post("/api/cleanup-session")
+async def api_cleanup_session(req: CleanupSessionRequest):
+    """
+    QR 모바일 다운로드 후 자동 파기 엔드포인트
+    - 모바일 브라우저에서 사진 또는 영상 다운로드 완료 시 호출됨
+    - 기본 60초(사진과 영상을 모두 받을 수 있는 시간) 후 해당 세션의 로컬 파일 영구 파기
+    """
+    sid = req.session_id
+    if not sid and req.files:
+        for f in req.files:
+            match = re.search(r"([a-f0-9]{8})", f)
+            if match:
+                sid = match.group(1)
+                break
+                
+    if not sid:
+        raise HTTPException(status_code=400, detail="session_id or valid files parameter is required")
+        
+    delay = 0 if req.immediate else (req.delay_seconds if req.delay_seconds is not None else 60)
+    delete_session_files_after_delay(sid, delay_seconds=delay)
+    
+    return {
+        "status": "success",
+        "message": f"세션 '{sid}'의 모든 미디어 파일이 {delay}초 후 영구 파기되도록 예약되었습니다.",
+        "session_id": sid,
+        "scheduled_delay": delay
+    }
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -381,10 +455,10 @@ async def api_transform_four_cut(
     # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (구글 로그인/계정선택/점3개 메뉴 완전 우회)
     base_host = "https://4cut-pjt.vercel.app"
     server_origin = str(request.base_url).rstrip("/")
-    download_url = f"{base_host}/download.html?img={ai_frame_filename}&vid={video_filename}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+    download_url = f"{base_host}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
     
     # 로컬 서빙 뷰어 URL 생성 (테스트용)
-    local_download_url = f"http://localhost:8000/download.html?img={ai_frame_filename}&vid={video_filename}&srv={server_origin}"
+    local_download_url = f"http://localhost:8000/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)

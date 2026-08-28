@@ -52,81 +52,75 @@ MODEL_REGISTRY = {
 }
 
 
-# 공통 강력한 얼굴 겹침/고스트/다중 인물 방지 네거티브 프롬프트
+# 공통 강력한 얼굴 겹침/고스트/다중 인물 방지 네거티브 프롬프트 (77토큰 한도 최적화: 18토큰)
 STRICT_NEGATIVE_PROMPT = (
-    "multiple faces, double face, extra face, ghosting, overlapping faces, female face overlay, "
-    "extra eyes, deformed iris, distorted eyes, bad face, deformed face, mutated face, "
-    "ugly, blurry, extra limbs, bad anatomy, low resolution, noise, artifacts, distorted features"
+    "double face, extra face, ghosting, deformed face, deformed eyes, bad anatomy, blurry, artifacts, lowres"
 )
 
 
-# 스타일 필터별 최적 모델, 프롬프트, Strength 파라미터 매핑
+# 스타일 필터별 최적 모델, 프롬프트, Strength 파라미터 매핑 (모든 프롬프트 40토큰 이내 설계)
 STYLE_CONFIGS = {
     "original": {
         "model_type": "realistic",
         "strength": 0.25,
         "guidance_scale": 7.0,
-        "positive": "masterpiece, 8k uhd, ultra-realistic portrait photo of the single person, crystal clear skin texture, sharp detailed eyes, natural studio lighting, photorealistic, 8k",
+        "positive": "masterpiece, 8k uhd, ultra-realistic portrait photo of single person, crystal clear skin, sharp eyes, natural studio lighting, photorealistic",
         "negative": STRICT_NEGATIVE_PROMPT
     },
     "soft_cartoon": {
         "model_type": "dreamshaper",
         "strength": 0.32,
         "guidance_scale": 7.5,
-        "positive": "3d pixar disney animation style portrait of the single person, high quality 3d character rendering, cute male facial features, smooth skin shading, vibrant warm colors, sharp detailed eyes, masterpiece",
+        "positive": "3d pixar disney animation style portrait of single person, high quality 3d character, cute facial features, smooth skin, vibrant colors, sharp eyes, masterpiece",
         "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
     },
     "ghibli": {
         "model_type": "dreamshaper",
         "strength": 0.32,
         "guidance_scale": 7.5,
-        "positive": "studio ghibli anime portrait of the single person, hand drawn anime illustration style, soft watercolor textures, warm anime lighting, detailed male facial features, masterpiece",
+        "positive": "studio ghibli anime portrait of single person, hand drawn anime illustration, soft watercolor, warm anime lighting, detailed facial features, masterpiece",
         "negative": STRICT_NEGATIVE_PROMPT + ", female, girl, woman"
     },
     "neon_fantasy": {
         "model_type": "realistic",
         "strength": 0.30,
         "guidance_scale": 7.5,
-        "positive": "cyberpunk neon fantasy portrait of the single person, glowing cyan and magenta rim light, futuristic cinematic lighting, sharp detailed face, crystal clear eyes, masterpiece",
+        "positive": "cyberpunk neon fantasy portrait of single person, glowing cyan magenta rim light, futuristic cinematic lighting, sharp face, crystal clear eyes, masterpiece",
         "negative": STRICT_NEGATIVE_PROMPT
     },
     "bw_cinema": {
         "model_type": "realistic",
         "strength": 0.28,
         "guidance_scale": 7.0,
-        "positive": "black and white 35mm film noir portrait of the single person, elegant studio shadows, high contrast monochrome, sharp focus on eyes and face, masterpiece",
+        "positive": "black and white 35mm film noir portrait of single person, elegant studio shadows, high contrast monochrome, sharp focus on face, masterpiece",
         "negative": STRICT_NEGATIVE_PROMPT
     },
     "wizard": {
         "model_type": "realistic",
-        "strength": 0.30,
+        "strength": 0.35,  # 인물 얼굴은 보존하면서 배경을 고딕 마법 도서관으로 확실히 전환
         "guidance_scale": 7.5,
         "positive": (
-            "masterpiece, 8k uhd portrait photo of single person as magic academy student, "
-            "wearing dark wizard robes over vintage uniform, holding glowing wooden wand, "
-            "grand ancient gothic library, towering wooden bookshelves, floating spellbooks, "
-            "flying quill pens, glowing magical particles, mysterious mood, warm candlelight and wand glow, "
-            "cinematic lighting, photorealistic, shot on 35mm lens, sharp facial features, real photography"
+            "masterpiece, photorealistic 8k photo of single person in dark wizard robes holding glowing wand, "
+            "ancient gothic magic library background, towering wooden bookshelves, floating spellbooks, "
+            "flying quills, glowing magical particles, warm candlelight, cinematic lighting, 35mm lens, sharp face"
         ),
         "negative": (
-            STRICT_NEGATIVE_PROMPT + ", illustration, anime, drawing, painting, cartoon, 3d render, "
-            "text, watermark, logo, frame, borders, margins, extra wands, deformed hands"
+            "double face, extra face, ghosting, illustration, anime, cartoon, 3d render, "
+            "text, watermark, frame, borders, blurry, bad anatomy, deformed"
         )
     },
     "magic_academy": {
         "model_type": "realistic",
-        "strength": 0.30,
+        "strength": 0.35,
         "guidance_scale": 7.5,
         "positive": (
-            "masterpiece, 8k uhd portrait photo of single person as magic academy student, "
-            "wearing dark wizard robes over vintage uniform, holding glowing wooden wand, "
-            "grand ancient gothic library, towering wooden bookshelves, floating spellbooks, "
-            "flying quill pens, glowing magical particles, mysterious mood, warm candlelight and wand glow, "
-            "cinematic lighting, photorealistic, shot on 35mm lens, sharp facial features, real photography"
+            "masterpiece, photorealistic 8k photo of single person in dark wizard robes holding glowing wand, "
+            "ancient gothic magic library background, towering wooden bookshelves, floating spellbooks, "
+            "flying quills, glowing magical particles, warm candlelight, cinematic lighting, 35mm lens, sharp face"
         ),
         "negative": (
-            STRICT_NEGATIVE_PROMPT + ", illustration, anime, drawing, painting, cartoon, 3d render, "
-            "text, watermark, logo, frame, borders, margins, extra wands, deformed hands"
+            "double face, extra face, ghosting, illustration, anime, cartoon, 3d render, "
+            "text, watermark, frame, borders, blurry, bad anatomy, deformed"
         )
     }
 }
