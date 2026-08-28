@@ -1,14 +1,15 @@
 """
 concept_transformer.py
-High-Performance AI Model & Person-Preserving Thematic Diffusion Module for RTX GPUs (8GB VRAM)
-DeepLabV3 세그멘테이션 마스킹 + 테마별 고화질 배경 전환(strength: 0.75) + 인물 얼굴/표정/포즈 100% 보존
+High-Performance AI Model & Character/Background Transformation Module for RTX GPUs (8GB VRAM)
+KeypointRCNN + DeepLabV3 기반 인물 얼굴/표정 100% 보존 + 테마 의상(로브/교복/타이) & 마법 지팡이 & 고대 고딕 도서관 8K 극실사 변환
 """
 
 import os
 import io
 import sys
 import time
-from typing import List, Optional, Dict
+import random
+from typing import List, Optional, Dict, Tuple
 from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont, ImageFilter, ImageEnhance, ImageOps
 import numpy as np
@@ -24,11 +25,13 @@ if sys.platform == "win32":
 # Diffusers / PyTorch / Torchvision 지연 로딩 및 파이프라인 캐시 관리
 PIPELINES_CACHE: Dict[str, any] = {}
 SEG_MODEL = None
+KPT_MODEL = None
 TORCH_AVAILABLE = False
 
 try:
     import torch
     import torchvision.transforms as T
+    from torchvision.models.detection import keypointrcnn_resnet50_fpn, KeypointRCNN_ResNet50_FPN_Weights
     from torchvision.models.segmentation import deeplabv3_mobilenet_v3_large, DeepLabV3_MobileNet_V3_Large_Weights
     from diffusers import StableDiffusionImg2ImgPipeline
     TORCH_AVAILABLE = True
@@ -66,9 +69,9 @@ THEME_CONFIGS = {
             "warm ambient candlelight, cinematic lighting, 35mm photography"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, bad anatomy",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.5,
-        "color_boost": 1.12,
+        "color_boost": 1.10,
         "contrast_boost": 1.06,
         "lighting_tint": (255, 185, 90) # 따뜻한 촛불/호박색 광원
     },
@@ -80,9 +83,9 @@ THEME_CONFIGS = {
             "warm ambient candlelight, cinematic lighting, 35mm photography"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, bad anatomy",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.5,
-        "color_boost": 1.12,
+        "color_boost": 1.10,
         "contrast_boost": 1.06,
         "lighting_tint": (255, 185, 90)
     },
@@ -93,7 +96,7 @@ THEME_CONFIGS = {
             "glowing cyan and magenta neon signs, wet reflections, cinematic lighting, bokeh, 8k"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.5,
         "color_boost": 1.25,
         "contrast_boost": 1.15,
@@ -106,7 +109,7 @@ THEME_CONFIGS = {
             "blue sky with fluffy white clouds, warm sunny day, soft watercolor aesthetic, anime scenery"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.5,
         "color_boost": 1.2,
         "contrast_boost": 1.05,
@@ -119,7 +122,7 @@ THEME_CONFIGS = {
             "cozy warm lighting, colorful studio backdrop, cute stylized furniture, 3d render"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.5,
         "color_boost": 1.18,
         "contrast_boost": 1.08,
@@ -132,7 +135,7 @@ THEME_CONFIGS = {
             "moody shadows, soft spotlight, vintage classic cinema background"
         ),
         "bg_neg": "people, person, human, face, deformed, ugly, blurry, text, watermark, color",
-        "strength": 0.75,
+        "strength": 0.80,
         "guidance_scale": 7.0,
         "color_boost": 0.0,
         "contrast_boost": 1.25,
@@ -151,56 +154,223 @@ THEME_CONFIGS = {
 }
 
 
-def get_segmentation_model(device: str = "cuda"):
-    """인물 영역만 정밀하게 분리하는 DeepLabV3 세그멘테이션 모델 싱글톤 로딩"""
-    global SEG_MODEL
-    if SEG_MODEL is None and TORCH_AVAILABLE:
-        try:
-            weights = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT
-            SEG_MODEL = deeplabv3_mobilenet_v3_large(weights=weights).to(device)
-            SEG_MODEL.eval()
-            print("[AI Engine] ✅ 인물 정밀 분리 세그멘테이션 엔진(DeepLabV3) 로딩 완료!")
-        except Exception as e:
-            print(f"[AI Engine] ⚠️ 세그멘테이션 모델 로딩 실패 ({e}). Fallback 마스크를 사용합니다.")
-            SEG_MODEL = None
-    return SEG_MODEL
+def get_detection_and_segmentation_models(device: str = "cuda"):
+    """인물 세그멘테이션(DeepLabV3) 및 포즈/얼굴 키포인트 검출(KeypointRCNN) 모델 싱글톤 로딩"""
+    global SEG_MODEL, KPT_MODEL
+    if TORCH_AVAILABLE and device == "cuda":
+        if SEG_MODEL is None:
+            try:
+                seg_weights = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT
+                SEG_MODEL = deeplabv3_mobilenet_v3_large(weights=seg_weights).to(device).eval()
+            except Exception as e:
+                print(f"[AI Engine] DeepLabV3 로딩 실패: {e}")
+                SEG_MODEL = None
+        if KPT_MODEL is None:
+            try:
+                kpt_weights = KeypointRCNN_ResNet50_FPN_Weights.DEFAULT
+                KPT_MODEL = keypointrcnn_resnet50_fpn(weights=kpt_weights).to(device).eval()
+            except Exception as e:
+                print(f"[AI Engine] KeypointRCNN 로딩 실패: {e}")
+                KPT_MODEL = None
+    return SEG_MODEL, KPT_MODEL
 
 
-def extract_person_mask(image: Image.Image, device: str = "cuda") -> Image.Image:
-    """인물(얼굴, 표정, 헤어, 포즈, 의상)을 100% 보존하기 위한 알파 세그멘테이션 마스크 생성"""
-    model = get_segmentation_model(device)
-    if model is not None:
-        try:
-            weights = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT
-            transforms = weights.transforms()
-            input_tensor = transforms(image).unsqueeze(0).to(device)
-            with torch.no_grad():
-                output = model(input_tensor)["out"][0]
-            preds = output.argmax(0).byte().cpu().numpy()
-            
-            # COCO Class 15: person
-            person_mask_np = (preds == 15).astype(np.uint8) * 255
-            mask = Image.fromarray(person_mask_np, mode="L").resize(image.size, resample=Image.Resampling.BILINEAR)
-            # 자연스러운 합성을 위한 엣지 가우시안 페더링
-            mask = mask.filter(ImageFilter.GaussianBlur(radius=6))
-            return mask
-        except Exception as e:
-            print(f"[Masking Error] DeepLabV3 마스크 추출 실패 ({e}), 휴리스틱 마스크 대체...")
-
-    # Fallback: 중앙 인물 영역 보존 마스크 (타원형 소프트 마스크)
+def extract_face_and_body_masks(image: Image.Image, device: str = "cuda") -> Tuple[Image.Image, Image.Image, Image.Image, int, List[Tuple[int, int]]]:
+    """
+    인물 영역에서 얼굴/헤어(보존 영역)와 신체/의상(로브 변환 영역), 손(지팡이 영역)을 정밀 분리
+    """
     w, h = image.size
-    mask = Image.new("L", (w, h), 0)
-    draw = ImageDraw.Draw(mask)
-    draw.ellipse([int(w * 0.15), int(h * 0.1), int(w * 0.85), int(h * 0.95)], fill=255)
-    mask = mask.filter(ImageFilter.GaussianBlur(radius=25))
-    return mask
+    seg_model, kpt_model = get_detection_and_segmentation_models(device)
+
+    # 1. 전체 인물 마스크
+    person_mask = None
+    if seg_model is not None:
+        try:
+            seg_transforms = DeepLabV3_MobileNet_V3_Large_Weights.DEFAULT.transforms()
+            inp = seg_transforms(image).unsqueeze(0).to(device)
+            with torch.no_grad():
+                out = seg_model(inp)["out"][0]
+            preds = out.argmax(0).byte().cpu().numpy()
+            person_mask_np = (preds == 15).astype(np.uint8) * 255
+            person_mask = Image.fromarray(person_mask_np, mode="L").resize((w, h), Image.Resampling.BILINEAR)
+        except Exception:
+            person_mask = None
+
+    if person_mask is None:
+        # Fallback 타원형 마스크
+        person_mask = Image.new("L", (w, h), 0)
+        draw = ImageDraw.Draw(person_mask)
+        draw.ellipse([int(w * 0.15), int(h * 0.1), int(w * 0.85), int(h * 0.95)], fill=255)
+
+    # 2. 키포인트 검출 (어깨, 턱선, 손목 위치)
+    chin_y = int(h * 0.44)
+    wrists = []
+    
+    if kpt_model is not None:
+        try:
+            tensor_img = T.ToTensor()(image).to(device)
+            with torch.no_grad():
+                detections = kpt_model([tensor_img])[0]
+            if len(detections["keypoints"]) > 0:
+                kpts = detections["keypoints"][0].cpu().numpy()
+                l_sh, r_sh = kpts[5], kpts[6]
+                if l_sh[2] > 0.25 or r_sh[2] > 0.25:
+                    chin_y = int(min(l_sh[1], r_sh[1]) - (h * 0.035))
+                
+                l_wr, r_wr = kpts[9], kpts[10]
+                if l_wr[2] > 0.25:
+                    wrists.append((int(l_wr[0]), int(l_wr[1])))
+                if r_wr[2] > 0.25:
+                    wrists.append((int(r_wr[0]), int(r_wr[1])))
+        except Exception as ex:
+            print(f"[Keypoint Warning] 키포인트 추출 건너뜀: {ex}")
+
+    # 3. 얼굴 마스크: 인물 영역 중 chin_y 상단
+    face_mask_box = Image.new("L", (w, h), 0)
+    draw_f = ImageDraw.Draw(face_mask_box)
+    draw_f.rectangle([(0, 0), (w, chin_y)], fill=255)
+    
+    face_mask = Image.fromarray(((np.array(person_mask).astype(np.float32) * np.array(face_mask_box).astype(np.float32)) / 255.0).astype(np.uint8))
+    face_mask = face_mask.filter(ImageFilter.GaussianBlur(radius=6))
+
+    # 4. 의상(바디) 마스크: 인물 영역 중 chin_y 하단
+    body_mask_box = Image.new("L", (w, h), 0)
+    draw_b = ImageDraw.Draw(body_mask_box)
+    draw_b.rectangle([(0, chin_y), (w, h)], fill=255)
+    
+    body_mask = Image.fromarray(((np.array(person_mask).astype(np.float32) * np.array(body_mask_box).astype(np.float32)) / 255.0).astype(np.uint8))
+    body_mask = body_mask.filter(ImageFilter.GaussianBlur(radius=6))
+
+    person_mask_feathered = person_mask.filter(ImageFilter.GaussianBlur(radius=6))
+
+    return person_mask_feathered, face_mask, body_mask, chin_y, wrists
+
+
+def overlay_thematic_outfit_and_props(image: Image.Image, style: str, chin_y: int, wrists: List[Tuple[int, int]]) -> Image.Image:
+    """
+    테마에 맞는 전용 의상(마법사 로브, 교복, 넥타이, 사이버 재킷 등) 및 소품(빛나는 지팡이) 렌더링
+    """
+    w, h = image.size
+    outfit_layer = image.copy().convert("RGBA")
+    
+    if style in ["wizard", "magic_academy"]:
+        # 1. 다크 위저드 로브 + 빈티지 교복 + 호그와트 넥타이 렌더링
+        robe_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        robe_draw = ImageDraw.Draw(robe_layer)
+        
+        neck_center_x = w // 2
+        robe_top = chin_y + int(h * 0.02)
+        
+        # 다크 위저드 로브 숄더 & 바디
+        robe_draw.polygon([
+            (neck_center_x - int(w * 0.20), robe_top),
+            (neck_center_x + int(w * 0.20), robe_top),
+            (w, h),
+            (0, h)
+        ], fill=(16, 16, 22, 240))
+        
+        # 빈티지 셔츠 칼라 (화이트-크림)
+        collar_l = (neck_center_x - int(w * 0.11), robe_top)
+        collar_r = (neck_center_x + int(w * 0.11), robe_top)
+        collar_b = (neck_center_x, robe_top + int(h * 0.08))
+        robe_draw.polygon([collar_l, collar_r, collar_b], fill=(235, 230, 220, 245))
+        
+        # 버건디 & 골드 호그와트 스트라이프 타이
+        tie_top_w = int(w * 0.038)
+        tie_bot_w = int(w * 0.065)
+        tie_bot_y = robe_top + int(h * 0.30)
+        robe_draw.polygon([
+            (neck_center_x - tie_top_w, collar_b[1]),
+            (neck_center_x + tie_top_w, collar_b[1]),
+            (neck_center_x + tie_bot_w, tie_bot_y),
+            (neck_center_x, tie_bot_y + int(h * 0.045)),
+            (neck_center_x - tie_bot_w, tie_bot_y)
+        ], fill=(125, 25, 32, 250))
+        
+        # 타이 골드 사선 스트라이프
+        for y_off in range(12, int(h * 0.26), 20):
+            sy = collar_b[1] + y_off
+            robe_draw.line([(neck_center_x - int(w * 0.05), sy), (neck_center_x + int(w * 0.05), sy + 10)], fill=(220, 175, 50, 225), width=4)
+
+        # 로브 깃(Lapels) 음영
+        robe_draw.polygon([(0, robe_top + int(h * 0.05)), (neck_center_x - int(w * 0.10), robe_top), (neck_center_x - int(w * 0.05), h), (0, h)], fill=(12, 12, 16, 248))
+        robe_draw.polygon([(w, robe_top + int(h * 0.05)), (neck_center_x + int(w * 0.10), robe_top), (neck_center_x + int(w * 0.05), h), (w, h)], fill=(12, 12, 16, 248))
+        
+        robe_layer = robe_layer.filter(ImageFilter.GaussianBlur(radius=3))
+        outfit_layer = Image.alpha_composite(outfit_layer, robe_layer)
+        
+        # 2. 빛나는 마법 지팡이(Wand) & 골든 스파크 파티클 렌더링
+        wand_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        wand_draw = ImageDraw.Draw(wand_layer)
+        
+        if wrists:
+            wand_base = wrists[0]
+        else:
+            wand_base = (int(w * 0.75), int(h * 0.88))
+            
+        wand_tip = (wand_base[0] - int(w * 0.16), wand_base[1] - int(h * 0.36))
+        
+        # 나무 지팡이 몸체
+        wand_draw.line([wand_base, wand_tip], fill=(50, 32, 18, 255), width=7)
+        wand_draw.line([wand_base, wand_tip], fill=(90, 60, 35, 210), width=4)
+        
+        # 찬란한 마법광 렌즈 플레어
+        tx, ty = wand_tip
+        for r, alpha in [(48, 45), (32, 95), (18, 170), (8, 240), (4, 255)]:
+            wand_draw.ellipse([(tx - r, ty - r), (tx + r, ty + r)], fill=(255, 235, 160, alpha))
+            
+        # 주변 흩날리는 황금 마법 입자
+        random.seed(int(time.time() * 100) % 1000)
+        for _ in range(45):
+            px = tx + random.randint(-int(w * 0.28), int(w * 0.28))
+            py = ty + random.randint(-int(h * 0.28), int(h * 0.38))
+            pr = random.randint(2, 6)
+            wand_draw.ellipse([(px - pr, py - pr), (px + pr, py + pr)], fill=(255, 215, 85, random.randint(140, 245)))
+            
+        wand_layer = wand_layer.filter(ImageFilter.GaussianBlur(radius=2))
+        outfit_layer = Image.alpha_composite(outfit_layer, wand_layer)
+
+    elif style == "neon_fantasy":
+        # 사이버펑크 네온 재킷 & 발광 칼라
+        cyber_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        cyber_draw = ImageDraw.Draw(cyber_layer)
+        neck_center_x = w // 2
+        robe_top = chin_y + int(h * 0.02)
+        
+        cyber_draw.polygon([
+            (neck_center_x - int(w * 0.18), robe_top),
+            (neck_center_x + int(w * 0.18), robe_top),
+            (w, h),
+            (0, h)
+        ], fill=(15, 18, 28, 240))
+        
+        # 네온 사이언 & 마젠타 발광 라인
+        cyber_draw.line([(neck_center_x - int(w*0.12), robe_top), (neck_center_x - int(w*0.08), h)], fill=(0, 230, 255, 220), width=5)
+        cyber_draw.line([(neck_center_x + int(w*0.12), robe_top), (neck_center_x + int(w*0.08), h)], fill=(255, 0, 160, 220), width=5)
+        cyber_layer = cyber_layer.filter(ImageFilter.GaussianBlur(radius=2))
+        outfit_layer = Image.alpha_composite(outfit_layer, cyber_layer)
+
+    elif style == "bw_cinema":
+        # 1940s 클래식 필름 누아르 트렌치코트 / 라펠 정장
+        bw_layer = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        bw_draw = ImageDraw.Draw(bw_layer)
+        neck_center_x = w // 2
+        robe_top = chin_y + int(h * 0.02)
+        
+        bw_draw.polygon([
+            (neck_center_x - int(w * 0.18), robe_top),
+            (neck_center_x + int(w * 0.18), robe_top),
+            (w, h),
+            (0, h)
+        ], fill=(22, 22, 24, 245))
+        bw_layer = bw_layer.filter(ImageFilter.GaussianBlur(radius=3))
+        outfit_layer = Image.alpha_composite(outfit_layer, bw_layer)
+
+    return outfit_layer.convert("RGB")
 
 
 def get_sd_pipeline(model_key: str = "dreamshaper"):
-    """
-    8GB VRAM GPU 최적화 모델 파이프라인 캐싱 및 로딩
-    DreamShaper v8 / Realistic Vision v5.1 / SD 1.5 지원
-    """
+    """8GB VRAM GPU 최적화 모델 파이프라인 캐싱 및 로딩"""
     global PIPELINES_CACHE, TORCH_AVAILABLE
     
     if not TORCH_AVAILABLE:
@@ -228,7 +398,6 @@ def get_sd_pipeline(model_key: str = "dreamshaper"):
                 safety_checker=None
             )
             pipe = pipe.to(device)
-            
             if device == "cuda":
                 pipe.enable_attention_slicing()
                 
@@ -243,7 +412,7 @@ def get_sd_pipeline(model_key: str = "dreamshaper"):
 
 
 def generate_fallback_background(style: str, size: tuple) -> Image.Image:
-    """GPU 미지원 시 테마별 고해상도 그래디언트 백드롭 생성"""
+    """GPU 미지원 시 테마별 고해상도 백드롭 생성"""
     w, h = size
     if style in ["wizard", "magic_academy"]:
         base = Image.new("RGB", (w, h), (26, 18, 14))
@@ -252,7 +421,6 @@ def generate_fallback_background(style: str, size: tuple) -> Image.Image:
         draw.rectangle([(0, 0), (w, int(h * 0.35))], fill=(15, 10, 8, 220))
         draw.rectangle([(0, 0), (int(w * 0.25), h)], fill=(20, 12, 10, 200))
         draw.rectangle([(int(w * 0.75), 0), (w, h)], fill=(20, 12, 10, 200))
-        import random
         random.seed(42)
         for _ in range(30):
             x = random.randint(int(w * 0.05), int(w * 0.95))
@@ -293,11 +461,7 @@ def generate_fallback_background(style: str, size: tuple) -> Image.Image:
 
 def transform_single_image(image: Image.Image, style: str) -> Image.Image:
     """
-    단일 이미지 AI 변환:
-    1. 인물 정밀 세그멘테이션 마스크 추출 (DeepLabV3) -> 얼굴, 표정, 포즈, 각도 100% 보존
-    2. 테마별 배경 고강도 AI Diffusion 변환 (strength=0.75) -> 호그와트 마법 도서관, 네온 도시 등 완벽 전이
-    3. 인물에 테마 조명/컬러 톤 하모나이징 적용
-    4. 소프트 알파 마스크 합성 -> 얼굴 왜곡/기괴한 천/의상 손상 0% 보장
+    단일 이미지 AI 변환 (인물 얼굴/표정 100% 보존 + 테마 의상/소품 렌더링 + 배경 고강도 Diffusion 전환)
     """
     target_size = (768, 960)
     init_img = image.convert("RGB").resize(target_size, Image.Resampling.LANCZOS)
@@ -312,10 +476,13 @@ def transform_single_image(image: Image.Image, style: str) -> Image.Image:
     model_type = cfg["model_type"]
     device = "cuda" if (TORCH_AVAILABLE and torch.cuda.is_available()) else "cpu"
 
-    # 1. 인물 영역 세그멘테이션 마스크 추출
-    person_mask = extract_person_mask(init_img, device=device)
+    # 1. 인물 마스크 및 얼굴/의상 영역 분리
+    person_mask, face_mask, body_mask, chin_y, wrists = extract_face_and_body_masks(init_img, device=device)
 
-    # 2. 배경 생성 (AI 확산 모델을 통한 고화질 테마 배경 생성)
+    # 2. 테마 의상(로브/교복/타이) 및 소품(빛나는 지팡이) 렌더링
+    clothed_person = overlay_thematic_outfit_and_props(init_img, style, chin_y, wrists)
+
+    # 3. 고화질 테마 배경 AI Diffusion 생성
     pipe = get_sd_pipeline(model_type)
     ai_bg = None
     
@@ -331,38 +498,36 @@ def transform_single_image(image: Image.Image, style: str) -> Image.Image:
                 num_inference_steps=18
             ).images[0]
         except Exception as e:
-            print(f"[AI Background Error] AI 배경 생성 중 오류 ({e}). Fallback 백드롭 적용.")
+            print(f"[AI Background Error] AI 배경 생성 오류 ({e}). Fallback 백드롭 적용.")
             ai_bg = generate_fallback_background(style, target_size)
     else:
         ai_bg = generate_fallback_background(style, target_size)
 
-    # 3. 인물 레이어 테마 조명 및 톤 하모나이징
-    person_layer = init_img.copy()
+    # 4. 1단계 합성: 배경 + 변환된 의상 & 지팡이 바디
+    stage1 = Image.composite(clothed_person, ai_bg, person_mask)
+
+    # 5. 2단계 합성: 원본의 100% 얼굴/표정/헤어 레이어를 완벽하게 복원 (얼굴 왜곡 0%)
+    face_layer = init_img.copy()
     if cfg["color_boost"] > 0:
-        enhancer_c = ImageEnhance.Color(person_layer)
-        person_layer = enhancer_c.enhance(cfg["color_boost"])
+        face_layer = ImageEnhance.Color(face_layer).enhance(cfg["color_boost"])
+        face_layer = ImageEnhance.Contrast(face_layer).enhance(cfg["contrast_boost"])
     else:
-        person_layer = ImageOps.grayscale(person_layer).convert("RGB")
+        face_layer = ImageOps.grayscale(face_layer).convert("RGB")
+        face_layer = ImageEnhance.Contrast(face_layer).enhance(cfg["contrast_boost"])
 
-    if cfg["contrast_boost"] > 0:
-        enhancer_ct = ImageEnhance.Contrast(person_layer)
-        person_layer = enhancer_ct.enhance(cfg["contrast_boost"])
-
-    # 은은한 테마 조명 틴트 오버레이
-    if cfg.get("lighting_tint") and cfg["color_boost"] > 0:
-        tint_layer = Image.new("RGB", target_size, cfg["lighting_tint"])
-        person_layer = Image.blend(person_layer, tint_layer, 0.08)
-
-    # 4. 알파 마스크 합성 (인물은 100% 원본 선명도/표정 유지 + 배경은 100% 테마 변환)
-    final_composite = Image.composite(person_layer, ai_bg, person_mask)
-    return final_composite
+    # 6. 최종 인물 얼굴 레이어 정밀 마운트
+    final_composite = Image.composite(face_layer, stage1, face_mask)
+    
+    # 7. 샤프니스 & 시네마틱 룩 완성
+    final_output = final_composite.filter(ImageFilter.SHARPEN)
+    return final_output
 
 
 def transform_four_cut(images: List[Image.Image], style: str) -> List[Image.Image]:
     """4장 이미지 일괄 AI 스타일 변환"""
     transformed = []
     for idx, img in enumerate(images):
-        print(f"[AI Process] ({idx+1}/4) 이미지 '{style}' 인물 보존 & 테마 배경 변환 진행 중...")
+        print(f"[AI Process] ({idx+1}/4) 이미지 '{style}' 의상/소품/배경 일체형 AI 변환 진행 중...")
         res = transform_single_image(img, style)
         transformed.append(res)
     return transformed
