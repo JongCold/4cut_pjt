@@ -1,6 +1,7 @@
 import os
 import io
 import time
+import base64
 from typing import List
 from PIL import Image, ImageDraw
 import openai
@@ -53,19 +54,25 @@ def transform_single_image_openai(image: Image.Image, cut_index: int, model_name
     try:
         response = client.images.edit(
             model=model_name,
-            image=img_bytes,
-            mask=mask_bytes,
+            image=("image.png", img_bytes.getvalue(), "image/png"),
+            mask=("mask.png", mask_bytes.getvalue(), "image/png"),
             prompt=prompt,
             n=1,
             size="1024x1024"
         )
-        url = response.data[0].url
-        
-        # URL에서 이미지 다운로드
-        import requests
-        res = requests.get(url, timeout=30)
-        edited_img = Image.open(io.BytesIO(res.content)).convert("RGB")
-        return edited_img
+        item = response.data[0]
+        if getattr(item, "b64_json", None):
+            img_data = base64.b64decode(item.b64_json)
+            edited_img = Image.open(io.BytesIO(img_data)).convert("RGB")
+            return edited_img
+        elif getattr(item, "url", None):
+            import requests
+            res = requests.get(item.url, timeout=30)
+            edited_img = Image.open(io.BytesIO(res.content)).convert("RGB")
+            return edited_img
+        else:
+            print(f"[OpenAI API Warning] Cut {cut_index}: 응답에 이미지 데이터가 없어 원본을 유지합니다.")
+            return image.convert("RGB")
     except Exception as e:
         error_msg = str(e)
         if "unverified_organization" in error_msg:

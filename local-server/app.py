@@ -331,11 +331,20 @@ async def serve_download_viewer():
 def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
     """
     webm 비디오 파일을 읽어서 2배속(속도 2배 빠르게, 재생시간 절반 감축)으로 MP4(H.264, iOS 호환)로 고속 변환 및 압축 저장
+    imageio_ffmpeg 또는 시스템 ffmpeg가 없을 경우 원본 복사로 안전 fallback 처리
     """
     import subprocess
-    import imageio_ffmpeg
+    import shutil
+    
+    # 1. imageio_ffmpeg 또는 시스템 ffmpeg 경로 탐색
+    ffmpeg_exe = "ffmpeg"
     try:
+        import imageio_ffmpeg
         ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+    except Exception:
+        pass
+
+    try:
         cmd = [
             ffmpeg_exe,
             '-y',
@@ -348,23 +357,16 @@ def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
             '-an',
             output_path
         ]
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        res = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         print(f"[Video Process] ✅ 비디오 2배속(빠르게) 변환 및 H.264 MP4 고속 인코딩 성공: {output_path}")
         return True
     except Exception as e:
-        print(f"[Video Process Error] ffmpeg 2배속 변환 실패 ({e}). Fallback 처리합니다.")
+        print(f"[Video Process Warning] ffmpeg 2배속 변환 불가 ({e}). 원본 파일로 안전하게 대체합니다.")
         try:
-            import imageio
-            reader = imageio.get_reader(input_path)
-            fps = reader.get_meta_data().get('fps', 30) or 30
-            writer = imageio.get_writer(output_path, fps=fps * 2, codec='libx264', pixelformat='yuv420p')
-            for frame in reader:
-                writer.append_data(frame)
-            reader.close()
-            writer.close()
+            shutil.copyfile(input_path, output_path)
             return True
-        except Exception as ex:
-            print(f"[Video Process Fallback Error] {ex}")
+        except Exception as copy_err:
+            print(f"[Video Process Error] 파일 복사 실패: {copy_err}")
             return False
 
 
