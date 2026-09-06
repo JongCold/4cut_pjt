@@ -1473,5 +1473,63 @@ input:checked + .slider:before {
   object-fit: cover;
 }
 
+/* ==========================================================================
+   고퀄리티 AI 생성 모드 토글 바 (필터 화면 상단) 프리미엄 스타일
+   ========================================================================== */
+
+.quality-toggle-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%);
+  border: 1.5px solid #CBD5E1;
+  border-radius: 14px;
+  padding: 10px 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.quality-toggle-bar.active {
+  background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+  border-color: #8B5CF6;
+  box-shadow: 0 4px 14px rgba(139, 92, 246, 0.2);
+}
+
+.quality-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quality-icon {
+  font-size: 1.3rem;
+  line-height: 1;
+}
+
+.quality-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #1E293B;
+  letter-spacing: -0.2px;
+}
+
+.quality-subtitle {
+  font-size: 0.74rem;
+  color: #64748B;
+  margin-top: 1px;
+  font-weight: 600;
+}
+
+.quality-toggle-bar.active .quality-title {
+  color: #6D28D9;
+}
+
+.quality-toggle-bar.active .quality-subtitle {
+  color: #7C3AED;
+}
+
 
 
