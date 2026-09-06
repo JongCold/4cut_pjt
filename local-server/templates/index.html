@@ -81,10 +81,40 @@
       </header>
 
       <div class="screen-content">
+        <!-- 상단 고퀄리티 모드 토글 바 -->
+        <div class="quality-toggle-bar">
+          <div class="quality-info">
+            <span class="quality-icon">💎</span>
+            <div>
+              <div class="quality-title">고퀄리티 AI 생성 모드</div>
+              <div class="quality-subtitle" id="quality-desc-text">초고속 gpt-image-1.5 모델 가동 중</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-high-quality">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
         <div class="filter-carousel-wrapper scrollable-content">
           <div class="filter-carousel">
             
-            <div class="filter-card selected" data-style="original">
+            <!-- [신규 대표 테마] ⏳ 인생 사계절 (연령 변환) -->
+            <div class="filter-card selected" data-style="time_travel">
+              <div class="filter-badge-popular">👑 BEST 인기</div>
+              <div class="filter-img-holder">
+                <div class="time-travel-preview">
+                  <div class="time-slice slice-child">👶<br>유년기</div>
+                  <div class="time-slice slice-teen">🧑‍🎓<br>학창시절</div>
+                  <div class="time-slice slice-adult">✨<br>현재모습</div>
+                  <div class="time-slice slice-elder">👵<br>노년기</div>
+                </div>
+              </div>
+              <div class="filter-name">⏳ 인생 사계절 (연령 변환)</div>
+              <div class="filter-subdesc">어린이부터 노년까지 한눈에</div>
+            </div>
+
+            <div class="filter-card" data-style="original">
               <div class="filter-img-holder">
                 <div style="width:100%;height:100%;background:linear-gradient(135deg, #E2E8F0, #CBD5E1);display:flex;align-items:center;justify-content:center;font-size:2rem;">📷</div>
               </div>
@@ -145,6 +175,11 @@
       </header>
 
       <div class="screen-content flex-column-content">
+        <!-- 현재 적용 테마 뱃지 -->
+        <div style="text-align: center;">
+          <div id="shoot-current-theme" class="current-theme-badge">⏳ 콘셉트: 인생 사계절 (연령 변환)</div>
+        </div>
+
         <div class="timer-container">
           <div class="shoot-timer-wrap">
             <svg class="timer-svg" viewBox="0 0 100 100">
@@ -156,11 +191,23 @@
           <div id="shoot-counter-badge" class="shoot-counter-badge">1 / 4 컷</div>
         </div>
 
+        <!-- 컷별 실시간 변환 가이드 뱃지 -->
+        <div id="shoot-cut-guide" class="cut-guide-badge">👶 1컷 준비: 어린이(유년기) 변환 예정</div>
+
         <div class="camera-viewport-container">
           <div class="camera-viewport">
             <video id="webcam-preview" autoplay playsinline muted></video>
             <div id="flash-effect" class="flash-effect"></div>
           </div>
+        </div>
+
+        <!-- 촬영 화면 고퀄리티 모드 토글 스위치 바 -->
+        <div class="shoot-quality-toggle-box">
+          <span class="shoot-quality-label">💎 고퀄리티 모드 (gpt-image-2)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-shoot-high-quality">
+            <span class="slider round"></span>
+          </label>
         </div>
 
         <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full">🚀 4컷 연사 시작</button>
@@ -329,12 +376,24 @@
   <script>
     // 전역 상태 변수
     let currentScreen = 'screen-home';
-    let selectedStyle = 'original';
+    let selectedStyle = 'time_travel'; // 기본값: 연령 변환 테마
     let mediaStream = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let capturedBlobs = [];
     let transformResult = null;
+    let isHighQuality = false;
+
+    // 스타일 표시명 매핑
+    const styleNames = {
+      'time_travel': '⏳ 인생 사계절 (연령 변환)',
+      'original': '📷 오리지널 클래식',
+      'soft_cartoon': '🎨 소프트 카툰 (3D)',
+      'ghibli': '🌿 지브리 수채화',
+      'neon_fantasy': '🌆 네온 판타지',
+      'bw_cinema': '🎬 흑백 시네마',
+      'wizard': '🧙‍♂️ 마법 학교 (호그와트)'
+    };
 
     // DOM 요소
     const screens = {
@@ -364,12 +423,46 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // 고퀄리티 모드 토글 양방향 동기화 함수
+    function updateQualityState(checked) {
+      isHighQuality = checked;
+      const t1 = document.getElementById('toggle-high-quality');
+      const t2 = document.getElementById('toggle-shoot-high-quality');
+      const bar = document.querySelector('.quality-toggle-bar');
+      const desc = document.getElementById('quality-desc-text');
+      if (t1) t1.checked = checked;
+      if (t2) t2.checked = checked;
+      if (bar) {
+        if (checked) {
+          bar.classList.add('active');
+          if (desc) desc.innerText = "초고화질 gpt-image-2 모델 가동 중 (극사실적 텍스처)";
+        } else {
+          bar.classList.remove('active');
+          if (desc) desc.innerText = "초고속 gpt-image-1.5 모델 가동 중 (빠른 반응 속도)";
+        }
+      }
+    }
+
+    // 토글 이벤트 리스너 바인딩
+    const tHighQuality = document.getElementById('toggle-high-quality');
+    if (tHighQuality) {
+      tHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
+    }
+    const tShootHighQuality = document.getElementById('toggle-shoot-high-quality');
+    if (tShootHighQuality) {
+      tShootHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
+    }
+
     // 필터 카루셀 선택 처리
     document.querySelectorAll('.filter-card').forEach(card => {
       card.addEventListener('click', () => {
         document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         selectedStyle = card.getAttribute('data-style');
+        const themeElem = document.getElementById('shoot-current-theme');
+        if (themeElem) {
+          themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
+        }
       });
     });
 
@@ -384,6 +477,18 @@
         showToast('AI 스타일을 먼저 선택해 주세요!');
         return;
       }
+      const themeElem = document.getElementById('shoot-current-theme');
+      if (themeElem) {
+        themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
+      }
+      const triggerBtn = document.getElementById('btn-manual-trigger');
+      if (triggerBtn) triggerBtn.style.display = 'block';
+      
+      const guideElem = document.getElementById('shoot-cut-guide');
+      if (guideElem) {
+        guideElem.innerText = selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 촬영 준비 중...';
+      }
+
       navigateTo('screen-shoot');
       await initWebcam();
     });
@@ -419,16 +524,53 @@
       startShootingSequence();
     });
 
+    let sessionId = "";
+
     async function startShootingSequence() {
       capturedBlobs = [];
+      sessionId = Math.random().toString(36).substring(2, 10);
+      
       if (mediaRecorder && mediaRecorder.state === 'inactive') {
         mediaRecorder.start();
       }
 
+      const cutGuides = {
+        1: selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 준비 중...',
+        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 준비: 청소년·교복 AI 변환 예정' : '📸 2컷 준비 중...',
+        3: selectedStyle === 'time_travel' ? '✨ 3컷 준비: 현재 모습 100% 원본 유지' : '📸 3컷 준비 중...',
+        4: selectedStyle === 'time_travel' ? '👵 4컷 준비: 온화한 노년 AI 변환 예정' : '📸 4컷 준비 중...'
+      };
+
+      const cutGuidesShooting = {
+        1: selectedStyle === 'time_travel' ? '👶 1컷 촬영 완료! 어린이 AI 변환 시작 ➔' : '📸 1컷 촬영 완료!',
+        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 촬영 완료! 청소년 AI 변환 시작 ➔' : '📸 2컷 촬영 완료!',
+        3: selectedStyle === 'time_travel' ? '✨ 3컷 촬영 완료! 현재 모습 보존 ➔' : '📸 3컷 촬영 완료!',
+        4: selectedStyle === 'time_travel' ? '👵 4컷 촬영 완료! 노년 AI 변환 시작 ➔' : '📸 4컷 촬영 완료!'
+      };
+
       for (let cut = 1; cut <= 4; cut++) {
         document.getElementById('shoot-counter-badge').innerText = `${cut} / 4 컷`;
+        const guideElem = document.getElementById('shoot-cut-guide');
+        if (guideElem) guideElem.innerText = cutGuides[cut];
+
         await runCountdown(5);
-        await captureCanvasShot();
+        let blob = await captureCanvasShot();
+        
+        if (guideElem) guideElem.innerText = cutGuidesShooting[cut];
+
+        // 즉시 비동기 업로드 (AI 백그라운드 변환 시작)
+        let formData = new FormData();
+        formData.append('photo', blob, `photo_${cut-1}.jpg`);
+        formData.append('session_id', sessionId);
+        formData.append('cut_index', cut-1);
+        formData.append('style', selectedStyle);
+        formData.append('is_high_quality', isHighQuality ? "true" : "false");
+        
+        fetch('/api/transform_single', {
+          method: 'POST',
+          body: formData
+        }).catch(err => console.error('비동기 전송 에러:', err));
+        
         // 셔터 플래시 효과
         const flash = document.getElementById('flash-effect');
         flash.classList.add('flash');
@@ -520,15 +662,13 @@
       overlay.classList.add('active');
 
       const formData = new FormData();
-      capturedBlobs.forEach((blob, index) => {
-        formData.append('photos', blob, `photo_${index}.jpg`);
-      });
+      formData.append('session_id', sessionId);
+      formData.append('style', selectedStyle);
 
       if (recordedChunks.length > 0) {
         const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
         formData.append('video', videoBlob, 'behind_video.webm');
       }
-      formData.append('style', selectedStyle);
 
       try {
         const res = await fetch('/api/transform', {

@@ -23,9 +23,24 @@ import qrcode
 from apscheduler.schedulers.background import BackgroundScheduler
 
 from concept_transformer import transform_four_cut, create_4cut_frame
+from openai_transformer import transform_single_image_openai
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(max_workers=10)
+TRANSFORM_TASKS = {}
 
 # 기본 경로 및 폴더 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# .env 환경변수 파일 자동 로드
+env_file_path = os.path.join(BASE_DIR, ".env")
+if os.path.exists(env_file_path):
+    with open(env_file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if line and not line.startswith("#") and "=" in line:
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
 UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 VERCEL_DIR = os.path.join(os.path.dirname(BASE_DIR), "vercel-frontend")
@@ -353,41 +368,80 @@ def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
             return False
 
 
+@app.post("/api/transform_single")
+async def api_transform_single(
+    session_id: str = Form(...),
+    cut_index: int = Form(...),
+    style: str = Form("time_travel"),
+    is_high_quality: str = Form("false"),
+    photo: UploadFile = File(...)
+):
+    """
+    개별 사진 수신 후 즉시 백그라운드 변환 시작
+    """
+    if session_id not in TRANSFORM_TASKS:
+        TRANSFORM_TASKS[session_id] = {}
+        
+    contents = await photo.read()
+    pil_img = Image.open(io.BytesIO(contents))
+    
+    # 원본 이미지 저장
+    single_filename = f"orig_single_{cut_index+1}_{session_id}.jpg"
+    single_path = os.path.join(UPLOAD_DIR, single_filename)
+    pil_img.save(single_path, format="JPEG", quality=95)
+    
+    # 모델 선택
+    model_name = "gpt-image-2" if is_high_quality.lower() == "true" else "gpt-image-1.5"
+    
+    # 백그라운드 태스크 등록
+    loop = asyncio.get_event_loop()
+    if style == "original":
+        task = loop.run_in_executor(executor, lambda img: img.convert("RGB"), pil_img)
+    else:
+        # time_travel (연령 변환) 및 기타 테마
+        task = loop.run_in_executor(executor, transform_single_image_openai, pil_img, cut_index, model_name)
+        
+    TRANSFORM_TASKS[session_id][cut_index] = {
+        "original_img": pil_img,
+        "single_path": single_path,
+        "single_filename": single_filename,
+        "task": task
+    }
+    return {"status": "success", "style": style, "cut_index": cut_index}
+
 @app.post("/api/transform")
 async def api_transform_four_cut(
     request: Request,
-    photos: List[UploadFile] = File(...),
+    session_id: str = Form(...),
     video: Optional[UploadFile] = File(None),
     style: str = Form("original")
 ):
     """
-    4컷 사진 + 비하인드 동영상 수신 후:
-    1. AI Img2Img 변환 & 4컷 합성 프레임 생성
-    2. Google Drive API 업로드
-    3. No-DB 모바일 뷰어 다운로드 QR 생성 및 반환
+    4컷 촬영 완료 후 최종 병합 및 구글 드라이브 업로드
     """
-    if len(photos) < 4:
-        raise HTTPException(status_code=400, detail="사진은 정확히 4장이 전달되어야 합니다.")
+    if session_id not in TRANSFORM_TASKS or len(TRANSFORM_TASKS[session_id]) < 4:
+        raise HTTPException(status_code=400, detail="모든 4컷 사진이 전송되지 않았습니다.")
 
-    session_id = uuid.uuid4().hex[:8]
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
     
-    # 1. 캡처된 사진 4장 읽기 및 개별 원본 이미지 저장
+    # 1. 캡처된 원본 4장 수집 (async 태스크 대기)
     original_pil_images = []
     single_orig_filenames = []
     single_orig_paths = []
+    transformed_pil_images = []
     
-    for idx, photo in enumerate(photos[:4]):
-        contents = await photo.read()
-        pil_img = Image.open(io.BytesIO(contents))
-        original_pil_images.append(pil_img)
+    for idx in range(4):
+        item = TRANSFORM_TASKS[session_id][idx]
+        original_pil_images.append(item["original_img"])
+        single_orig_filenames.append(item["single_filename"])
+        single_orig_paths.append(item["single_path"])
         
-        # 개별 원본 컷 이미지 로컬 저장 (24시간 자동 파기 대상)
-        single_filename = f"orig_single_{idx+1}_{session_id}.jpg"
-        single_path = os.path.join(UPLOAD_DIR, single_filename)
-        pil_img.save(single_path, format="JPEG", quality=95)
-        single_orig_filenames.append(single_filename)
-        single_orig_paths.append(single_path)
+        # AI 변환 완료 대기 (비동기 처리)
+        transformed_img = await item["task"]
+        transformed_pil_images.append(transformed_img)
+        
+    # 메모리 정리
+    del TRANSFORM_TASKS[session_id]
         
     # 2. 원본 4컷 프레임 합성 및 저장
     orig_frame = create_4cut_frame(original_pil_images, brand_title="AI 4-CUT STUDIO (ORIGINAL)")
@@ -396,13 +450,14 @@ async def api_transform_four_cut(
     orig_frame.save(orig_frame_path, format="JPEG", quality=92)
     
     # 3. AI 변환 적용 & 4컷 프레임 생성
-    transformed_pil_images = transform_four_cut(original_pil_images, style)
-    ai_frame = create_4cut_frame(transformed_pil_images, brand_title=f"AI 4-CUT STUDIO ({style.upper()})")
+    frame_title = "AI 4-CUT (TIME TRAVEL)" if style == "time_travel" else f"AI 4-CUT STUDIO ({style.upper()})"
+    ai_frame = create_4cut_frame(transformed_pil_images, brand_title=frame_title)
     ai_frame_filename = f"ai_frame_{session_id}_{style}.jpg"
     ai_frame_path = os.path.join(UPLOAD_DIR, ai_frame_filename)
     ai_frame.save(ai_frame_path, format="JPEG", quality=95)
     
     # 4. 비하인드 동영상 저장 (2배속 인코딩 및 H.264 MP4로 변환)
+
     video_filename = f"behind_video_{session_id}.mp4"
     video_path = os.path.join(UPLOAD_DIR, video_filename)
     if video:
