@@ -10,16 +10,46 @@ import openai
 api_key = os.environ.get("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=api_key) if api_key else None
 
-# 프롬프트 매핑 (0: 어린이, 1: 청소년, 2: 원본유지(호출 생략됨), 3: 노년)
+# 프롬프트 매핑 (c:\4cuts_pjt\연령변환 프롬프트 규격 100% 준수)
 PROMPTS = {
-    0: "Transform the people in the input photograph into realistic childhood versions, approximately 6-10 years old. Give each person natural child-like facial proportions. Keep the background simple and neutral. Photorealistic photography.",
-    1: "Transform the people in the input photograph into realistic teenagers, approximately 15-18 years old, wearing Korean high school uniforms. Keep the background simple and neutral. Photorealistic photography.",
-    3: "Transform the people in the input photograph into realistic older adults, approximately 65-80 years old, with natural aging wrinkles and gray hair. Keep the background simple and neutral. Photorealistic photography."
+    0: (
+        "Transform the people in the input photograph into realistic childhood versions, approximately 6–10 years old. "
+        "CRITICAL IDENTITY & POSE PRESERVATION: "
+        "- Preserve the exact number of people visible in the input image. Do not add, remove, or duplicate anyone. "
+        "- Strictly preserve each person's exact recognizable facial identity, facial structure, eye shape, smile, and glasses (if the person is wearing glasses in the photo, MUST keep the glasses). The child MUST be undeniably and recognizably the SAME person. "
+        "- Strictly preserve each person's original pose, body orientation, head tilt, hand gestures, and relative position from the photograph. If they are smiling or making a hand sign, keep the exact same gesture. "
+        "- AGE TRANSFORMATION: Give natural child-like facial proportions and soft youthful skin while strictly retaining individual facial identity. Do NOT create babies or toddlers; target elementary school age (6–10 years old). "
+        "- CLOTHING: Dress in clean, neat, age-appropriate children's casual clothing. "
+        "- RECOMMENDED BACKGROUND: Clean, modern, warm photography studio backdrop with soft pastel lighting (warm beige and soft off-white tones), complementing the childhood theme. "
+        "Photorealistic, authentic studio portrait, natural skin texture, realistic shadows, 8k resolution, sharp focus. No cartoon, no anime."
+    ),
+    1: (
+        "Transform the people in the input photograph into realistic teenagers, approximately 15–18 years old. "
+        "CRITICAL IDENTITY & POSE PRESERVATION: "
+        "- Preserve the exact number of people visible in the input image. Do not add, remove, duplicate, or merge anyone. "
+        "- Strictly preserve each person's exact recognizable facial identity, facial bone structure, distinctive facial features, and glasses (if wearing glasses, MUST keep the glasses). The teenager MUST be undeniably and recognizably the SAME person. "
+        "- Strictly preserve each person's original pose, body orientation, head posture, hand gestures, and interaction from the photograph. "
+        "- CLOTHING & UNIFORM: Dress EVERY visible person in a neat, stylish, realistic Korean-style high school uniform appropriate for their gender (clean blazer jacket, crisp collared shirt, and school tie/ribbon). Realistic fabric, avoid exaggerated costumes. "
+        "- AGE TRANSFORMATION: Youthful, clear skin, natural teenage facial features of an authentic high school student. "
+        "- RECOMMENDED BACKGROUND: A bright, elegant, modern photography studio portrait background with soft neutral lighting (light gray and subtle beige tones). "
+        "Photorealistic photography, natural lighting, realistic skin texture, realistic shadows, 8k resolution, sharp focus. No cartoon, no illustration."
+    ),
+    3: (
+        "Transform the people in the input photograph into dignified, realistic older adults, approximately 65–80 years old. "
+        "CRITICAL IDENTITY & POSE PRESERVATION: "
+        "- Preserve the exact number of people visible in the input image. Do not add, remove, or duplicate anyone. "
+        "- Strictly preserve each person's recognizable facial bone structure, facial identity, eye shape, smile, and glasses (if wearing glasses, MUST keep the glasses). The elderly person MUST be undeniably and recognizably the SAME person. "
+        "- Strictly preserve each person's original pose, body orientation, posture, head angle, and hand gestures from the input photograph. "
+        "- NATURAL AGING TRANSFORMATION: Apply natural, graceful, realistic aging including gentle facial wrinkles, subtle laugh lines, natural skin texture, and dignified silver/gray hair. Do NOT create exaggerated deformities or hunched postures. "
+        "- CLOTHING: Dress in elegant, sophisticated, warm elderly knitwear or classic blazer attire. "
+        "- RECOMMENDED BACKGROUND: A warm, classic, dignified photo studio background with gentle ambient lighting and timeless soft neutral aesthetics. "
+        "Photorealistic photography, authentic dignified portrait, realistic skin texture, realistic shadows, 8k resolution, sharp focus. No cartoon, no caricature."
+    )
 }
 
 def transform_single_image_openai(image: Image.Image, cut_index: int, model_name: str = "gpt-image-1.5") -> Image.Image:
     """
-    단일 이미지를 받아 OpenAI Edit API를 통해 연령 변환을 수행합니다.
+    단일 이미지를 받아 OpenAI Edit API(Image-to-Image)를 통해 원본 얼굴/포즈 기반 연령 변환을 수행합니다.
     cut_index: 0(어린이), 1(청소년), 2(원본유지), 3(노년)
     model_name: 기본 'gpt-image-1.5', 고퀄리티 선택 시 'gpt-image-2'
     """
@@ -28,20 +58,13 @@ def transform_single_image_openai(image: Image.Image, cut_index: int, model_name
 
     prompt = PROMPTS.get(cut_index, "")
     
-    # DALL-E 2 Edit API 요구사항: 1024x1024 투명 PNG, 4MB 이하
-    img_square = image.convert("RGBA").resize((1024, 1024), Image.Resampling.LANCZOS)
-    
-    # 마스크 생성: 투명 영역을 재생성
-    mask = Image.new("RGBA", (1024, 1024), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(mask)
-    draw.rectangle([(150, 150), (874, 950)], fill=(255, 255, 255, 0))
+    # 1024x1024 고화질 RGB 변환
+    img_square = image.convert("RGB").resize((1024, 1024), Image.Resampling.LANCZOS)
     
     img_bytes = io.BytesIO()
     img_square.save(img_bytes, format="PNG")
     img_bytes.seek(0)
     
-    mask_bytes = io.BytesIO()
-    mask.save(mask_bytes, format="PNG")
     global client
     if client is None:
         key = os.environ.get("OPENAI_API_KEY")
@@ -52,10 +75,10 @@ def transform_single_image_openai(image: Image.Image, cut_index: int, model_name
             return image.convert("RGB")
 
     try:
+        # mask 없이 인풋 이미지를 직접 넘겨 완벽한 Image-to-Image 인물/포즈 보존 변환 수행
         response = client.images.edit(
             model=model_name,
             image=("image.png", img_bytes.getvalue(), "image/png"),
-            mask=("mask.png", mask_bytes.getvalue(), "image/png"),
             prompt=prompt,
             n=1,
             size="1024x1024"

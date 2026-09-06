@@ -411,6 +411,18 @@ async def api_transform_single(
     }
     return {"status": "success", "style": style, "cut_index": cut_index}
 
+def get_host_lan_ip() -> str:
+    import socket
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+
 @app.post("/api/transform")
 async def api_transform_four_cut(
     request: Request,
@@ -509,13 +521,14 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (구글 로그인/계정선택/점3개 메뉴 완전 우회)
-    base_host = "https://4cut-pjt.vercel.app"
-    server_origin = str(request.base_url).rstrip("/")
-    download_url = f"{base_host}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (스마트폰 직결 LAN IP 지원)
+    lan_ip = get_host_lan_ip()
+    port = request.base_url.port or 8000
+    server_origin = f"http://{lan_ip}:{port}"
     
-    # 로컬 서빙 뷰어 URL 생성 (테스트용)
-    local_download_url = f"http://localhost:8000/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+    # 스마트폰 카메라 QR 스캔 시 바로 접속 가능한 모바일 다운로드 뷰어 URL
+    download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+    local_download_url = download_url
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)

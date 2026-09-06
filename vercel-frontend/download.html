@@ -273,7 +273,7 @@
           <span class="badge-speed">⚡ 2배속 고속 모드</span>
         </div>
         <div class="video-preview-box">
-          <video id="display-video" controls loop playsinline webkit-playsinline preload="metadata">
+          <video id="display-video" controls loop autoplay muted playsinline webkit-playsinline preload="auto">
             <source id="video-source" src="" type="video/mp4">
             브라우저가 동영상 재생을 지원하지 않습니다.
           </video>
@@ -461,22 +461,24 @@
         const baseUrl = serverOrigin ? serverOrigin : '';
         const targetUrl = `${baseUrl}/uploads/${vidId}`;
 
+        // 직접 URL을 video 태그의 src로 먼저 지정하여 즉시 스트리밍 및 버퍼링 지원
+        videoElem.src = targetUrl;
+        videoSource.src = targetUrl;
+        videoBlobUrl = targetUrl;
+        
         try {
-          const response = await fetch(targetUrl, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-          });
-          const blob = await response.blob();
-          videoBlobUrl = URL.createObjectURL(blob);
+          // 비동기 fetch를 통해 다운로드용 Blob도 백그라운드 준비
+          fetch(targetUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
+            .then(res => res.blob())
+            .then(blob => {
+              videoBlobUrl = URL.createObjectURL(blob);
+            }).catch(e => console.log('Blob fetch fallback to direct URL:', e));
           
-          videoElem.src = videoBlobUrl;
-          videoSource.src = videoBlobUrl;
           videoElem.load();
+          videoElem.play().catch(e => console.log('Auto-play suppressed by browser:', e));
         } catch (err) {
-          console.error('동영상 로딩 실패:', err);
+          console.error('동영상 로딩 예외:', err);
           videoElem.src = targetUrl;
-          videoSource.src = targetUrl;
-          videoBlobUrl = targetUrl;
-          videoElem.load();
         }
       } else {
         const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;

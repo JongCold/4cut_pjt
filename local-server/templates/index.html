@@ -29,8 +29,8 @@
     <div id="loading-overlay" class="loading-overlay">
       <div class="loading-spinner-box">
         <div class="quantum-spinner"></div>
-        <div class="loading-title">AI 4컷 이미지를 생성 중입니다</div>
-        <div class="loading-desc">오픈소스 Stable Diffusion 파이프라인으로 화질을 높이고 스타일을 전이하는 중...</div>
+        <div class="loading-title">AI 인생 4컷을 생성하고 있습니다</div>
+        <div class="loading-desc">최신 OpenAI 생성 AI가 얼굴과 포즈를 정밀 분석하여 어린이·청소년·노년 생애 주기 변환을 완성하는 중...</div>
       </div>
     </div>
 
@@ -311,17 +311,35 @@
         <div class="header-desc">QR 코드를 스캔하여 완성본과 비하인드 영상을 받으세요!</div>
       </header>
 
-      <div class="screen-content center-content">
+      <div class="screen-content center-content finish-scrollable">
         <div class="finish-panel">
+          <!-- 미디어 프리뷰 2열 그리드 (4컷 사진 + 2배속 영상) -->
+          <div class="finish-media-preview-grid">
+            <div class="preview-mini-card">
+              <div class="mini-card-badge">📸 4컷 완성본</div>
+              <div class="mini-thumb-box">
+                <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
+              </div>
+            </div>
+            <div class="preview-mini-card">
+              <div class="mini-card-badge">⚡ 2배속 비하인드 캠</div>
+              <div class="mini-video-box">
+                <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
+                  <source id="kiosk-video-source" src="" type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
           <div class="qr-container-box">
             <div class="qrcode-wrapper">
-              <img id="qr-code-img" width="180" height="180" src="" alt="QR Code">
+              <img id="qr-code-img" width="160" height="160" src="" alt="QR Code">
             </div>
             <p class="qr-info-text">
-              스마트폰 카메라로 QR 코드를 스캔하면<br>
-              <strong>4컷 완성본 사진</strong>과 <strong>비하인드 캠 영상</strong>을<br>
-              개별 다운로드할 수 있습니다.<br>
-              <span style="font-size:0.78rem;color:#94A3B8;">(개인정보 보호법에 의거 24시간 후 자동 파기)</span>
+              스마트폰 카메라로 <strong>QR 코드를 스캔</strong>하면<br>
+              <strong>4컷 완성본 사진</strong>과 <strong>2배속 비하인드 영상</strong>을<br>
+              로그인 없이 1초 만에 스마트폰에 즉시 다운로드할 수 있습니다.<br>
+              <span style="font-size:0.75rem;color:#94A3B8;">(개인정보 보호법 준수 24시간 후 자동 영구 파기)</span>
             </p>
           </div>
         </div>
@@ -716,6 +734,27 @@
 
     // 5. 결과 확인 -> Finish (QR)
     document.getElementById('btn-to-finish').addEventListener('click', () => {
+      // 선택된 프레임(AI 또는 원본) 썸네일 설정
+      const thumbImg = document.getElementById('kiosk-finish-thumb');
+      const activeFrameImg = selectedFrameChoice === 'ai' 
+        ? document.getElementById('ai-frame-preview')
+        : document.getElementById('orig-frame-preview');
+      if (thumbImg && activeFrameImg) {
+        thumbImg.src = activeFrameImg.src;
+      }
+
+      // 2배속 비하인드 동영상 플레이어 연동
+      if (transformResult && transformResult.video_url) {
+        const kioskVideo = document.getElementById('kiosk-behind-video');
+        const kioskSource = document.getElementById('kiosk-video-source');
+        if (kioskVideo && kioskSource) {
+          kioskVideo.src = transformResult.video_url;
+          kioskSource.src = transformResult.video_url;
+          kioskVideo.load();
+          kioskVideo.play().catch(e => console.log('Kiosk video autoplay:', e));
+        }
+      }
+
       navigateTo('screen-finish');
     });
 
