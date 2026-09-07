@@ -25,12 +25,78 @@
       </div>
     </div>
 
-    <!-- AI 변환 로딩 오버레이 -->
+    <!-- AI 변환 & 인화 실시간 동적 로딩 오버레이 (멀티 스테이지 프로그레스 UI) -->
     <div id="loading-overlay" class="loading-overlay">
-      <div class="loading-spinner-box">
-        <div class="quantum-spinner"></div>
-        <div class="loading-title">AI 인생 4컷을 생성하고 있습니다</div>
-        <div class="loading-desc">최신 OpenAI 생성 AI가 얼굴과 포즈를 정밀 분석하여 어린이·청소년·노년 생애 주기 변환을 완성하는 중...</div>
+      <div class="dynamic-loading-card">
+        <!-- 상단 헤더 & 회전 스피너 -->
+        <div class="loading-header-area">
+          <div class="quantum-spinner-wrap">
+            <div class="quantum-spinner"></div>
+            <div class="camera-center-icon">📸</div>
+          </div>
+          <h2 class="loading-dynamic-title">AI 인생 4컷 인화 & 생성 중</h2>
+          <p id="loading-dynamic-desc" class="loading-dynamic-desc">최신 OpenAI 생성 AI가 얼굴 골격과 고유 특징을 정밀 분석하고 있습니다...</p>
+        </div>
+
+        <!-- 실시간 프로그레스 바 & 타임 트래커 -->
+        <div class="progress-section">
+          <div class="progress-meta-row">
+            <span id="progress-step-badge" class="progress-step-badge">1단계: 유년기 변환</span>
+            <span id="progress-percent-text" class="progress-percent-text">15%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 15%;"></div>
+          </div>
+          <div class="time-meta-row">
+            <span id="loading-timer-elapsed" class="timer-badge">⏱️ 경과 시간: 00:00</span>
+            <span id="loading-timer-remaining" class="timer-badge highlight">⏳ 예상 남은 시간: 약 90초</span>
+          </div>
+        </div>
+
+        <!-- 5단계 생애주기 스텝 트래커 -->
+        <div class="timeline-stepper">
+          <div class="stepper-item active" id="step-track-1">
+            <div class="stepper-circle">👶</div>
+            <div class="stepper-info">
+              <div class="stepper-title">1컷 유년기</div>
+              <div class="stepper-status" id="step-stat-1">변환 중</div>
+            </div>
+          </div>
+          <div class="stepper-item" id="step-track-2">
+            <div class="stepper-circle">🎓</div>
+            <div class="stepper-info">
+              <div class="stepper-title">2컷 청소년기</div>
+              <div class="stepper-status" id="step-stat-2">대기 중</div>
+            </div>
+          </div>
+          <div class="stepper-item" id="step-track-3">
+            <div class="stepper-circle">📸</div>
+            <div class="stepper-info">
+              <div class="stepper-title">3컷 현재 모습</div>
+              <div class="stepper-status" id="step-stat-3">대기 중</div>
+            </div>
+          </div>
+          <div class="stepper-item" id="step-track-4">
+            <div class="stepper-circle">👓</div>
+            <div class="stepper-info">
+              <div class="stepper-title">4컷 황혼기</div>
+              <div class="stepper-status" id="step-stat-4">대기 중</div>
+            </div>
+          </div>
+          <div class="stepper-item" id="step-track-5">
+            <div class="stepper-circle">🖨️</div>
+            <div class="stepper-info">
+              <div class="stepper-title">인화 & 합성</div>
+              <div class="stepper-status" id="step-stat-5">대기 중</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 하단 팁 / 감성 안내 -->
+        <div class="loading-tip-box">
+          <span class="tip-bulb">💡</span>
+          <span id="loading-tip-text">DSLR 85mm 렌즈의 섬세한 피부 질감과 본인 고유의 얼굴 골격을 살려 생애 사계절을 완성하고 있습니다.</span>
+        </div>
       </div>
     </div>
 
@@ -315,8 +381,8 @@
         <div class="finish-panel">
           <!-- 미디어 프리뷰 2열 그리드 (4컷 사진 + 2배속 영상) -->
           <div class="finish-media-preview-grid">
-            <div class="preview-mini-card">
-              <div class="mini-card-badge">📸 4컷 완성본</div>
+            <div id="btn-thumb-preview-card" class="preview-mini-card clickable-thumb" title="클릭하면 4컷을 큰 화면으로 다시 봅니다">
+              <div class="mini-card-badge">📸 4컷 완성본 <span class="badge-zoom-hint">(크게 보기 🔍)</span></div>
               <div class="mini-thumb-box">
                 <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
               </div>
@@ -346,7 +412,10 @@
       </div>
 
       <footer class="fixed-footer">
-        <div class="split-buttons">
+        <div class="split-buttons finish-action-buttons">
+          <button id="btn-back-to-result" class="btn btn-outline-purple">
+            ◀ 4컷 다시보기 (크게)
+          </button>
           <button id="btn-print-modal" class="btn btn-secondary">🖨️ 인화 출력</button>
           <button id="btn-reset-home" class="btn btn-primary">🏠 처음으로</button>
         </div>
@@ -669,6 +738,104 @@
       await initWebcam();
     });
 
+    // 실시간 AI 변환 & 인화 상태 폴링 관리
+    let statusPollInterval = null;
+    let pollStartTime = 0;
+    const tipsList = [
+      "DSLR 85mm 렌즈의 섬세한 피부 질감과 본인 고유의 얼굴 골격을 살려 생애 사계절을 완성하고 있습니다.",
+      "과도한 플라스틱 스무딩을 배제하고 자연스러운 모공과 미세 주름을 디테일하게 묘사하고 있습니다.",
+      "곧 2배속 비하인드 동영상과 고해상도 4컷 포토 프레임이 완성됩니다. 잠시만 기다려주세요!",
+      "촬영 중 담긴 따뜻한 미소와 손동작이 연령대별로 생생하게 연결되고 있습니다."
+    ];
+    let tipIndex = 0;
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startStatusPolling(sId) {
+      pollStartTime = Date.now();
+      tipIndex = 0;
+      
+      // 초기 상태 리셋
+      document.getElementById('progress-bar-fill').style.width = '10%';
+      document.getElementById('progress-percent-text').innerText = '10%';
+      document.getElementById('progress-step-badge').innerText = '1단계: 유년기 변환';
+      document.getElementById('loading-dynamic-desc').innerText = 'AI가 원본 얼굴 골격과 생체 특징을 분석하고 있습니다...';
+      document.getElementById('loading-timer-elapsed').innerText = '⏱️ 경과 시간: 00:00';
+      document.getElementById('loading-timer-remaining').innerText = '⏳ 예상 남은 시간: 약 90초';
+
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById(`step-track-${i}`);
+        const stat = document.getElementById(`step-stat-${i}`);
+        if (el) el.className = 'stepper-item' + (i === 1 ? ' active' : '');
+        if (stat) stat.innerText = i === 1 ? '변환 분석 중' : '대기 중';
+      }
+
+      if (statusPollInterval) clearInterval(statusPollInterval);
+
+      statusPollInterval = setInterval(async () => {
+        const elapsedSec = Math.floor((Date.now() - pollStartTime) / 1000);
+        document.getElementById('loading-timer-elapsed').innerText = `⏱️ 경과 시간: ${formatTime(elapsedSec)}`;
+        
+        // 예상 남은 시간 계산 (기본 100초 기준 점진적 감소, 최소 5초)
+        const remainSec = Math.max(5, 100 - elapsedSec);
+        document.getElementById('loading-timer-remaining').innerText = `⏳ 예상 남은 시간: 약 ${remainSec}초`;
+
+        // 팁 텍스트 6초마다 변경
+        if (elapsedSec % 6 === 0) {
+          tipIndex = (tipIndex + 1) % tipsList.length;
+          document.getElementById('loading-tip-text').innerText = tipsList[tipIndex];
+        }
+
+        try {
+          const res = await fetch(`/api/transform_status/${sId}`);
+          if (res.ok) {
+            const st = await res.json();
+            const prog = Math.min(98, Math.max(st.progress || 10, Math.min(95, Math.floor(elapsedSec * 1.0))));
+            document.getElementById('progress-bar-fill').style.width = `${prog}%`;
+            document.getElementById('progress-percent-text').innerText = `${prog}%`;
+            
+            if (st.step_name) {
+              document.getElementById('progress-step-badge').innerText = `${st.step}단계: ${st.step_name}`;
+            }
+            if (st.message) {
+              document.getElementById('loading-dynamic-desc').innerText = st.message;
+            }
+
+            // 스텝 트래커 상태 갱신
+            const curStep = st.step || 1;
+            for (let i = 1; i <= 5; i++) {
+              const el = document.getElementById(`step-track-${i}`);
+              const stat = document.getElementById(`step-stat-${i}`);
+              if (!el || !stat) continue;
+              if (i < curStep) {
+                el.className = 'stepper-item completed';
+                stat.innerText = '완료 ✓';
+              } else if (i === curStep) {
+                el.className = 'stepper-item active';
+                stat.innerText = '진행 중...';
+              } else {
+                el.className = 'stepper-item';
+                stat.innerText = '대기 중';
+              }
+            }
+          }
+        } catch (e) {
+          console.log('Status polling error:', e);
+        }
+      }, 1000);
+    }
+
+    function stopStatusPolling() {
+      if (statusPollInterval) {
+        clearInterval(statusPollInterval);
+        statusPollInterval = null;
+      }
+    }
+
     // 4. AI 변환 생성 API 호출
     document.getElementById('btn-transform').addEventListener('click', async () => {
       if (capturedBlobs.length < 4) {
@@ -678,6 +845,9 @@
 
       const overlay = document.getElementById('loading-overlay');
       overlay.classList.add('active');
+
+      // 실시간 동적 프로그레스 폴링 시작
+      startStatusPolling(sessionId);
 
       const formData = new FormData();
       formData.append('session_id', sessionId);
@@ -701,13 +871,31 @@
           document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || data.orig_frame_url;
           document.getElementById('qr-code-img').src = data.qr_code_base64;
 
-          overlay.classList.remove('active');
-          navigateTo('screen-result');
+          // 100% 완료 상태 표시
+          document.getElementById('progress-bar-fill').style.width = '100%';
+          document.getElementById('progress-percent-text').innerText = '100%';
+          document.getElementById('progress-step-badge').innerText = '완료: 인화 준비 완료';
+          document.getElementById('loading-dynamic-desc').innerText = 'AI 인생 4컷 생성이 완벽히 완료되었습니다!';
+          for (let i = 1; i <= 5; i++) {
+            const el = document.getElementById(`step-track-${i}`);
+            const stat = document.getElementById(`step-stat-${i}`);
+            if (el) el.className = 'stepper-item completed';
+            if (stat) stat.innerText = '완료 ✓';
+          }
+
+          stopStatusPolling();
+
+          // 부드러운 전환
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            navigateTo('screen-result');
+          }, 600);
         } else {
           throw new Error('변환 실패');
         }
       } catch (err) {
         console.error('AI 변환 오류:', err);
+        stopStatusPolling();
         overlay.classList.remove('active');
         showToast('AI 변환 중 오류가 발생했습니다.');
       }
@@ -758,17 +946,37 @@
       navigateTo('screen-finish');
     });
 
-    // 인화 모달 열기 시뮬레이션
+    // 5.1 [UX 개선] 완성본 큰 화면 다시보기 (뒤로가기 버튼 & 썸네일 클릭)
+    document.getElementById('btn-back-to-result').addEventListener('click', () => {
+      navigateTo('screen-result');
+    });
+
+    const thumbCard = document.getElementById('btn-thumb-preview-card');
+    if (thumbCard) {
+      thumbCard.addEventListener('click', () => {
+        navigateTo('screen-result');
+      });
+    }
+
+    // 인화 모달 열기 시뮬레이션 및 인쇄 연결
     document.getElementById('btn-print-modal').addEventListener('click', () => {
       const modal = document.getElementById('modal-print');
       modal.classList.add('active');
 
       // 인화 단계별 상태 전환 애니메이션
-      setTimeout(() => document.getElementById('p-step-1').classList.add('completed'), 1000);
-      setTimeout(() => document.getElementById('p-step-2').classList.add('active'), 1500);
-      setTimeout(() => document.getElementById('p-step-2').classList.add('completed'), 2500);
-      setTimeout(() => document.getElementById('p-step-3').classList.add('active'), 3000);
-      setTimeout(() => document.getElementById('p-step-3').classList.add('completed'), 4000);
+      setTimeout(() => document.getElementById('p-step-1').classList.add('completed'), 800);
+      setTimeout(() => document.getElementById('p-step-2').classList.add('active'), 1200);
+      setTimeout(() => document.getElementById('p-step-2').classList.add('completed'), 2000);
+      setTimeout(() => document.getElementById('p-step-3').classList.add('active'), 2500);
+      setTimeout(() => {
+        document.getElementById('p-step-3').classList.add('completed');
+        // 브라우저 네이티브 인쇄 다이얼로그 호출 (실제 포토프린터 연결)
+        try {
+          window.print();
+        } catch (pe) {
+          console.log('Print trigger:', pe);
+        }
+      }, 3500);
     });
 
     document.getElementById('modal-close').addEventListener('click', () => {

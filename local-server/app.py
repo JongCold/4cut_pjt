@@ -29,6 +29,23 @@ from concurrent.futures import ThreadPoolExecutor
 
 executor = ThreadPoolExecutor(max_workers=10)
 TRANSFORM_TASKS = {}
+TRANSFORM_PROGRESS = {}
+
+def set_progress(session_id: str, step: int, progress: int, step_name: str, message: str):
+    """세션별 실시간 AI 변환 및 인화 진행률 갱신"""
+    if session_id not in TRANSFORM_PROGRESS:
+        TRANSFORM_PROGRESS[session_id] = {
+            "start_time": time.time(),
+            "step": 1,
+            "progress": 5,
+            "step_name": "촬영 초기화",
+            "message": "AI 생애 주기 변환을 준비하고 있습니다..."
+        }
+    entry = TRANSFORM_PROGRESS[session_id]
+    entry["step"] = step
+    entry["progress"] = progress
+    entry["step_name"] = step_name
+    entry["message"] = message
 
 # 기본 경로 및 폴더 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -90,7 +107,7 @@ if os.path.exists(VERCEL_DIR):
 
 
 def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder_id: str = None) -> Optional[str]:
-    """구글 드라이브 파일 업로드 (GAS Webhook 또는 Service Account 지원)"""
+    """구글 드라이브 파일 업로드 (GAS Webhook 재시도 및 Service Account Fallback 지원)"""
     import urllib.request
     import json
     
@@ -98,39 +115,45 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
 
     # 1. Google Apps Script (GAS) Webhook 방식 우선 (사용자 5TB 할당량 사용)
     if GAS_WEBHOOK_URL:
-        try:
-            import requests
-            with open(file_path, "rb") as f:
-                b64_content = base64.b64encode(f.read()).decode("utf-8")
-            
-            payload = {
-                "filename": filename,
-                "mimeType": mime_type,
-                "base64Data": b64_content,
-                "folderType": folder_type
-            }
-            
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-                "Content-Type": "application/json"
-            }
-            
-            res = requests.post(GAS_WEBHOOK_URL, json=payload, headers=headers, timeout=60)
-            if res.status_code == 200:
-                try:
-                    res_data = res.json()
-                    if res_data.get("status") == "success":
-                        file_id = res_data.get("fileId")
-                        print(f"[Google Drive GAS] ✅ 구글 드라이브 업로드 성공! ID: {file_id}")
-                        return file_id
-                    else:
-                        print(f"[Google Drive GAS Error] 스크립트 오류: {res_data.get('message')}")
-                except Exception as parse_err:
-                    print(f"[Google Drive GAS Error] 응답 파싱 실패 ({parse_err}). GAS 배포 설정을 '모든 사용자(Anyone)'로 지정했는지 확인하세요.")
-            else:
-                print(f"[Google Drive GAS Error] GAS 업로드 실패 (HTTP {res.status_code}). GAS 앱스 스크립트 배포 시 액세스 권한을 '모든 사용자(Anyone)'로 설정했는지 확인하세요.")
-        except Exception as ex:
-            print(f"[Google Drive GAS Error] GAS 연동 예외: {ex}")
+        # 최대 2회 재시도
+        for attempt in range(2):
+            try:
+                import requests
+                with open(file_path, "rb") as f:
+                    b64_content = base64.b64encode(f.read()).decode("utf-8")
+                
+                payload = {
+                    "filename": filename,
+                    "mimeType": mime_type,
+                    "base64Data": b64_content,
+                    "folderType": folder_type
+                }
+                
+                headers = {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                    "Content-Type": "application/json"
+                }
+                
+                res = requests.post(GAS_WEBHOOK_URL, json=payload, headers=headers, timeout=60, allow_redirects=True)
+                if res.status_code == 200:
+                    try:
+                        res_data = res.json()
+                        if res_data.get("status") == "success":
+                            file_id = res_data.get("fileId")
+                            print(f"[Google Drive GAS] ✅ 구글 드라이브 업로드 성공! ID: {file_id}")
+                            return file_id
+                        else:
+                            print(f"[Google Drive GAS Error] 스크립트 오류: {res_data.get('message')}")
+                    except Exception as parse_err:
+                        print(f"[Google Drive GAS Error] 응답 파싱 실패 ({parse_err}).")
+                elif res.status_code in (301, 302, 307, 308):
+                    # 리다이렉트 발생 시 재시도
+                    continue
+                else:
+                    print(f"[Google Drive GAS Error] GAS 업로드 실패 (HTTP {res.status_code}, 시도 {attempt+1}/2).")
+            except Exception as ex:
+                print(f"[Google Drive GAS Error] GAS 연동 예외 (시도 {attempt+1}/2): {ex}")
+            time.sleep(1)
 
     # 2. Service Account API 방식 Fallback
     if DRIVE_SERVICE is not None:
@@ -370,6 +393,33 @@ def process_video_to_2x_mp4(input_path: str, output_path: str) -> bool:
             return False
 
 
+@app.get("/api/transform_status/{session_id}")
+async def get_transform_status(session_id: str):
+    """
+    세션별 실시간 AI 변환 및 인화 진행 상태 조회 (프론트엔드 동적 프로그레스 UI 연동)
+    """
+    prog = TRANSFORM_PROGRESS.get(session_id)
+    if not prog:
+        return {
+            "status": "waiting",
+            "step": 1,
+            "progress": 5,
+            "step_name": "초기화 중",
+            "message": "AI 생애 주기 변환을 준비하고 있습니다...",
+            "elapsed_seconds": 0
+        }
+    
+    elapsed = int(time.time() - prog.get("start_time", time.time()))
+    return {
+        "status": "completed" if prog.get("progress", 0) >= 100 else "processing",
+        "step": prog.get("step", 1),
+        "progress": prog.get("progress", 5),
+        "step_name": prog.get("step_name", "진행 중"),
+        "message": prog.get("message", ""),
+        "elapsed_seconds": elapsed
+    }
+
+
 @app.post("/api/transform_single")
 async def api_transform_single(
     session_id: str = Form(...),
@@ -395,6 +445,16 @@ async def api_transform_single(
     # 모델 선택
     model_name = "gpt-image-2" if is_high_quality.lower() == "true" else "gpt-image-1.5"
     
+    # 컷별 실시간 진행 상태 등록
+    step_descriptions = {
+        0: (1, 15, "1컷 유년기 변환", "어린이 AI 실사 변환 분석 중... (골격 100% 보존)"),
+        1: (2, 35, "2컷 청소년기 변환", "청소년 교복 AI 실사 변환 분석 중..."),
+        2: (3, 50, "3컷 현재 원본 보존", "현재 본연의 모습 원본 100% 보존 완료"),
+        3: (4, 65, "4컷 노년기 변환", "품격 있는 황혼 AI 실사 변환 분석 중...")
+    }
+    step_num, prog_val, s_name, s_msg = step_descriptions.get(cut_index, (1, 10, "변환 진행 중", "AI 이미지 분석 중..."))
+    set_progress(session_id, step_num, prog_val, s_name, s_msg)
+
     # 백그라운드 태스크 등록
     loop = asyncio.get_event_loop()
     if style == "original":
@@ -437,13 +497,21 @@ async def api_transform_four_cut(
         raise HTTPException(status_code=400, detail="모든 4컷 사진이 전송되지 않았습니다.")
 
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    
+    set_progress(session_id, 4, 70, "변환 마무리 대기", "생애 주기별 고화질 AI 이미지 변환 결과를 수집하고 있습니다...")
+
     # 1. 캡처된 원본 4장 수집 (async 태스크 대기)
     original_pil_images = []
     single_orig_filenames = []
     single_orig_paths = []
     transformed_pil_images = []
     
+    cut_finish_msgs = {
+        0: (1, 30, "1컷 유년기 완료", "어린이 AI 변환 완료 (DSLR 실사 텍스처 반영)"),
+        1: (2, 55, "2컷 청소년기 완료", "청소년 교복 AI 변환 완료"),
+        2: (3, 65, "3컷 현재 모습 완료", "현재 원본 보존 완료"),
+        3: (4, 80, "4컷 노년기 완료", "노년 황혼 AI 변환 완료")
+    }
+
     for idx in range(4):
         item = TRANSFORM_TASKS[session_id][idx]
         original_pil_images.append(item["original_img"])
@@ -453,6 +521,10 @@ async def api_transform_four_cut(
         # AI 변환 완료 대기 (비동기 처리)
         transformed_img = await item["task"]
         transformed_pil_images.append(transformed_img)
+
+        # 각 컷 변환 완료 시 실시간 상태 갱신
+        s_num, s_prog, s_title, s_desc = cut_finish_msgs.get(idx, (idx+1, 20*(idx+1), "완료", "처리 중"))
+        set_progress(session_id, s_num, s_prog, s_title, s_desc)
         
     # 메모리 정리
     del TRANSFORM_TASKS[session_id]
@@ -464,6 +536,7 @@ async def api_transform_four_cut(
     orig_frame.save(orig_frame_path, format="JPEG", quality=92)
     
     # 3. AI 변환 적용 & 4컷 프레임 생성
+    set_progress(session_id, 5, 85, "4컷 인화 프레임 렌더링", "고해상도 4컷 포토 프레임을 합성 중입니다...")
     frame_title = "AI 4-CUT (TIME TRAVEL)" if style == "time_travel" else f"AI 4-CUT STUDIO ({style.upper()})"
     ai_frame = create_4cut_frame(transformed_pil_images, brand_title=frame_title)
     ai_frame_filename = f"ai_frame_{session_id}_{style}.jpg"
@@ -471,7 +544,7 @@ async def api_transform_four_cut(
     ai_frame.save(ai_frame_path, format="JPEG", quality=95)
     
     # 4. 비하인드 동영상 저장 (2배속 인코딩 및 H.264 MP4로 변환)
-
+    set_progress(session_id, 5, 90, "2배속 비하인드 영상 인코딩", "촬영 순간을 담은 2배속 모바일 최적화 비디오를 생성 중입니다...")
     video_filename = f"behind_video_{session_id}.mp4"
     video_path = os.path.join(UPLOAD_DIR, video_filename)
     if video:
@@ -510,13 +583,20 @@ async def api_transform_four_cut(
     ai_frame.save(ai_buf, format="JPEG", quality=92)
     ai_frame_base64 = "data:image/jpeg;base64," + base64.b64encode(ai_buf.getvalue()).decode("utf-8")
 
-    # 5. 구글 드라이브 업로드 (개별 원본 4장 + 원본 4컷 프레임 + AI 4컷 프레임 + 비하인드 동영상)
-    for idx, s_path in enumerate(single_orig_paths):
-        upload_to_google_drive(s_path, single_orig_filenames[idx], "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
-
-    upload_to_google_drive(orig_frame_path, orig_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+    # 5. 구글 드라이브 업로드 최적화
+    set_progress(session_id, 5, 95, "클라우드 저장 및 QR 발급", "구글 드라이브 업로드 및 모바일 QR 코드를 생성하고 있습니다...")
+    
+    # 5-1. 필수 메인 결과물 (AI 4컷 프레임 + 비하인드 동영상) 우선 동기 업로드
     img_drive_id = upload_to_google_drive(ai_frame_path, ai_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
     vid_drive_id = upload_to_google_drive(video_path, video_filename, "video/mp4", folder_id=GOOGLE_VIDEO_FOLDER_ID)
+    
+    # 5-2. 개별 원본 사진 4장 및 원본 프레임은 백그라운드 스레드로 비동기 업로드 (대기시간 15초 대폭 단축)
+    def _bg_upload_originals():
+        for idx, s_path in enumerate(single_orig_paths):
+            upload_to_google_drive(s_path, single_orig_filenames[idx], "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+        upload_to_google_drive(orig_frame_path, orig_frame_filename, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+    
+    executor.submit(_bg_upload_originals)
     
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
@@ -526,7 +606,6 @@ async def api_transform_four_cut(
     port = request.base_url.port or 8000
     server_origin = f"http://{lan_ip}:{port}"
     
-    # 스마트폰 카메라 QR 스캔 시 바로 접속 가능한 모바일 다운로드 뷰어 URL
     download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
     local_download_url = download_url
     
@@ -539,6 +618,8 @@ async def api_transform_four_cut(
     buffered = io.BytesIO()
     qr_img.save(buffered, format="PNG")
     qr_base64 = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+    set_progress(session_id, 5, 100, "인화 및 완성 완료!", "모든 변환이 완료되었습니다. 결과 화면으로 이동합니다.")
 
     return {
         "status": "success",
@@ -556,5 +637,5 @@ async def api_transform_four_cut(
         "local_download_url": local_download_url,
         "qr_code_base64": qr_base64,
         "drive_upload_success": img_drive_id is not None and vid_drive_id is not None,
-        "drive_status_msg": "구글 드라이브 업로드 완료 (개별 원본 4장 포함)" if (img_drive_id and vid_drive_id) else "로컬 스토리지 저장 완료 (24시간 자동 파기 대상)"
+        "drive_status_msg": "구글 드라이브 업로드 완료 (AI 프레임 및 비디오)" if (img_drive_id and vid_drive_id) else "로컬 스토리지 저장 완료 (24시간 자동 파기 대상)"
     }
