@@ -1,35 +1,34 @@
-Transform the people in the input photograph into realistic older adults, approximately 65–80 years old.
+Ultra-realistic studio portrait of the people in the input photograph transformed into dignified, realistic older adults, approximately 65–80 years old.
 
-The input photograph may contain one or more people. The number of people can vary from photo to photo. Identify every visible person in the input image and transform each person into a believable older version of themselves.
+The input photograph may contain one or more people. The number of people can vary from photo to photo. Identify every visible person in the input image and transform each person into a believable, dignified older version of themselves while strictly anchoring their biological facial identity and bone structure.
 
-CRITICAL REQUIREMENTS:
+CRITICAL ANATOMICAL IDENTITY & BONE STRUCTURE PRESERVATION:
 - Preserve the exact number of people visible in the input image.
 - Do not add any new people.
 - Do not remove any existing people.
 - Do not duplicate anyone.
 - Do not merge two people into one person.
 - Preserve each person's individual gender.
-- Preserve each person's recognizable facial characteristics and individual identity.
+- Strictly anchor and preserve each person's unique facial bone structure, jawline contours, cheekbones, distinctive eye shape, eyelid folds, eyebrow curvature, nose contour, and mouth shape directly derived from the input photograph.
+- The elderly person MUST be undeniably and recognizably the EXACT same individual gracefully aged, preserving their unique facial identity and expressions. Do NOT replace the face with an unrelated generic elderly model.
+- If wearing glasses, preserve the exact glasses style, frame, color, and fit naturally on the aged face.
 - Age each person independently and naturally.
 - Do not assume that the people in this image are the same people as in any other image.
 
-Apply realistic, natural aging to each individual person.
+GRACEFUL NATURAL AGING & HYPER-REALISTIC SKIN TEXTURE (ZERO OVER-SMOOTHING):
+- Natural, authentic aging anchored to the subject's own facial structure: subtle laugh lines, fine crow's feet around eyes, natural forehead lines, realistic skin texture with visible pores and natural aged skin elasticity.
+- Absolutely NO plastic skin, NO porcelain smoothing, NO airbrushed face, NO heavy retouching.
+- Dignified silver/gray hair with realistic hair strand texture and natural volume.
+- Avoid grotesque deformities, excessive hollow cheeks, or extreme uncharacteristic wrinkles.
 
-Include subtle age-related characteristics such as:
-- Natural facial wrinkles.
-- Fine lines.
-- Realistic skin texture.
-- Natural changes in facial volume.
-- Gray or white hair where appropriate.
-- Naturally aged facial features.
-- Subtle age-related changes around the eyes and mouth.
-
-Do not apply identical aging effects to every person. Each individual should age naturally according to their own facial structure and characteristics.
+CLOTHING & AMBIENCE:
+- Elegant, sophisticated, warm elderly knitwear or classic tailored blazer attire with authentic fabric texture.
+- Keep clothing natural and dignified.
 
 Preserve the original photograph's composition as much as possible:
 - Keep each person's relative position.
 - Keep the original camera angle and framing.
-- Keep each person's body orientation.
+- Keep each person's body orientation, posture, head tilt, and hand gestures.
 - Preserve their original gestures, actions, interactions, and poses.
 - If someone is sitting, keep them sitting.
 - If someone is standing, keep them standing.
@@ -37,15 +36,13 @@ Preserve the original photograph's composition as much as possible:
 - If people are hugging, leaning on one another, or interacting, preserve the interaction.
 - Do not rearrange the group.
 
-Do not create exaggerated elderly features.
-Avoid extremely deep wrinkles, severely hunched posture, unrealistic facial deformation, or stereotypical elderly appearances.
+BACKGROUND & LIGHTING:
+- Clean, classic, dignified photography studio background with warm neutral ambient lighting (soft beige or muted warm gray).
 
-Keep clothing natural and realistic. Do not unnecessarily change the clothing style unless required to make the age transformation visually coherent.
+STUDIO DSLR PHOTOGRAPHY SPECIFICATIONS:
+- Shot on full-frame DSLR camera, 85mm prime portrait lens, f/2.8 aperture, sharp optical focus on eyes and facial contours, shallow depth of field.
+- Soft directional key light with gentle falloff, natural warm catchlights in the eyes, realistic shadows, authentic RAW photograph color grading.
+- The final image should look like an authentic, high-resolution DSLR photograph of the people approximately 65–80 years old.
 
-Keep the background simple, clean, and neutral. Preserve the original background when possible. If background adjustment is necessary, use a subtle neutral studio-style background with soft beige, light gray, or off-white tones.
-
-Use photorealistic photography, natural lighting, realistic skin texture, realistic shadows, and natural expressions.
-
-The final image should look like an authentic photograph of the people approximately 65–80 years old.
-
-Do not turn the image into an illustration, cartoon, anime, or heavily stylized image.
+STRICT EXCLUSIONS & NEGATIVE CONSTRAINTS:
+- plastic skin, porcelain face, airbrushed smoothness, heavy retouching, artificial mask, exaggerated grotesque wrinkles, hunchback, cartoon, caricature, CGI, 3D render, distortion, blur.
