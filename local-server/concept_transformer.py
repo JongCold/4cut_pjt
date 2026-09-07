@@ -596,3 +596,99 @@ def create_4cut_frame(images: List[Image.Image], brand_title: str = "AI 4-CUT ST
     draw.text((bottom_center_x, text_y2), f"MEMORY PHOTO • {now_str}", fill=(120, 130, 145), font=sub_font, anchor="mm")
     
     return frame
+
+
+def create_4cut_frame_postcard(images: List[Image.Image], brand_title: str = "AI 4-CUT STUDIO") -> Image.Image:
+    """
+    Canon SELPHY CP1500 엽서(Postcard 4x6인치) 300 DPI 규격 (1200 x 1800 px)
+    - 좌/우 2x6인치 2분할 듀얼 스트립 (2인이 1장씩 나눠 가질 수 있는 구조)
+    - 웹캠 세로 4:5 촬영 사진의 왜곡을 방지한 세로형 4컷 슬롯 (490 x 345 px)
+    - 중앙 절취 가이드 점선(Cutting Guide Line) 포함
+    - 고해상도 안티앨리어싱 TTF 폰트 렌더링
+    """
+    canvas_w = 1200
+    canvas_h = 1800
+    
+    frame = Image.new("RGB", (canvas_w, canvas_h), (255, 255, 255))
+    draw = ImageDraw.Draw(frame)
+
+    strip_w = 600
+    side_margin = 55   # 좌우 여백
+    photo_w = strip_w - (side_margin * 2)  # 490px
+    photo_h = 345      # 세로형 인물 비율 최적화 (345px)
+    top_margin = 55    # 상단 여백
+    gap = 22           # 컷 간격
+
+    # 폰트 로드 (고해상도 300DPI 출력에 최적화된 크기)
+    brand_font = None
+    sub_font = None
+    font_paths = [
+        "C:/Windows/Fonts/malgunbd.ttf", # 맑은 고딕 볼드
+        "C:/Windows/Fonts/malgun.ttf",   # 맑은 고딕
+        "C:/Windows/Fonts/arialbd.ttf",  # Arial Bold
+        "C:/Windows/Fonts/arial.ttf"
+    ]
+    for fp in font_paths:
+        if os.path.exists(fp):
+            try:
+                brand_font = ImageFont.truetype(fp, 32)
+                sub_font = ImageFont.truetype(fp, 18)
+                break
+            except Exception:
+                continue
+
+    if not brand_font:
+        brand_font = ImageFont.load_default()
+        sub_font = ImageFont.load_default()
+
+    now_str = datetime.now().strftime("%Y.%m.%d | %H:%M")
+
+    # 좌/우 2개 스트립(각 600px)에 동일한 4컷 및 브랜딩 렌더링
+    for offset_x in [0, strip_w]:
+        y_cursor = top_margin
+        for idx, img in enumerate(images[:4]):
+            img_rgb = img.convert("RGB")
+            
+            # 인물 중심 Aspect Fill (크롭 리사이즈)
+            img_w, img_h = img_rgb.size
+            target_ratio = photo_w / photo_h
+            current_ratio = img_w / img_h
+            
+            if current_ratio > target_ratio:
+                # 가로가 긴 경우 좌우 크롭
+                new_w = int(img_h * target_ratio)
+                left = (img_w - new_w) // 2
+                img_cropped = img_rgb.crop((left, 0, left + new_w, img_h))
+            else:
+                # 세로가 긴 경우 상하 크롭 (인물 중심: 상단 25% 보존)
+                new_h = int(img_w / target_ratio)
+                top = max(0, int((img_h - new_h) * 0.25))
+                img_cropped = img_rgb.crop((0, top, img_w, top + new_h))
+                
+            img_resized = img_cropped.resize((photo_w, photo_h), Image.Resampling.LANCZOS)
+            slot_x = offset_x + side_margin
+            slot_y = y_cursor
+            frame.paste(img_resized, (slot_x, slot_y))
+            
+            # 컷 슬롯 테두리 라인
+            draw.rectangle(
+                [slot_x, slot_y, slot_x + photo_w, slot_y + photo_h],
+                outline=(220, 225, 230),
+                width=2
+            )
+            y_cursor += photo_h + gap
+
+        # 하단 브랜드 텍스트 & 촬영 일시
+        strip_center_x = offset_x + (strip_w // 2)
+        text_y_brand = canvas_h - 170
+        text_y_date = canvas_h - 110
+
+        draw.text((strip_center_x, text_y_brand), brand_title, fill=(30, 41, 59), font=brand_font, anchor="mm")
+        draw.text((strip_center_x, text_y_date), f"MEMORY PHOTO • {now_str}", fill=(100, 116, 139), font=sub_font, anchor="mm")
+
+    # 중앙 절취 안내선 (점선: 15px 선, 15px 공백)
+    for y in range(30, canvas_h - 30, 30):
+        draw.line([(strip_w, y), (strip_w, y + 16)], fill=(203, 213, 225), width=2)
+
+    return frame
+

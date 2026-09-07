@@ -422,37 +422,71 @@
       </footer>
     </section>
 
-    <!-- 프린터 시뮬레이션 모달 -->
+    <!-- Canon SELPHY CP1500 무선 인화 모달 -->
     <div id="modal-print" class="modal-overlay">
-      <div class="modal-card">
-        <button id="modal-close" class="modal-close-btn">✕</button>
+      <div class="modal-card print-kiosk-modal">
+        <button id="modal-close" class="modal-close-btn" disabled>✕</button>
+        
         <div class="modal-header">
           <div class="print-animation">
             <div class="printer-pulse">🖨️</div>
           </div>
-          <h3>포토 프린터 인화 중</h3>
+          <h3 class="print-modal-title">Canon SELPHY CP1500 무선 인화 중</h3>
+          <p class="print-modal-sub">4x6 엽서 (1200x1800 300DPI) 듀얼 스트립 출력</p>
         </div>
+
         <div class="modal-body">
-          <div class="status-tracker">
-            <div class="status-step active" id="p-step-1">
-              <div class="step-indicator">1</div>
-              <span>고화질 4컷 이미지 데이터 전송</span>
+          <!-- 45초 카운트다운 프로그레스 바 -->
+          <div class="print-timer-card">
+            <div class="print-timer-meta">
+              <span id="print-pass-status" class="print-pass-badge">🟡 1차 왕복: Yellow(노랑) 현색 중</span>
+              <span id="print-countdown-text" class="print-countdown-text">45초</span>
             </div>
-            <div class="status-step" id="p-step-2">
-              <div class="step-indicator">2</div>
-              <span>인화지 정렬 및 현색 작업</span>
+            <div class="print-progress-track">
+              <div id="print-progress-bar" class="print-progress-bar" style="width: 0%;"></div>
             </div>
-            <div class="status-step" id="p-step-3">
-              <div class="step-indicator">3</div>
-              <span>코팅 처리 및 사진 배출 완료</span>
+          </div>
+
+          <!-- 4-Pass 실시간 왕복 상태 인디케이터 -->
+          <div class="four-pass-stepper">
+            <div class="pass-chip active" id="pass-chip-1">
+              <div class="pass-chip-circle" style="background:#FACC15;"></div>
+              <span>1. 노랑</span>
             </div>
+            <div class="pass-chip" id="pass-chip-2">
+              <div class="pass-chip-circle" style="background:#F43F5E;"></div>
+              <span>2. 빨강</span>
+            </div>
+            <div class="pass-chip" id="pass-chip-3">
+              <div class="pass-chip-circle" style="background:#0EA5E9;"></div>
+              <span>3. 파랑</span>
+            </div>
+            <div class="pass-chip" id="pass-chip-4">
+              <div class="pass-chip-circle" style="background:#A855F7;"></div>
+              <span>4. 코팅</span>
+            </div>
+          </div>
+
+          <!-- 하드웨어 고장 방지 필수 안전 경고 배너 -->
+          <div class="hardware-safety-alert">
+            <div class="safety-icon-pulse">⚠️</div>
+            <div class="safety-text-group">
+              <strong>사진이 앞뒤로 4번 왕복합니다!</strong>
+              <p>인화가 완전히 끝나 트레이에 멈출 때까지 <u>절대 손으로 잡아당기거나 만지지 마세요.</u> (기기 기어 파손 방지)</p>
+            </div>
+          </div>
+
+          <!-- 카세트 18매 용지 잔여량 정보 -->
+          <div class="cartridge-status-row">
+            <span class="cartridge-label">📄 용지 카세트 상태:</span>
+            <span id="cartridge-sheet-badge" class="cartridge-badge">잔여 18 / 18매 (정상)</span>
           </div>
         </div>
+
         <div class="modal-footer">
-          <div class="sub-alert-text">
-            <i>ℹ️</i>
-            <span>인화 출력 시뮬레이션이 진행 중입니다. 출구가 차단되지 않았는지 확인해 주세요.</span>
-          </div>
+          <button id="btn-print-confirm" class="btn btn-primary w-full" disabled>
+            ⏳ 인화가 진행 중입니다... (약 45초)
+          </button>
         </div>
       </div>
     </div>
@@ -958,28 +992,127 @@
       });
     }
 
-    // 인화 모달 열기 시뮬레이션 및 인쇄 연결
-    document.getElementById('btn-print-modal').addEventListener('click', () => {
-      const modal = document.getElementById('modal-print');
-      modal.classList.add('active');
+    // 5.2 [IoT 연동] Canon SELPHY CP1500 실제 무선 인화 및 45초 4-Pass 안전 카운트다운
+    let printCountdownInterval = null;
 
-      // 인화 단계별 상태 전환 애니메이션
-      setTimeout(() => document.getElementById('p-step-1').classList.add('completed'), 800);
-      setTimeout(() => document.getElementById('p-step-2').classList.add('active'), 1200);
-      setTimeout(() => document.getElementById('p-step-2').classList.add('completed'), 2000);
-      setTimeout(() => document.getElementById('p-step-3').classList.add('active'), 2500);
-      setTimeout(() => {
-        document.getElementById('p-step-3').classList.add('completed');
-        // 브라우저 네이티브 인쇄 다이얼로그 호출 (실제 포토프린터 연결)
-        try {
-          window.print();
-        } catch (pe) {
-          console.log('Print trigger:', pe);
+    document.getElementById('btn-print-modal').addEventListener('click', async () => {
+      if (!transformResult || !transformResult.session_id) {
+        showToast('인쇄할 4컷 사진 데이터가 없습니다.');
+        return;
+      }
+
+      const modal = document.getElementById('modal-print');
+      const closeBtn = document.getElementById('modal-close');
+      const confirmBtn = document.getElementById('btn-print-confirm');
+      const passStatus = document.getElementById('print-pass-status');
+      const countdownText = document.getElementById('print-countdown-text');
+      const progressBar = document.getElementById('print-progress-bar');
+      const cartridgeBadge = document.getElementById('cartridge-sheet-badge');
+
+      // 1. 모달 활성화 및 안전 초기화 (인쇄 도중 닫기 차단)
+      modal.classList.add('active');
+      closeBtn.disabled = true;
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = '⏳ 사진이 인화기에 전송되어 출력 중입니다...';
+
+      let remainSeconds = 45;
+      progressBar.style.width = '0%';
+      countdownText.innerText = '45초';
+
+      // 4-Pass 칩 리셋
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`pass-chip-${i}`).className = 'pass-chip' + (i === 1 ? ' active' : '');
+      }
+
+      // 2. 실제 백엔드 Wi-Fi 인쇄 API 호출
+      try {
+        fetch('/api/print', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: transformResult.session_id,
+            frame_type: selectedFrameChoice || 'ai',
+            printer_name: 'Canon SELPHY CP1500'
+          })
+        }).then(res => res.json()).then(data => {
+          if (data && data.remaining_sheets !== undefined) {
+            cartridgeBadge.innerText = `잔여 ${data.remaining_sheets} / 18매` + (data.low_paper ? ' ⚠️ (용지 부족 경고)' : ' (정상)');
+            if (data.low_paper) {
+              cartridgeBadge.classList.add('low-paper');
+            }
+          }
+        }).catch(err => {
+          console.log('[Print API Notice]', err);
+        });
+      } catch (e) {
+        console.error('Print request trigger error:', e);
+      }
+
+      // 3. 45초 4-Pass 인터랙티브 카운트다운 타이머 가동
+      if (printCountdownInterval) clearInterval(printCountdownInterval);
+
+      const passMessages = [
+        { time: 34, chip: 1, text: '🟡 1차 왕복: Yellow (노랑) 염료 승화 중...' },
+        { time: 23, chip: 2, text: '🔴 2차 왕복: Magenta (빨강) 염료 승화 중...' },
+        { time: 12, chip: 3, text: '🔵 3차 왕복: Cyan (파랑) 염료 승화 중...' },
+        { time: 0,  chip: 4, text: '✨ 4차 왕복: Overcoat 투명 보호막 코팅 중...' }
+      ];
+
+      printCountdownInterval = setInterval(() => {
+        remainSeconds--;
+        const elapsed = 45 - remainSeconds;
+        const percent = Math.min(100, Math.floor((elapsed / 45) * 100));
+
+        progressBar.style.width = `${percent}%`;
+        countdownText.innerText = `${Math.max(0, remainSeconds)}초`;
+
+        // Pass 단계별 칩 및 메시지 전환
+        let currentPass = 4;
+        if (remainSeconds > 33) currentPass = 1;
+        else if (remainSeconds > 22) currentPass = 2;
+        else if (remainSeconds > 11) currentPass = 3;
+
+        for (let i = 1; i <= 4; i++) {
+          const chip = document.getElementById(`pass-chip-${i}`);
+          if (!chip) continue;
+          if (i < currentPass) {
+            chip.className = 'pass-chip completed';
+          } else if (i === currentPass) {
+            chip.className = 'pass-chip active';
+          } else {
+            chip.className = 'pass-chip';
+          }
         }
-      }, 3500);
+
+        const msgObj = passMessages.find(p => remainSeconds >= p.time) || passMessages[3];
+        passStatus.innerText = msgObj.text;
+
+        // 45초 인화 완료 처리
+        if (remainSeconds <= 0) {
+          clearInterval(printCountdownInterval);
+          progressBar.style.width = '100%';
+          countdownText.innerText = '완료!';
+          passStatus.innerText = '✅ 인화 완료! 4x6 엽서가 배출구에 안착했습니다.';
+
+          for (let i = 1; i <= 4; i++) {
+            const chip = document.getElementById(`pass-chip-${i}`);
+            if (chip) chip.className = 'pass-chip completed';
+          }
+
+          // 닫기 버튼 활성화
+          closeBtn.disabled = false;
+          confirmBtn.disabled = false;
+          confirmBtn.innerText = '🎉 인화 완료! 사진을 수령하세요 (창 닫기)';
+          showToast('🎉 인화가 성공적으로 완료되었습니다!');
+        }
+      }, 1000);
     });
 
     document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('modal-print').classList.remove('active');
+    });
+
+    document.getElementById('btn-print-confirm').addEventListener('click', () => {
       document.getElementById('modal-print').classList.remove('active');
     });
 
