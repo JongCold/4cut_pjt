@@ -692,3 +692,75 @@ def create_4cut_frame_postcard(images: List[Image.Image], brand_title: str = "AI
 
     return frame
 
+
+def create_test_pattern_postcard(printer_name: str = "Canon SELPHY CP1500") -> Image.Image:
+    """
+    현장 셋업 점검용 4x6 엽서 (1200x1800 300DPI) 테스트 패턴 생성
+    - 색감 점검용 4색 CMYK / RGB 바
+    - 2분할 절취선 및 슬롯 정렬 그리드
+    - 네트워크 및 하드웨어 테스트 정보 표기
+    """
+    canvas_w = 1200
+    canvas_h = 1800
+    frame = Image.new("RGB", (canvas_w, canvas_h), (255, 255, 255))
+    draw = ImageDraw.Draw(frame)
+
+    brand_font = None
+    sub_font = None
+    for fp in ["C:/Windows/Fonts/malgunbd.ttf", "C:/Windows/Fonts/malgun.ttf", "C:/Windows/Fonts/arialbd.ttf"]:
+        if os.path.exists(fp):
+            try:
+                brand_font = ImageFont.truetype(fp, 36)
+                sub_font = ImageFont.truetype(fp, 22)
+                break
+            except Exception:
+                continue
+    if not brand_font:
+        brand_font = ImageFont.load_default()
+        sub_font = ImageFont.load_default()
+
+    strip_w = 600
+    colors = [
+        ("YELLOW (1-Pass)", (250, 204, 21)),
+        ("MAGENTA (2-Pass)", (244, 63, 94)),
+        ("CYAN (3-Pass)", (14, 165, 233)),
+        ("BLACK (K)", (30, 41, 59))
+    ]
+
+    for offset_x in [0, strip_w]:
+        # 스트립 테두리
+        draw.rectangle([offset_x + 30, 30, offset_x + strip_w - 30, canvas_h - 30], outline=(203, 213, 225), width=3)
+        
+        # 타이틀
+        draw.text((offset_x + strip_w // 2, 80), "PRINTER DIAGNOSTICS TEST", fill=(15, 23, 42), font=brand_font, anchor="mm")
+        draw.text((offset_x + strip_w // 2, 130), f"Device: {printer_name}", fill=(71, 85, 105), font=sub_font, anchor="mm")
+        
+        # 색상 테스트 바
+        y_c = 190
+        for name, col in colors:
+            draw.rectangle([offset_x + 60, y_c, offset_x + strip_w - 60, y_c + 140], fill=col, outline=(148, 163, 184), width=1)
+            draw.text((offset_x + strip_w // 2, y_c + 70), name, fill=(255, 255, 255) if col != (250, 204, 21) else (30, 41, 59), font=sub_font, anchor="mm")
+            y_c += 170
+
+        # 그라디언트/해상도 라인 테스트
+        y_g = y_c + 20
+        draw.rectangle([offset_x + 60, y_g, offset_x + strip_w - 60, y_g + 260], outline=(203, 213, 225), width=2)
+        draw.text((offset_x + strip_w // 2, y_g + 35), "300 DPI ALIGNMENT GRID", fill=(71, 85, 105), font=sub_font, anchor="mm")
+        
+        # 정렬 라인
+        for ly in range(y_g + 70, y_g + 240, 25):
+            draw.line([(offset_x + 80, ly), (offset_x + strip_w - 80, ly)], fill=(226, 232, 240), width=2)
+        draw.line([(offset_x + strip_w // 2, y_g + 60), (offset_x + strip_w // 2, y_g + 245)], fill=(148, 163, 184), width=2)
+
+        # 시스템 정보 & 시간
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        draw.text((offset_x + strip_w // 2, canvas_h - 220), "AI 4-CUT STUDIO KIOSK", fill=(109, 40, 217), font=brand_font, anchor="mm")
+        draw.text((offset_x + strip_w // 2, canvas_h - 160), f"Test Date: {now_str}", fill=(100, 116, 139), font=sub_font, anchor="mm")
+        draw.text((offset_x + strip_w // 2, canvas_h - 110), "Status: 100x148mm Postcard OK", fill=(16, 185, 129), font=sub_font, anchor="mm")
+
+    # 중앙 절취선
+    for y in range(30, canvas_h - 30, 30):
+        draw.line([(strip_w, y), (strip_w, y + 16)], fill=(203, 213, 225), width=2)
+
+    return frame
+

@@ -106,6 +106,13 @@
     <section id="screen-home" class="screen active">
       <div class="hero-section">
         <div class="logo-area">
+          <div class="header-top-status-bar">
+            <button id="btn-open-diagnostics" class="diagnostics-status-pill" title="현장 네트워크 & IoT 연동 상태 진단">
+              <span class="status-indicator-dot online"></span>
+              <span id="quick-status-text">네트워크 정상 (0ms)</span>
+              <span class="gear-icon">⚙️</span>
+            </button>
+          </div>
           <div class="logo-icon-wrap">
             <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor"/>
@@ -486,6 +493,117 @@
         <div class="modal-footer">
           <button id="btn-print-confirm" class="btn btn-primary w-full" disabled>
             ⏳ 인화가 진행 중입니다... (약 45초)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 현장 네트워크 & IoT 연동 진단 모달 (모니터링 대시보드) -->
+    <div id="modal-diagnostics" class="modal-overlay">
+      <div class="modal-card diagnostics-modal">
+        <button id="diagnostics-close" class="modal-close-btn">✕</button>
+
+        <div class="modal-header">
+          <div class="diagnostics-icon-wrap">🛠️</div>
+          <h3 class="diagnostics-title">현장 네트워크 & IoT 연동 진단기</h3>
+          <p class="diagnostics-sub">태블릿 ⇄ Host PC ⇄ Canon CP1500 통신 상태 모니터링</p>
+        </div>
+
+        <div class="modal-body diagnostics-body">
+          <!-- 1. 태블릿 ⇄ Host PC 통신 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">📱</span>
+                <strong>태블릿 ⇄ Host PC 통신</strong>
+              </div>
+              <span id="diag-ping-badge" class="diag-badge badge-green">측정 중...</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">Host PC 서버 IP:</span>
+                <span id="diag-host-ip" class="diag-val font-mono">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">태블릿 클라이언트 IP:</span>
+                <span id="diag-client-ip" class="diag-val font-mono">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">동일 서브넷 (동일 Wi-Fi):</span>
+                <span id="diag-subnet-status" class="diag-val font-bold text-green">확인 중...</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">API 왕복 응답 지연 (Latency):</span>
+                <span id="diag-latency-val" class="diag-val font-mono font-bold">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Canon SELPHY CP1500 인화기 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">🖨️</span>
+                <strong>Canon SELPHY CP1500 인화기</strong>
+              </div>
+              <span id="diag-printer-badge" class="diag-badge badge-green">감지 중...</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">드라이버 감지:</span>
+                <span id="diag-printer-name" class="diag-val font-bold">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">용지 카세트 잔여량:</span>
+                <span id="diag-cartridge-sheets" class="diag-val font-bold text-green">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">출력 용지 규격:</span>
+                <span class="diag-val">4x6 엽서 (1200x1800 300DPI 2분할)</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">누적 인쇄 성공:</span>
+                <span id="diag-print-total" class="diag-val font-mono">0회</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 클라우드 및 인터넷 통신 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">☁️</span>
+                <strong>클라우드 & AI API 연동</strong>
+              </div>
+              <span id="diag-cloud-badge" class="diag-badge badge-green">정상</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">Google Drive 백업:</span>
+                <span id="diag-gdrive-status" class="diag-val text-green font-bold">연결됨</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">OpenAI 연령 변환 모델:</span>
+                <span id="diag-openai-status" class="diag-val text-green font-bold">정상 구성</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 현장 1장 시험 인쇄 액션 영역 -->
+          <div class="diag-test-print-box">
+            <div class="test-print-desc">
+              <strong>🧪 현장 테스트 인쇄 (1장)</strong>
+              <p>행사 시작 전 CP1500의 4색 컬러 밴드 발색과 300 DPI 엽서 정렬 상태를 즉시 시험 출력합니다.</p>
+            </div>
+            <button id="btn-diag-test-print" class="btn btn-primary btn-sm">
+              🖨️ 테스트 엽서 1장 출력
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer diagnostics-footer">
+          <button id="btn-refresh-diagnostics" class="btn btn-outline-purple w-full">
+            🔄 실시간 통신 상태 다시 확인 (Ping)
           </button>
         </div>
       </div>
@@ -1121,6 +1239,162 @@
       document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
       navigateTo('screen-home');
     });
+
+    // ==========================================================================
+    // 5.3 [현장 셋업 & 네트워크 진단 모니터링] Diagnostics 실시간 헬스체크 & 테스트 인쇄
+    // ==========================================================================
+    const diagModal = document.getElementById('modal-diagnostics');
+    const btnOpenDiag = document.getElementById('btn-open-diagnostics');
+    const btnCloseDiag = document.getElementById('diagnostics-close');
+    const btnRefreshDiag = document.getElementById('btn-refresh-diagnostics');
+    const btnDiagTestPrint = document.getElementById('btn-diag-test-print');
+    const quickStatusText = document.getElementById('quick-status-text');
+
+    async function checkSystemHealth(isManual = false) {
+      const startTime = performance.now();
+      try {
+        const res = await fetch('/api/diagnostics/health');
+        const latency = Math.round(performance.now() - startTime);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // 1. 빠른 상단 헤더 뱃지 갱신
+        if (quickStatusText) {
+          quickStatusText.innerText = `네트워크 정상 (${latency}ms)`;
+        }
+
+        // 2. 모달 내 네트워크 상세 정보 갱신
+        const pingBadge = document.getElementById('diag-ping-badge');
+        const latencyVal = document.getElementById('diag-latency-val');
+        if (pingBadge && latencyVal) {
+          latencyVal.innerText = `${latency} ms`;
+          if (latency < 50) {
+            pingBadge.className = 'diag-badge badge-green';
+            pingBadge.innerText = '⚡ 매우 빠름';
+          } else if (latency < 150) {
+            pingBadge.className = 'diag-badge badge-green';
+            pingBadge.innerText = '🟢 정상 (양호)';
+          } else {
+            pingBadge.className = 'diag-badge badge-amber';
+            pingBadge.innerText = '⚠️ 지연 발생';
+          }
+        }
+
+        document.getElementById('diag-host-ip').innerText = data.network.host_ip + ':' + data.network.port;
+        document.getElementById('diag-client-ip').innerText = data.network.client_ip;
+        
+        const subnetEl = document.getElementById('diag-subnet-status');
+        if (subnetEl) {
+          if (data.network.same_subnet) {
+            subnetEl.className = 'diag-val font-bold text-green';
+            subnetEl.innerText = '✅ 동일 Wi-Fi 서브넷 일치';
+          } else {
+            subnetEl.className = 'diag-val font-bold text-amber';
+            subnetEl.innerText = '⚠️ 서로 다른 IP 대역 (라우터 점검 필요)';
+          }
+        }
+
+        // 3. 프린터 상태 갱신
+        const pBadge = document.getElementById('diag-printer-badge');
+        const pName = document.getElementById('diag-printer-name');
+        const pSheets = document.getElementById('diag-cartridge-sheets');
+        const pTotal = document.getElementById('diag-print-total');
+
+        if (pBadge && data.printer) {
+          if (data.printer.detected) {
+            pBadge.className = 'diag-badge badge-green';
+            pBadge.innerText = '🟢 온라인 (연결됨)';
+          } else {
+            pBadge.className = 'diag-badge badge-purple';
+            pBadge.innerText = '🟣 시뮬레이션 모드';
+          }
+          pName.innerText = data.printer.printer_name;
+          pSheets.innerText = `잔여 ${data.printer.remaining_sheets} / 18매` + (data.printer.low_paper ? ' ⚠️ (용지 부족)' : ' (정상)');
+          pSheets.className = data.printer.low_paper ? 'diag-val font-bold text-amber' : 'diag-val font-bold text-green';
+          pTotal.innerText = `${data.printer.print_count}회`;
+        }
+
+        // 4. 클라우드 연동 상태
+        const gdriveEl = document.getElementById('diag-gdrive-status');
+        const openaiEl = document.getElementById('diag-openai-status');
+        if (gdriveEl && data.cloud) {
+          gdriveEl.innerText = data.cloud.google_drive_connected ? '✅ 연결됨 (GAS/API)' : '⚠️ 로컬 저장 전용';
+        }
+        if (openaiEl && data.cloud) {
+          openaiEl.innerText = data.cloud.openai_api_configured ? '✅ API 키 정상' : '⚠️ 미등록';
+        }
+
+        if (isManual) {
+          showToast('진단 상태가 최신으로 갱신되었습니다.');
+        }
+      } catch (err) {
+        console.error('[Health Check Failed]', err);
+        if (quickStatusText) {
+          quickStatusText.innerText = '네트워크 점검 필요 ⚠️';
+        }
+        const pingBadge = document.getElementById('diag-ping-badge');
+        if (pingBadge) {
+          pingBadge.className = 'diag-badge badge-amber';
+          pingBadge.innerText = '❌ 응답 없음';
+        }
+      }
+    }
+
+    if (btnOpenDiag) {
+      btnOpenDiag.addEventListener('click', () => {
+        diagModal.classList.add('active');
+        checkSystemHealth(false);
+      });
+    }
+
+    if (btnCloseDiag) {
+      btnCloseDiag.addEventListener('click', () => {
+        diagModal.classList.remove('active');
+      });
+    }
+
+    if (btnRefreshDiag) {
+      btnRefreshDiag.addEventListener('click', () => {
+        btnRefreshDiag.disabled = true;
+        btnRefreshDiag.innerText = '⏳ 측정 중...';
+        checkSystemHealth(true).finally(() => {
+          btnRefreshDiag.disabled = false;
+          btnRefreshDiag.innerText = '🔄 실시간 통신 상태 다시 확인 (Ping)';
+        });
+      });
+    }
+
+    if (btnDiagTestPrint) {
+      btnDiagTestPrint.addEventListener('click', async () => {
+        if (!confirm('Canon SELPHY CP1500으로 4x6 엽서 진단 테스트 패턴을 1장 출력하시겠습니까?')) {
+          return;
+        }
+
+        btnDiagTestPrint.disabled = true;
+        btnDiagTestPrint.innerText = '⏳ 테스트 인화 전송 중...';
+
+        try {
+          const res = await fetch('/api/diagnostics/test-print', { method: 'POST' });
+          const data = await res.json();
+          if (res.ok && data.status === 'success') {
+            showToast('🖨️ 테스트 엽서 인쇄 요청이 성공적으로 전송되었습니다!');
+            checkSystemHealth(false);
+          } else {
+            showToast('테스트 출력 전송 실패: ' + (data.detail || '오류'));
+          }
+        } catch (e) {
+          showToast('인화기 통신 오류 발생');
+        } finally {
+          btnDiagTestPrint.disabled = false;
+          btnDiagTestPrint.innerText = '🖨️ 테스트 엽서 1장 출력';
+        }
+      });
+    }
+
+    // 앱 기동 시 1회 및 15초 주기 백그라운드 헬스체크
+    setTimeout(() => checkSystemHealth(false), 1000);
+    setInterval(() => checkSystemHealth(false), 15000);
   </script>
 </body>
 </html>

@@ -33,18 +33,26 @@ Canon SELPHY CP1500 무선 네트워크 IoT 사진 인화기를 포토부스 시
   - 인쇄 도중에는 모달 닫기 버튼이 비활성화되어 안전한 수령 유도.
 - **카세트 18매 카운터**: 백엔드와 연동되어 잔여 용지 매수를 모달 하단에 실시간 뱃지로 표기.
 
+### ④ [신규 추가] 현장 네트워크 & IoT 연동 진단 모니터링 도구 (`Diagnostics`)
+- **홈 화면 상단 퀵 상태 캡슐**: `🟢 네트워크 정상 (00ms) ⚙️` 뱃지를 통해 태블릿-Host PC 간 핑 레이턴시를 15초 주기로 실시간 노출.
+- **종합 진단 대시보드 팝업**:
+  - **태블릿 ⇄ Host PC**: Host IP/Client IP, 동일 Wi-Fi 서브넷 일치 여부, HTTP API 왕복 응답 지연(ms) 실시간 측정.
+  - **Canon SELPHY CP1500**: 드라이버 온라인 여부, 18매 카세트 잔여 용지, 누적 인쇄 횟수.
+  - **클라우드 연동**: Google Drive 백업 및 OpenAI API 키 정상 구성 여부.
+- **[🧪 테스트 엽서 1장 출력]**: 본 행사 전 CP1500으로 4색 CMYK 컬러 밴드와 300 DPI 정렬 격자가 담긴 테스트 패턴을 1장 즉시 시험 인쇄하는 기능 탑재.
+
 ---
 
 ## 2. 변경된 파일 목록
 
 | 파일 경로 | 변경 내용 |
 | :--- | :--- |
-| [concept_transformer.py](file:///c:/4cuts_pjt/local-server/concept_transformer.py) | `create_4cut_frame_postcard` (1200x1800 300DPI 듀얼스트립 및 절취선) 구현 |
-| [app.py](file:///c:/4cuts_pjt/local-server/app.py) | `POST /api/print`, GDI Silent Spooling, 프린터 자동 감지, 엽서 동시 렌더링 파이프라인 |
-| [index.html](file:///c:/4cuts_pjt/local-server/templates/index.html) | 45초 카운트다운, 4-Pass 컬러 칩, 안전 경고 배너, 카세트 18매 뱃지, 비동기 호출 JS |
-| [templates/style.css](file:///c:/4cuts_pjt/local-server/templates/style.css) | CP1500 인화 모달 전용 프리미엄 CSS 스타일 및 애니메이션 |
+| [concept_transformer.py](file:///c:/4cuts_pjt/local-server/concept_transformer.py) | `create_4cut_frame_postcard`, `create_test_pattern_postcard` 구현 |
+| [app.py](file:///c:/4cuts_pjt/local-server/app.py) | `POST /api/print`, `/api/diagnostics/health`, `/api/diagnostics/test-print` |
+| [index.html](file:///c:/4cuts_pjt/local-server/templates/index.html) | 진단 모달 대시보드 마크업, 상단 상태 캡슐, 실시간 핑/상태 폴링 및 테스트 인쇄 JS |
+| [templates/style.css](file:///c:/4cuts_pjt/local-server/templates/style.css) | CP1500 인화 모달 및 진단 대시보드 카드, 핑 뱃지 전용 CSS |
 | [style.css](file:///c:/4cuts_pjt/style.css) | 루트 CSS 동기화 |
-| [{IoT 연동} 개발 완료 보고서.md](file:///c:/4cuts_pjt/{IoT%20연동}%20개발%20완료%20보고서.md) | IoT 인화기 연동 종합 기술 보고서 및 현장 운용 가이드 |
+| [{IoT 연동} 개발 완료 보고서.md](file:///c:/4cuts_pjt/{IoT%20연동}%20개발%20완료%20보고서.md) | 현장 네트워크 초기 세팅 및 모니터링 기능 매뉴얼 추가 |
 | [walkthrough.md](file:///c:/4cuts_pjt/walkthrough.md) | 전체 작업 진행 및 검증 히스토리 워크스루 |
 
 ---
@@ -52,6 +60,6 @@ Canon SELPHY CP1500 무선 네트워크 IoT 사진 인화기를 포토부스 시
 ## 3. 검증 결과
 
 - ✅ `git diff`를 통한 소스코드 전수 검토 및 정적 무결성 확인 완료.
-- ✅ 1200x1800 캔버스 내 듀얼 600px 스트립 및 가로/세로 비율 보존 로직 확인.
-- ✅ 백엔드 GDI 스풀러에서 인화기 미연결 시 시뮬레이션 Fallback 모드로 정상 동작함을 확인.
-- ✅ 프론트엔드 모달 카운트다운 및 4-Pass 단계 전환 스크립트 정상 연동 완료.
+- ✅ `/api/diagnostics/health` 엔드포인트 및 태블릿 클라이언트 IP/서브넷 진단 로직 검증.
+- ✅ `/api/diagnostics/test-print` 엽서 규격 테스트 패턴 생성 및 GDI 스풀링 파이프라인 검증.
+- ✅ 프론트엔드 실시간 핑(ms) 측정 및 상태 뱃지 전환 인터랙션 확인.

@@ -22,7 +22,7 @@ from PIL import Image
 import qrcode
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from concept_transformer import transform_four_cut, create_4cut_frame, create_4cut_frame_postcard
+from concept_transformer import transform_four_cut, create_4cut_frame, create_4cut_frame_postcard, create_test_pattern_postcard
 from openai_transformer import transform_single_image_openai
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
@@ -810,4 +810,79 @@ async def api_print_photo(req: PrintJobRequest):
     loop = asyncio.get_event_loop()
     result = await loop.run_in_executor(executor, _silent_print_postcard_worker, target_path, req.printer_name)
     return result
+
+
+@app.get("/api/diagnostics/health")
+async def api_diagnostics_health(req: Request):
+    """
+    태블릿-Host PC-Canon CP1500 간 네트워크 상태 및 초기 세팅 종합 진단 API
+    """
+    import socket
+    
+    # 1. Host PC IP 정보
+    host_ip = "127.0.0.1"
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        host_ip = s.getsockname()[0]
+        s.close()
+    except Exception:
+        host_ip = "127.0.0.1"
+
+    client_ip = req.client.host if req.client else "unknown"
+
+    # 2. 프린터 드라이버 및 하드웨어 상태
+    detected_printer = find_selphy_printer()
+    printer_online = detected_printer is not None
+    printer_status_desc = "온라인 (대기 중)" if detected_printer else "인화기 드라이버 미연결 (가상 시뮬레이션 모드)"
+    
+    rem_sheets = 18 - (PRINT_SUCCESS_COUNT % 18)
+
+    # 3. 클라우드 및 인터넷 상태 체크
+    gdrive_auth_ok = os.path.exists(GOOGLE_KEY_PATH) or (GAS_WEBHOOK_URL is not None)
+    openai_key_ok = bool(os.environ.get("OPENAI_API_KEY"))
+
+    return {
+        "status": "healthy",
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "network": {
+            "host_ip": host_ip,
+            "client_ip": client_ip,
+            "same_subnet": (client_ip.rsplit(".", 1)[0] == host_ip.rsplit(".", 1)[0]) if ("." in client_ip and "." in host_ip) else True,
+            "port": 8000
+        },
+        "printer": {
+            "detected": printer_online,
+            "printer_name": detected_printer or "Canon SELPHY CP1500 (시뮬레이션)",
+            "status": printer_status_desc,
+            "print_count": PRINT_SUCCESS_COUNT,
+            "remaining_sheets": rem_sheets,
+            "low_paper": rem_sheets <= 3,
+            "paper_type": "Postcard 100x148mm (4x6인치 300DPI)"
+        },
+        "cloud": {
+            "google_drive_connected": gdrive_auth_ok,
+            "openai_api_configured": openai_key_ok
+        }
+    }
+
+
+@app.post("/api/diagnostics/test-print")
+async def api_diagnostics_test_print():
+    """
+    현장 셋업 점검용 4x6 엽서 (1200x1800 300DPI) 테스트 패턴 즉시 1장 시험 인쇄
+    """
+    test_img = create_test_pattern_postcard("Canon SELPHY CP1500")
+    test_filename = f"test_pattern_{int(time.time())}.jpg"
+    test_path = os.path.join(UPLOAD_DIR, test_filename)
+    test_img.save(test_path, format="JPEG", quality=95)
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(executor, _silent_print_postcard_worker, test_path, "Canon SELPHY CP1500")
+    return {
+        "status": "success",
+        "message": "진단용 4x6 엽서 테스트 패턴 인화 요청이 전송되었습니다.",
+        "test_image_url": f"/uploads/{test_filename}",
+        "print_result": result
+    }
 
