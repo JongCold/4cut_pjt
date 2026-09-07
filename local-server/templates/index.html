@@ -25,77 +25,35 @@
       </div>
     </div>
 
-    <!-- AI 변환 & 인화 실시간 동적 로딩 오버레이 (멀티 스테이지 프로그레스 UI) -->
+    <!-- AI 변환 & 인화 실시간 간결 로딩 오버레이 (미니멀 프리미엄 UI) -->
     <div id="loading-overlay" class="loading-overlay">
-      <div class="dynamic-loading-card">
+      <div class="dynamic-loading-card simple-loading-card">
         <!-- 상단 헤더 & 회전 스피너 -->
         <div class="loading-header-area">
           <div class="quantum-spinner-wrap">
             <div class="quantum-spinner"></div>
-            <div class="camera-center-icon">📸</div>
+            <div class="camera-center-icon">✨</div>
           </div>
-          <h2 class="loading-dynamic-title">AI 인생 4컷 인화 & 생성 중</h2>
-          <p id="loading-dynamic-desc" class="loading-dynamic-desc">최신 OpenAI 생성 AI가 얼굴 골격과 고유 특징을 정밀 분석하고 있습니다...</p>
+          <h2 id="loading-main-title" class="loading-dynamic-title">AI 인생 4컷 변환 중...</h2>
         </div>
 
-        <!-- 실시간 프로그레스 바 & 타임 트래커 -->
+        <!-- 실시간 프로그레스 게이지 & 남은 시간 -->
         <div class="progress-section">
           <div class="progress-meta-row">
-            <span id="progress-step-badge" class="progress-step-badge">1단계: 유년기 변환</span>
-            <span id="progress-percent-text" class="progress-percent-text">15%</span>
+            <span id="loading-status-text" class="progress-status-highlight">인화 준비 및 4컷 변환 중...</span>
+            <span id="progress-percent-text" class="progress-percent-text font-mono">10%</span>
           </div>
           <div class="progress-bar-track">
-            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 15%;"></div>
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 10%;"></div>
           </div>
-          <div class="time-meta-row">
-            <span id="loading-timer-elapsed" class="timer-badge">⏱️ 경과 시간: 00:00</span>
-            <span id="loading-timer-remaining" class="timer-badge highlight">⏳ 예상 남은 시간: 약 90초</span>
-          </div>
-        </div>
-
-        <!-- 5단계 생애주기 스텝 트래커 -->
-        <div class="timeline-stepper">
-          <div class="stepper-item active" id="step-track-1">
-            <div class="stepper-circle">👶</div>
-            <div class="stepper-info">
-              <div class="stepper-title">1컷 유년기</div>
-              <div class="stepper-status" id="step-stat-1">변환 중</div>
-            </div>
-          </div>
-          <div class="stepper-item" id="step-track-2">
-            <div class="stepper-circle">🎓</div>
-            <div class="stepper-info">
-              <div class="stepper-title">2컷 청소년기</div>
-              <div class="stepper-status" id="step-stat-2">대기 중</div>
-            </div>
-          </div>
-          <div class="stepper-item" id="step-track-3">
-            <div class="stepper-circle">📸</div>
-            <div class="stepper-info">
-              <div class="stepper-title">3컷 현재 모습</div>
-              <div class="stepper-status" id="step-stat-3">대기 중</div>
-            </div>
-          </div>
-          <div class="stepper-item" id="step-track-4">
-            <div class="stepper-circle">👓</div>
-            <div class="stepper-info">
-              <div class="stepper-title">4컷 황혼기</div>
-              <div class="stepper-status" id="step-stat-4">대기 중</div>
-            </div>
-          </div>
-          <div class="stepper-item" id="step-track-5">
-            <div class="stepper-circle">🖨️</div>
-            <div class="stepper-info">
-              <div class="stepper-title">인화 & 합성</div>
-              <div class="stepper-status" id="step-stat-5">대기 중</div>
-            </div>
+          <div class="time-meta-row simple-time-row">
+            <span id="loading-timer-remaining" class="timer-badge highlight">⏳ 예상 남은 시간: 약 45초</span>
           </div>
         </div>
 
-        <!-- 하단 팁 / 감성 안내 -->
-        <div class="loading-tip-box">
-          <span class="tip-bulb">💡</span>
-          <span id="loading-tip-text">DSLR 85mm 렌즈의 섬세한 피부 질감과 본인 고유의 얼굴 골격을 살려 생애 사계절을 완성하고 있습니다.</span>
+        <!-- 변환 완료 이벤트성 배너 (100% 도달 시 노출) -->
+        <div id="loading-complete-banner" class="loading-complete-banner" style="display: none;">
+          <div class="complete-badge">🎉 AI 4컷 변환 완료!</div>
         </div>
       </div>
     </div>
@@ -418,13 +376,21 @@
         </div>
       </div>
 
-      <footer class="fixed-footer">
-        <div class="split-buttons finish-action-buttons">
-          <button id="btn-back-to-result" class="btn btn-outline-purple">
-            ◀ 4컷 다시보기 (크게)
+      <footer class="fixed-footer finish-fixed-footer">
+        <div class="finish-action-grid">
+          <!-- 1행: 4컷 다시보기 & 엽서 인화 출력 (50:50 분할) -->
+          <div class="finish-dual-btn-row">
+            <button id="btn-back-to-result" class="btn btn-action-dual btn-back-dual">
+              ◀ 4컷 다시보기
+            </button>
+            <button id="btn-print-modal" class="btn btn-action-dual btn-print-dual">
+              🖨️ 엽서 인화 출력
+            </button>
+          </div>
+          <!-- 2행: 처음으로 (새로운 촬영) 전폭 버튼 -->
+          <button id="btn-reset-home" class="btn btn-home-full">
+            🏠 처음으로 (새로운 촬영)
           </button>
-          <button id="btn-print-modal" class="btn btn-secondary">🖨️ 인화 출력</button>
-          <button id="btn-reset-home" class="btn btn-primary">🏠 처음으로</button>
         </div>
       </footer>
     </section>
@@ -909,69 +875,46 @@
 
     function startStatusPolling(sId) {
       pollStartTime = Date.now();
-      tipIndex = 0;
       
       // 초기 상태 리셋
-      document.getElementById('progress-bar-fill').style.width = '10%';
-      document.getElementById('progress-percent-text').innerText = '10%';
-      document.getElementById('progress-step-badge').innerText = '1단계: 유년기 변환';
-      document.getElementById('loading-dynamic-desc').innerText = 'AI가 원본 얼굴 골격과 생체 특징을 분석하고 있습니다...';
-      document.getElementById('loading-timer-elapsed').innerText = '⏱️ 경과 시간: 00:00';
-      document.getElementById('loading-timer-remaining').innerText = '⏳ 예상 남은 시간: 약 90초';
+      const mainTitle = document.getElementById('loading-main-title');
+      const statusText = document.getElementById('loading-status-text');
+      const timerRemaining = document.getElementById('loading-timer-remaining');
+      const completeBanner = document.getElementById('loading-complete-banner');
+      const progFill = document.getElementById('progress-bar-fill');
+      const progText = document.getElementById('progress-percent-text');
 
-      for (let i = 1; i <= 5; i++) {
-        const el = document.getElementById(`step-track-${i}`);
-        const stat = document.getElementById(`step-stat-${i}`);
-        if (el) el.className = 'stepper-item' + (i === 1 ? ' active' : '');
-        if (stat) stat.innerText = i === 1 ? '변환 분석 중' : '대기 중';
-      }
+      if (mainTitle) mainTitle.innerText = 'AI 인생 4컷 변환 중...';
+      if (statusText) statusText.innerText = '인화 준비 및 4컷 변환 진행 중...';
+      if (timerRemaining) timerRemaining.innerText = '⏳ 예상 남은 시간: 약 45초';
+      if (completeBanner) completeBanner.style.display = 'none';
+      if (progFill) progFill.style.width = '10%';
+      if (progText) progText.innerText = '10%';
 
       if (statusPollInterval) clearInterval(statusPollInterval);
 
       statusPollInterval = setInterval(async () => {
         const elapsedSec = Math.floor((Date.now() - pollStartTime) / 1000);
-        document.getElementById('loading-timer-elapsed').innerText = `⏱️ 경과 시간: ${formatTime(elapsedSec)}`;
         
-        // 예상 남은 시간 계산 (기본 100초 기준 점진적 감소, 최소 5초)
-        const remainSec = Math.max(5, 100 - elapsedSec);
-        document.getElementById('loading-timer-remaining').innerText = `⏳ 예상 남은 시간: 약 ${remainSec}초`;
-
-        // 팁 텍스트 6초마다 변경
-        if (elapsedSec % 6 === 0) {
-          tipIndex = (tipIndex + 1) % tipsList.length;
-          document.getElementById('loading-tip-text').innerText = tipsList[tipIndex];
+        // 예상 남은 시간 계산 (기본 60초 기준 점진적 감소, 최소 5초)
+        const remainSec = Math.max(5, 60 - elapsedSec);
+        if (timerRemaining) {
+          timerRemaining.innerText = `⏳ 예상 남은 시간: 약 ${remainSec}초`;
         }
 
         try {
           const res = await fetch(`/api/transform_status/${sId}`);
           if (res.ok) {
             const st = await res.json();
-            const prog = Math.min(98, Math.max(st.progress || 10, Math.min(95, Math.floor(elapsedSec * 1.0))));
-            document.getElementById('progress-bar-fill').style.width = `${prog}%`;
-            document.getElementById('progress-percent-text').innerText = `${prog}%`;
+            const prog = Math.min(98, Math.max(st.progress || 10, Math.min(95, Math.floor(elapsedSec * 1.6))));
+            if (progFill) progFill.style.width = `${prog}%`;
+            if (progText) progText.innerText = `${prog}%`;
             
-            if (st.step_name) {
-              document.getElementById('progress-step-badge').innerText = `${st.step}단계: ${st.step_name}`;
-            }
-            if (st.message) {
-              document.getElementById('loading-dynamic-desc').innerText = st.message;
-            }
-
-            // 스텝 트래커 상태 갱신
-            const curStep = st.step || 1;
-            for (let i = 1; i <= 5; i++) {
-              const el = document.getElementById(`step-track-${i}`);
-              const stat = document.getElementById(`step-stat-${i}`);
-              if (!el || !stat) continue;
-              if (i < curStep) {
-                el.className = 'stepper-item completed';
-                stat.innerText = '완료 ✓';
-              } else if (i === curStep) {
-                el.className = 'stepper-item active';
-                stat.innerText = '진행 중...';
-              } else {
-                el.className = 'stepper-item';
-                stat.innerText = '대기 중';
+            if (statusText) {
+              if (st.step_name) {
+                statusText.innerText = `${st.step_name} (${prog}%)`;
+              } else if (st.message) {
+                statusText.innerText = st.message;
               }
             }
           }
@@ -1023,25 +966,28 @@
           document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || data.orig_frame_url;
           document.getElementById('qr-code-img').src = data.qr_code_base64;
 
-          // 100% 완료 상태 표시
-          document.getElementById('progress-bar-fill').style.width = '100%';
-          document.getElementById('progress-percent-text').innerText = '100%';
-          document.getElementById('progress-step-badge').innerText = '완료: 인화 준비 완료';
-          document.getElementById('loading-dynamic-desc').innerText = 'AI 인생 4컷 생성이 완벽히 완료되었습니다!';
-          for (let i = 1; i <= 5; i++) {
-            const el = document.getElementById(`step-track-${i}`);
-            const stat = document.getElementById(`step-stat-${i}`);
-            if (el) el.className = 'stepper-item completed';
-            if (stat) stat.innerText = '완료 ✓';
-          }
-
           stopStatusPolling();
 
-          // 부드러운 전환
+          // ✨ 100% 완료 및 이벤트성 완료 애니메이션 노출
+          const progFill = document.getElementById('progress-bar-fill');
+          const progText = document.getElementById('progress-percent-text');
+          const mainTitle = document.getElementById('loading-main-title');
+          const statusText = document.getElementById('loading-status-text');
+          const timerRemaining = document.getElementById('loading-timer-remaining');
+          const completeBanner = document.getElementById('loading-complete-banner');
+
+          if (progFill) progFill.style.width = '100%';
+          if (progText) progText.innerText = '100%';
+          if (mainTitle) mainTitle.innerText = '✨ 변환 완료!';
+          if (statusText) statusText.innerText = '완성된 4컷 사진을 불러옵니다...';
+          if (timerRemaining) timerRemaining.innerText = '✅ 준비 완료!';
+          if (completeBanner) completeBanner.style.display = 'block';
+
+          // 0.8초 후 화면 전환
           setTimeout(() => {
             overlay.classList.remove('active');
             navigateTo('screen-result');
-          }, 600);
+          }, 800);
         } else {
           throw new Error('변환 실패');
         }

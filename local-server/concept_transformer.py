@@ -562,15 +562,28 @@ def create_4cut_frame(images: List[Image.Image], brand_title: str = "AI 4-CUT ST
     ]
     
     for idx, img in enumerate(images[:4]):
-        img_resized = img.convert("RGB").resize((slot_w, slot_h), Image.Resampling.LANCZOS)
-        pos = positions[idx]
-        frame.paste(img_resized, pos)
+        img_rgb = img.convert("RGB")
+        img_w, img_h = img_rgb.size
+        scale = min(slot_w / img_w, slot_h / img_h)
+        new_w = int(img_w * scale)
+        new_h = int(img_h * scale)
+        img_resized = img_rgb.resize((new_w, new_h), Image.Resampling.LANCZOS)
         
+        pos = positions[idx]
+        slot_x, slot_y = pos
+        
+        # 슬롯 배경 및 테두리
         draw.rectangle(
-            [pos[0], pos[1], pos[0] + slot_w, pos[1] + slot_h],
+            [slot_x, slot_y, slot_x + slot_w, slot_y + slot_h],
+            fill=(255, 255, 255),
             outline=(220, 225, 230),
             width=2
         )
+        
+        # 전체 이미지를 온전히 중앙 배치 (크롭 잘림 및 왜곡 방지)
+        paste_x = slot_x + (slot_w - new_w) // 2
+        paste_y = slot_y + (slot_h - new_h) // 2
+        frame.paste(img_resized, (paste_x, paste_y))
         
     brand_font = None
     sub_font = None
@@ -613,11 +626,11 @@ def create_4cut_frame_postcard(images: List[Image.Image], brand_title: str = "AI
     draw = ImageDraw.Draw(frame)
 
     strip_w = 600
-    side_margin = 55   # 좌우 여백
-    photo_w = strip_w - (side_margin * 2)  # 490px
-    photo_h = 345      # 세로형 인물 비율 최적화 (345px)
-    top_margin = 55    # 상단 여백
-    gap = 22           # 컷 간격
+    side_margin = 50   # 좌우 여백
+    photo_w = strip_w - (side_margin * 2)  # 500px
+    photo_h = 365      # 4컷 최적화 슬롯 높이 (365px)
+    top_margin = 48    # 상단 여백
+    gap = 18           # 컷 간격
 
     # 폰트 로드 (고해상도 300DPI 출력에 최적화된 크기)
     brand_font = None
@@ -648,40 +661,37 @@ def create_4cut_frame_postcard(images: List[Image.Image], brand_title: str = "AI
         y_cursor = top_margin
         for idx, img in enumerate(images[:4]):
             img_rgb = img.convert("RGB")
-            
-            # 인물 중심 Aspect Fill (크롭 리사이즈)
             img_w, img_h = img_rgb.size
-            target_ratio = photo_w / photo_h
-            current_ratio = img_w / img_h
             
-            if current_ratio > target_ratio:
-                # 가로가 긴 경우 좌우 크롭
-                new_w = int(img_h * target_ratio)
-                left = (img_w - new_w) // 2
-                img_cropped = img_rgb.crop((left, 0, left + new_w, img_h))
-            else:
-                # 세로가 긴 경우 상하 크롭 (인물 중심: 상단 25% 보존)
-                new_h = int(img_w / target_ratio)
-                top = max(0, int((img_h - new_h) * 0.25))
-                img_cropped = img_rgb.crop((0, top, img_w, top + new_h))
-                
-            img_resized = img_cropped.resize((photo_w, photo_h), Image.Resampling.LANCZOS)
+            # 촬영된 실제 전체 이미지가 손실 없이 100% 보이도록 Aspect Fit (Contain) 적용
+            # 머리부터 어깨, 옷, 손동작까지 크롭으로 인한 얼굴 확대/잘림 원천 방지
+            scale = min(photo_w / img_w, photo_h / img_h)
+            new_w = int(img_w * scale)
+            new_h = int(img_h * scale)
+            img_resized = img_rgb.resize((new_w, new_h), Image.Resampling.LANCZOS)
+            
             slot_x = offset_x + side_margin
             slot_y = y_cursor
-            frame.paste(img_resized, (slot_x, slot_y))
             
-            # 컷 슬롯 테두리 라인
+            # 슬롯 배경 및 부드러운 테두리
             draw.rectangle(
                 [slot_x, slot_y, slot_x + photo_w, slot_y + photo_h],
-                outline=(220, 225, 230),
+                fill=(255, 255, 255),
+                outline=(226, 232, 240),
                 width=2
             )
+            
+            # 슬롯 정중앙 배치
+            paste_x = slot_x + (photo_w - new_w) // 2
+            paste_y = slot_y + (photo_h - new_h) // 2
+            frame.paste(img_resized, (paste_x, paste_y))
+            
             y_cursor += photo_h + gap
 
         # 하단 브랜드 텍스트 & 촬영 일시
         strip_center_x = offset_x + (strip_w // 2)
-        text_y_brand = canvas_h - 170
-        text_y_date = canvas_h - 110
+        text_y_brand = canvas_h - 150
+        text_y_date = canvas_h - 95
 
         draw.text((strip_center_x, text_y_brand), brand_title, fill=(30, 41, 59), font=brand_font, anchor="mm")
         draw.text((strip_center_x, text_y_date), f"MEMORY PHOTO • {now_str}", fill=(100, 116, 139), font=sub_font, anchor="mm")

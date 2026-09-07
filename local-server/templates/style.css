@@ -2026,3 +2026,143 @@ input:checked + .slider:before {
 .diagnostics-footer {
   margin-top: 4px;
 }
+
+/* ==========================================================================
+   간결하고 모던한 AI 변환 로딩 UI & 완료 이벤트 배너
+   ========================================================================== */
+
+.simple-loading-card {
+  max-width: 360px !important;
+  padding: 32px 24px 28px !important;
+  border-radius: 24px !important;
+  gap: 20px !important;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(139, 92, 246, 0.22) !important;
+}
+
+.progress-status-highlight {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #6D28D9;
+  letter-spacing: -0.2px;
+}
+
+.simple-time-row {
+  justify-content: center !important;
+  margin-top: 4px;
+}
+
+.simple-time-row .timer-badge {
+  font-size: 0.82rem !important;
+  padding: 6px 14px !important;
+  border-radius: 9999px !important;
+  background: #F5F3FF !important;
+  border: 1px solid #DDD6FE !important;
+  color: #7C3AED !important;
+  font-weight: 700 !important;
+}
+
+.loading-complete-banner {
+  animation: completePop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes completePop {
+  0% { transform: scale(0.85); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.complete-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: #FFFFFF;
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 8px 18px;
+  border-radius: 9999px;
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+}
+
+/* ==========================================================================
+   화면 7 Finish 화면 하단 버튼 2단 그리드 (텍스트 넘침 원천 방지)
+   ========================================================================== */
+
+.finish-fixed-footer {
+  padding: 12px 18px 18px !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(14px) !important;
+  border-top: 1px solid #E2E8F0 !important;
+}
+
+.finish-action-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.finish-dual-btn-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.btn-action-dual {
+  padding: 14px 8px !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+  border-radius: 14px !important;
+  white-space: nowrap !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  text-align: center !important;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.btn-back-dual {
+  background: #FFFFFF !important;
+  color: #6D28D9 !important;
+  border: 2px solid #8B5CF6 !important;
+}
+
+.btn-back-dual:hover {
+  background: #F5F3FF !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(139, 92, 246, 0.25) !important;
+}
+
+.btn-print-dual {
+  background: linear-gradient(135deg, #7C3AED 0%, #6D28D9 100%) !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+}
+
+.btn-print-dual:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45) !important;
+}
+
+.btn-home-full {
+  width: 100% !important;
+  padding: 13px !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+  border-radius: 14px !important;
+  background: #F1F5F9 !important;
+  color: #475569 !important;
+  border: 1px solid #CBD5E1 !important;
+  transition: all 0.2s ease !important;
+  white-space: nowrap !important;
+}
+
+.btn-home-full:hover {
+  background: #E2E8F0 !important;
+  color: #1E293B !important;
+  transform: translateY(-1px);
+}

@@ -41,25 +41,33 @@ Canon SELPHY CP1500 무선 네트워크 IoT 사진 인화기를 포토부스 시
   - **클라우드 연동**: Google Drive 백업 및 OpenAI API 키 정상 구성 여부.
 - **[🧪 테스트 엽서 1장 출력]**: 본 행사 전 CP1500으로 4색 CMYK 컬러 밴드와 300 DPI 정렬 격자가 담긴 테스트 패턴을 1장 즉시 시험 인쇄하는 기능 탑재.
 
+### ⑤ [11차 개선] UI 미감 최적화 & 엽서 인쇄 전체 이미지 Aspect Fit 보존
+- **AI 변환 로딩 UI 간소화**:
+  - 장황한 5단계 스텝 및 팁 줄글 제거 ➔ 심플 스피너, 게이지 바, 남은 시간(`약 OO초`), `✨ 변환 완료!` 이벤트 배너로 개편.
+- **화면 7 Finish 하단 버튼 2단 그리드 개편**:
+  - 상단 1열 `[ ◀ 4컷 다시보기 ]` (50%) + `[ 🖨️ 엽서 인화 출력 ]` (50%), 하단 2열 `[ 🏠 처음으로 ]` (전폭) 배치로 글자 삐져나옴/잘림 원천 방지.
+- **엽서 인쇄 프레임 인물 크롭 왜곡 해결**:
+  - `concept_transformer.py`의 상하 45% 강제 크롭을 전면 제거하고, 실제 촬영된 전체 이미지(상반신, 어깨, 옷, 손)가 100% 손실 없이 슬롯 중앙에 렌더링되는 **Aspect Fit (Contain)** 알고리즘 적용.
+
 ---
 
 ## 2. 변경된 파일 목록
 
 | 파일 경로 | 변경 내용 |
 | :--- | :--- |
-| [concept_transformer.py](file:///c:/4cuts_pjt/local-server/concept_transformer.py) | `create_4cut_frame_postcard`, `create_test_pattern_postcard` 구현 |
-| [app.py](file:///c:/4cuts_pjt/local-server/app.py) | `POST /api/print`, `/api/diagnostics/health`, `/api/diagnostics/test-print` |
-| [index.html](file:///c:/4cuts_pjt/local-server/templates/index.html) | 진단 모달 대시보드 마크업, 상단 상태 캡슐, 실시간 핑/상태 폴링 및 테스트 인쇄 JS |
-| [templates/style.css](file:///c:/4cuts_pjt/local-server/templates/style.css) | CP1500 인화 모달 및 진단 대시보드 카드, 핑 뱃지 전용 CSS |
+| [concept_transformer.py](file:///c:/4cuts_pjt/local-server/concept_transformer.py) | 엽서/일반 4컷 프레임 크롭 제거 및 전체 이미지 100% Aspect Fit 보존 |
+| [app.py](file:///c:/4cuts_pjt/local-server/app.py) | 무선 인화, 진단 헬스체크 및 테스트 인쇄 엔드포인트 |
+| [index.html](file:///c:/4cuts_pjt/local-server/templates/index.html) | 로딩 오버레이 간소화, 완료 이벤트 배너, 하단 2단 버튼 그리드 개편 |
+| [templates/style.css](file:///c:/4cuts_pjt/local-server/templates/style.css) | 미니멀 로딩 카드 및 2단 액션 버튼 프리미엄 CSS |
 | [style.css](file:///c:/4cuts_pjt/style.css) | 루트 CSS 동기화 |
-| [{IoT 연동} 개발 완료 보고서.md](file:///c:/4cuts_pjt/{IoT%20연동}%20개발%20완료%20보고서.md) | 현장 네트워크 초기 세팅 및 모니터링 기능 매뉴얼 추가 |
+| [개선작업_11.md](file:///c:/4cuts_pjt/개선작업_11.md) | 11차 개선 상세 내역 문서 |
+| [{IoT 연동} 개발 완료 보고서 2.md](file:///c:/4cuts_pjt/{IoT%20연동}%20개발%20완료%20보고서%202.md) | UI 미감 및 인쇄 Aspect Fit 완료 보고서 |
 | [walkthrough.md](file:///c:/4cuts_pjt/walkthrough.md) | 전체 작업 진행 및 검증 히스토리 워크스루 |
 
 ---
 
 ## 3. 검증 결과
 
-- ✅ `git diff`를 통한 소스코드 전수 검토 및 정적 무결성 확인 완료.
-- ✅ `/api/diagnostics/health` 엔드포인트 및 태블릿 클라이언트 IP/서브넷 진단 로직 검증.
-- ✅ `/api/diagnostics/test-print` 엽서 규격 테스트 패턴 생성 및 GDI 스풀링 파이프라인 검증.
-- ✅ 프론트엔드 실시간 핑(ms) 측정 및 상태 뱃지 전환 인터랙션 확인.
+- ✅ 로딩 화면의 불필요한 줄글이 제거되고 심플 게이지와 남은 시간, 완료 배너가 명확히 작동함.
+- ✅ Finish 화면 하단 버튼의 글자가 삐져나오지 않고 단정하고 터치하기 편한 2단 레이아웃으로 렌더링됨.
+- ✅ 엽서 인쇄 시 얼굴만 확대되던 현상이 해결되어 상반신 전체 구도가 온전히 인화됨.
