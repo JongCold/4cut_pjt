@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>&lbrace;IoT &#xc5f0;&#xb3d9;&rbrace; &#xac1c;&#xbc1c;&#xae30;&#xd68d;&#xc11c;&colon; Canon SELPHY CP1500 &#xbb34;&#xc120; &#xb124;&#xd2b8;&#xc6cc;&#xd06c; &#xc778;&#xd654; &#xc2dc;&#xc2a4;&#xd15c; &#xad6c;&#xcd95;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex/dist/katex.min.css">
+<link href="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.css" rel="stylesheet" type="text/css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="iot-연동-개발기획서-canon-selphy-cp1500-무선-네트워크-인화-시스템-구축">{IoT 연동} 개발기획서: Canon SELPHY CP1500 무선 네트워크 인화 시스템 구축</h1>
+<h2 id="1-기획-배경-및-추진-목적">1. 기획 배경 및 추진 목적</h2>
+<h3 id="11-추진-배경">1.1. 추진 배경</h3>
+<ul>
+<li>현재 포토부스 시스템은 스마트폰 카메라를 통한 **모바일 무선 QR 다운로드(사진/2배속 영상)**를 지원하고 있습니다.</li>
+<li>그러나 오프라인 포토부스(인생네컷, 포토이즘 등)의 가장 핵심적인 사용자 경험은 **&quot;손에 쥐어지는 고품질 실물 인화 사진(Physical Printout)&quot;**입니다.</li>
+<li>특히 본 프로젝트의 &quot;인생 사계절(어린이-청소년-현재-노년)&quot; 테마는 실물 소장 가치와 선물/기념 가치가 매우 높으므로, 현장에서 태블릿 터치 한 번으로 즉시 실물 인화가 이루어지는 IoT 인화기 연동이 필수적입니다.</li>
+</ul>
+<h3 id="12-도입-목표">1.2. 도입 목표</h3>
+<ol>
+<li><strong>선 없는 현장 무선 인화 (Wi-Fi Wireless Silent Print)</strong>: 복잡한 케이블 연결 없이 태블릿 ➔ Host PC ➔ Canon CP1500으로 이어지는 무선 네트워크 인화 파이프라인 구축.</li>
+<li><strong>표준 엽서 4x6인치 듀얼 스트립(2x6인치 2분할) 구현</strong>: 엽서 1장에 좌우 동일한 4컷 스트립 2장을 배치하고 중앙 절취 점선을 포함하여, 2인이 1장씩 나눠 가질 수 있는 오리지널 인생네컷 감성 제공.</li>
+<li><strong>염료승화형 4-Pass 출력 특성에 최적화된 UX</strong>: 41~45초 동안 사진이 앞뒤로 4번 왕복(노랑 ➔ 빨강 ➔ 파랑 ➔ 코팅)하는 하드웨어 특성을 반영한 인터랙티브 안내 모달 및 안전 수칙 제공.</li>
+<li><strong>18매 용지 카세트 관리 기능</strong>: 대여 및 현장 운용 특성을 고려하여 18매 단위 용지 소진을 사전에 감지하고 교체 알림을 주는 카운터 시스템 탑재.</li>
+</ol>
+<hr>
+<h2 id="2-하드웨어-스펙-및-물리적-특성-분석-canon-selphy-cp1500">2. 하드웨어 스펙 및 물리적 특성 분석 (Canon SELPHY CP1500)</h2>
+<p>참고 링크: <a href="https://www.slrrent.com/m/camera/view.php?idx=2181">SLRRENT - Canon SELPHY CP1500 사양</a></p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">항목</th>
+<th style="text-align:left">상세 사양</th>
+<th style="text-align:left">포토부스 개발 시 시사점</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left"><strong>인쇄 방식</strong></td>
+<td style="text-align:left">염료승화형 열전사 방식 (Dye-Sublimation)</td>
+<td style="text-align:left">잉크 노즐 막힘이 없고, 오버코트 라미네이팅으로 물/지문/빛에 강해 100년 보존 가능</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>인쇄 해상도</strong></td>
+<td style="text-align:left">300 x 300 DPI (256 계조/색, 1,677만 색상)</td>
+<td style="text-align:left">이미지 해상도를 **300 DPI 기준 픽셀(1200 x 1800 px)**로 정확히 맞춰야 뭉개짐/계단현상 없음</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>출력 용지</strong></td>
+<td style="text-align:left">엽서(Postcard) 사이즈 (KP-36IP / RP-108 등)<br>100 x 148 mm (약 4 x 6 인치)</td>
+<td style="text-align:left">2:3 비율 규격. 기존 웹용 3:4(900x1200) 프레임 대신 <strong>1200x1800 엽서 전용 프레임</strong> 필수</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>인쇄 속도</strong></td>
+<td style="text-align:left">엽서 사이즈 1매당 <strong>약 41초 ~ 45초</strong></td>
+<td style="text-align:left">사용자가 지루함을 느끼지 않도록 45초 카운트다운 타이머 및 하드웨어 왕복 안내 제공</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>용지 카세트 용량</strong></td>
+<td style="text-align:left">엽서 카세트(PCP-CP400) <strong>최대 18매 적재</strong></td>
+<td style="text-align:left">18매 출력 시마다 용지/카트리지 교체 필요 ➔ 인쇄 카운터(15매 이상 시 경고) 필수</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>네트워크 인터페이스</strong></td>
+<td style="text-align:left">Wi-Fi (IEEE 802.11b/g, 2.4GHz)</td>
+<td style="text-align:left">동일 Wi-Fi 서브넷 내에서 Windows 프린터 스풀러(<code>win32print</code>) 무선 통신 완벽 지원</td>
+</tr>
+<tr>
+<td style="text-align:left"><strong>인쇄 물리 동작</strong></td>
+<td style="text-align:left">용지가 앞뒤로 <strong>4회 왕복</strong> 배출</td>
+<td style="text-align:left">출력 중 용지를 당기거나 막으면 기기 기어 파손 발생 ➔ 모달에 &quot;손대지 마세요&quot; 경고 필수</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-통신-아키텍처-및-네트워크-환경-세팅">3. 통신 아키텍처 및 네트워크 환경 세팅</h2>
+<h3 id="31-통신-흐름-다이어그램">3.1. 통신 흐름 다이어그램</h3>
+<pre><code class="language-mermaid">sequenceDiagram
+    autonumber
+    actor User as 사용자
+    participant Tablet as 태블릿 UI (index.html)
+    participant HostPC as Host PC (app.py)
+    participant Spooler as Windows OS Spooler (win32print)
+    participant CP1500 as Canon SELPHY CP1500 (Wi-Fi)
+
+    User-&gt;&gt;Tablet: [화면 7]에서 &quot;🖨️ 인화 출력&quot; 버튼 터치
+    Tablet-&gt;&gt;Tablet: 버튼 비활성화 &amp; 45초 인화 카운트다운 모달 팝업
+    Tablet-&gt;&gt;HostPC: POST /api/print (session_id, frame_type, printer_name)
+    
+    Note over HostPC: 1. 고해상도 1200x1800 프레임 로드&lt;br&gt;2. 용지 방향 및 GDI DC(Device Context) 생성&lt;br&gt;3. 인쇄 성공 누적 카운터 (+1)
+    
+    HostPC-&gt;&gt;Spooler: GDI StartDoc / StartPage / DIB Draw / EndDoc (Silent Spooling)
+    HostPC--&gt;&gt;Tablet: 200 OK {&quot;status&quot;: &quot;success&quot;, &quot;print_count&quot;: 5, &quot;remaining_sheets&quot;: 13}
+    
+    Spooler-&gt;&gt;CP1500: Wi-Fi 무선 인쇄 데이터 스트림 전송
+    Note over CP1500: 4-Pass 염료승화 인쇄 시작 (약 45초)&lt;br&gt;Pass 1: Yellow (노랑)&lt;br&gt;Pass 2: Magenta (빨강)&lt;br&gt;Pass 3: Cyan (파랑)&lt;br&gt;Pass 4: Overcoat (투명 코팅)
+    
+    Tablet-&gt;&gt;User: &quot;사진이 앞뒤로 4번 왕복합니다. 완전히 멈출 때까지 손대지 마세요!&quot;
+    Tablet-&gt;&gt;User: 45초 경과 후 &quot;인화 완료! 배출구에서 사진을 수령하세요.&quot;
+</code></pre>
+<h3 id="32-현장-네트워크-구성-방식-택-1">3.2. 현장 네트워크 구성 방식 (택 1)</h3>
+<ul>
+<li><strong>방법 A (강력 권장 - 외부 유무선 공유기 활용)</strong>:
+<ul>
+<li>현장에 소형 유무선 공유기(iptime 등)를 설치하고, <strong>Host PC, 태블릿, Canon CP1500</strong>을 모두 같은 2.4GHz Wi-Fi SSID에 접속시킵니다.</li>
+<li>외부 인터넷 신호 간섭이 적고, 대량 인쇄 시 패킷 전송이 가장 안정적입니다.</li>
+</ul>
+</li>
+<li><strong>방법 B (단독 운용 - Windows 모바일 핫스팟 활용)</strong>:
+<ul>
+<li>Host PC(노트북)의 Windows 설정에서 **[모바일 핫스팟]**을 켭니다 (대역: 2.4GHz).</li>
+<li>태블릿과 CP1500 본체 Wi-Fi 설정에서 노트북 핫스팟 SSID로 연결합니다.</li>
+<li>외부 공유기 장비가 없을 때 매우 경제적이고 독립적으로 동작합니다.</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-windows-프린터-드라이버-세팅-가이드">3.3. Windows 프린터 드라이버 세팅 가이드</h3>
+<ol>
+<li>캐논 코리아 다운로드 센터에서 <strong>[SELPHY CP1500 프린터 드라이버 (Windows)]</strong> 공식 설치.</li>
+<li>설치 시 연결 방식을 **[네트워크 / 무선 LAN 연결]**로 선택 후 동일 Wi-Fi에 연결된 CP1500을 자동 검색하여 등록.</li>
+<li>Windows [설정] ➔ [프린터 및 스캐너] ➔ [Canon SELPHY CP1500] ➔ [인쇄 기본 설정]:
+<ul>
+<li><strong>용지 크기</strong>: <code>엽서 (100 x 148 mm)</code></li>
+<li><strong>테두리 설정</strong>: <code>테두리 없음 (Borderless)</code></li>
+<li><strong>인쇄 방향</strong>: <code>세로 (Portrait)</code></li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="4-인화-프레임-레이아웃-상세-기획-300-dpi-엽서-규격">4. 인화 프레임 레이아웃 상세 기획 (300 DPI 엽서 규격)</h2>
+<h3 id="41-해상도-및-규격-사양">4.1. 해상도 및 규격 사양</h3>
+<ul>
+<li><strong>캔버스 픽셀 크기</strong>: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>1200</mn><mo>×</mo><mn>1800</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">1200 \times 1800\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.7278em;vertical-align:-0.0833em;"></span><span class="mord">1200</span><span class="mspace" style="margin-right:0.2222em;"></span><span class="mbin">×</span><span class="mspace" style="margin-right:0.2222em;"></span></span><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">1800</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong> (4 x 6인치 @ 300 DPI, 2:3 비율)</li>
+<li><strong>2분할 듀얼 스트립(2x6인치) 구조</strong>:
+<ul>
+<li>가로폭 1200px를 정확히 절반인 600px씩 2개의 독립된 스트립으로 분할.</li>
+<li>좌측 스트립(0~600px)과 우측 스트립(600~1200px)에 완전히 동일한 4컷 사진 및 브랜딩 로고를 나란히 렌더링.</li>
+<li>정중앙(x = 600px)에 **연한 회색 절취 안내 점선(Cutting Guide Line)**을 인쇄하여 가위나 작두칼로 손쉽게 2장으로 분리 가능.</li>
+</ul>
+</li>
+</ul>
+<pre><code>┌─────────────────────────── 1200 px ───────────────────────────┐
+│              좌측 스트립 (600px)  ┆  우측 스트립 (600px)              │
+│  ┌─────────────────────────────┐ ┆ ┌─────────────────────────────┐  │
+│  │   [1컷] 유년기 (어린이)     │ ┆ │   [1컷] 유년기 (어린이)     │  │
+│  └─────────────────────────────┘ ┆ └─────────────────────────────┘  │
+│  ┌─────────────────────────────┐ ┆ ┌─────────────────────────────┐  │
+│  │   [2컷] 청소년기 (교복)     │ ┆ │   [2컷] 청소년기 (교복)     │  │
+│  └─────────────────────────────┘ ┆ └─────────────────────────────┘  │
+│  ┌─────────────────────────────┐ ┆ ┌─────────────────────────────┐  │
+│  │   [3컷] 현재 본연의 모습    │ ┆ │   [3컷] 현재 본연의 모습    │  │ 1800 px
+│  └─────────────────────────────┘ ┆ └─────────────────────────────┘  │
+│  ┌─────────────────────────────┐ ┆ ┌─────────────────────────────┐  │
+│  │   [4컷] 노년기 (황혼)       │ ┆ │   [4컷] 노년기 (황혼)       │  │
+│  └─────────────────────────────┘ ┆ └─────────────────────────────┘  │
+│     AI 4-CUT (TIME TRAVEL)       ┆    AI 4-CUT (TIME TRAVEL)        │
+│   MEMORY PHOTO • 2026.09.07      ┆  MEMORY PHOTO • 2026.09.07       │
+│                                  ┆ (중앙 절취 점선)                 │
+└──────────────────────────────────┴───────────────────────────┘
+</code></pre>
+<h3 id="42-포토-슬롯-치수-및-비율-최적화">4.2. 포토 슬롯 치수 및 비율 최적화</h3>
+<ul>
+<li>스트립 너비: 600px</li>
+<li>좌우 여백: 각 50px ➔ 사진 가로폭: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>500</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">500\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">500</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong></li>
+<li>사진 세로 높이: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>340</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">340\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">340</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong> (인물 중심의 세로형 4컷 배치에 최적화, 약 3:2.04 비율)</li>
+<li>컷 간격(Gap): <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>22</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">22\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">22</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong>, 상단 여백: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>55</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">55\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">55</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong></li>
+<li>하단 여백: <strong><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>240</mn><mtext> px</mtext></mrow><annotation encoding="application/x-tex">240\text{ px}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8389em;vertical-align:-0.1944em;"></span><span class="mord">240</span><span class="mord text"><span class="mord"> px</span></span></span></span></span></strong> (브랜드명, 촬영 일시, 타임스탬프 영문 폰트 렌더링)</li>
+</ul>
+<hr>
+<h2 id="5-사용자-경험ux-및-하드웨어-보호-기획">5. 사용자 경험(UX) 및 하드웨어 보호 기획</h2>
+<h3 id="51-45초-인쇄-대기-심리적-지연-해소--장비-고장-방지">5.1. 45초 인쇄 대기 심리적 지연 해소 &amp; 장비 고장 방지</h3>
+<ul>
+<li>셀피 CP1500은 인쇄 도중 용지가 프린터 앞뒤로 약 10cm 이상 4차례 왕복 배출됩니다.</li>
+<li>이용자가 사진이 다 나온 줄 알고 손으로 잡아당기면 <strong>프린터 기어와 롤러가 파손</strong>됩니다.</li>
+<li><strong>대응책</strong>:
+<ol>
+<li>인화 버튼 클릭 시 즉시 화면에 <strong>대형 주의 모달</strong> 노출.</li>
+<li>노랑 ➔ 빨강 ➔ 파랑 ➔ 코팅 4단계를 시각적으로 보여주는 <strong>4-Pass 진행 애니메이션</strong>.</li>
+<li><strong>&quot;⚠️ 주의: 사진이 앞뒤로 4번 왕복합니다! 완전히 멈추고 트레이에 안착할 때까지 절대 손대지 마세요.&quot;</strong> 문구를 점멸 강조.</li>
+<li>45초 타이머 종료 시 팡파르 애니메이션과 함께 &quot;사진이 성공적으로 인화되었습니다&quot; 안내.</li>
+</ol>
+</li>
+</ul>
+<h3 id="52-트레이-18매-카운터-관리">5.2. 트레이 18매 카운터 관리</h3>
+<ul>
+<li>CP1500 전용 카세트는 최대 18매의 인화지를 수용합니다.</li>
+<li>백엔드(<code>app.py</code>)에 세션 독립적인 누적 인쇄 카운터(<code>PRINT_COUNTER</code>)를 유지:
+<ul>
+<li>1회 출력 시마다 <code>PRINT_COUNTER += 1</code></li>
+<li>현재 카세트 잔여 매수: <code>18 - (PRINT_COUNTER % 18)</code></li>
+<li>잔여 매수가 3매 이하(15매 이상 출력)일 경우:
+<ul>
+<li>백엔드 콘솔 로그에 <code>[Printer Alert] ⚠️ 인화지 잔량 부족 (잔여 3매 이하)! 카세트 용지와 카트리지를 확인하세요.</code> 출력.</li>
+<li><code>/api/print</code> 응답에 <code>warning: &quot;low_paper&quot;</code> 플래그를 내려보내 태블릿 상단에 관리자용 안내 배지 표시.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="6-개발-범위-및-마일스톤">6. 개발 범위 및 마일스톤</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">단계</th>
+<th style="text-align:left">작업 내용</th>
+<th style="text-align:left">결과물</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>1단계</strong></td>
+<td style="text-align:left">1200x1800 300DPI 엽서 규격 프레임 생성기 구현</td>
+<td style="text-align:left"><code>concept_transformer.py</code> (<code>create_4cut_frame_postcard</code>)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>2단계</strong></td>
+<td style="text-align:left">Windows GDI Spooler 기반 무선 Silent Print 백엔드 API 신설</td>
+<td style="text-align:left"><code>app.py</code> (<code>POST /api/print</code>, 프린터 자동감지, 18매 카운터)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>3단계</strong></td>
+<td style="text-align:left">키오스크 태블릿 UI 연동 및 45초 4-Pass 안전 모달 구현</td>
+<td style="text-align:left"><code>index.html</code>, <code>style.css</code> (45초 타이머, 안전 경고 애니메이션)</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>4단계</strong></td>
+<td style="text-align:left">무선 LAN 환경 통합 통신 및 인쇄 품질 실차 테스트</td>
+<td style="text-align:left">최종 동작 검증 및 운영 매뉴얼 업데이트</td>
+</tr>
+</tbody>
+</table>
+
+            <script async src="https://cdn.jsdelivr.net/npm/katex-copytex@latest/dist/katex-copytex.min.js"></script>
+            
+        </body>
+        </html>
