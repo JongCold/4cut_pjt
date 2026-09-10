@@ -707,7 +707,14 @@
       }
       if (connText) connText.innerText = '연결 확인 중...';
       try {
-        const testRes = await fetch(`${target}/api/diagnostics/health`, { method: 'GET', mode: 'cors' });
+        const testRes = await fetch(`${target}/api/diagnostics/health`, {
+          method: 'GET',
+          mode: 'cors',
+          headers: {
+            'Bypass-Tunnel-Reminder': 'true',
+            'ngrok-skip-browser-warning': 'true'
+          }
+        });
         if (testRes.ok) {
           updateConfigModalStatus(true, '✅ 백엔드 정상 연결됨 (FastAPI 8000)');
           return true;
@@ -1101,7 +1108,9 @@
         let serverMsg = "";
 
         try {
-          const res = await fetch(`${getApiBaseUrl()}/api/transform_status/${sId}`);
+          const res = await fetch(`${getApiBaseUrl()}/api/transform_status/${sId}`, {
+            headers: { 'Bypass-Tunnel-Reminder': 'true', 'ngrok-skip-browser-warning': 'true' }
+          });
           if (res.ok) {
             const st = await res.json();
             serverProg = st.progress || 10;
@@ -1434,7 +1443,9 @@
     async function checkSystemHealth(isManual = false) {
       const startTime = performance.now();
       try {
-        const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/health`);
+        const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/health`, {
+          headers: { 'Bypass-Tunnel-Reminder': 'true', 'ngrok-skip-browser-warning': 'true' }
+        });
         const latency = Math.round(performance.now() - startTime);
 
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
