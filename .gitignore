@@ -13,3 +13,6 @@ local-server/uploads/*
 local-server/test_frame_*.jpg
 local-server/test_dummy_video.webm
 local-server/test_gdrive_upload.py
+
+# Executables
+*.exe

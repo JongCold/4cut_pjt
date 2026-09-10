@@ -39,6 +39,7 @@ body {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
 }
 
@@ -47,6 +48,7 @@ body {
   width: 100%;
   max-width: 480px;
   height: 100vh;
+  height: 100dvh;
   max-height: 920px;
   background-color: var(--color-bg);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
@@ -64,6 +66,7 @@ body {
   .app-container {
     max-width: 100%;
     height: 100vh;
+    height: 100dvh;
     max-height: 100%;
     border-radius: 0;
     box-shadow: none;
@@ -128,8 +131,9 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
-  padding: 20px 24px;
-  background-color: rgba(255, 255, 255, 0.85);
+  padding: 16px 20px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background-color: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(12px);
   border-top: 1px solid var(--color-divider);
   z-index: 100;
@@ -1397,7 +1401,7 @@ input:checked + .slider:before {
 }
 
 /* ==========================================================================
-   변환 완료 (screen-result) 대형 4컷 프레임 한눈에 보기 레이아웃 최적화
+   변환 완료 (screen-result) 모바일/태블릿 세로 스크롤 및 대형 4컷 뷰 최적화
    ========================================================================== */
 
 .result-large-content {
@@ -1405,8 +1409,29 @@ input:checked + .slider:before {
   flex-direction: column;
   align-items: center;
   height: 100%;
-  padding: 6px 14px 100px 14px;
-  overflow: hidden !important; /* 스크롤 없이 한눈에 */
+  padding-top: 78px !important; /* 상단 헤더(70px) 가림 방지 */
+  padding-bottom: 110px !important; /* 하단 고정 푸터(버튼) 가림 방지 */
+  padding-left: 14px;
+  padding-right: 14px;
+  overflow-y: auto !important; /* 모바일/태블릿 세로 스크롤 허용 */
+  -webkit-overflow-scrolling: touch; /* iOS/안드로이드 부드러운 스크롤 */
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* 슬림 스크롤바 */
+.result-large-content::-webkit-scrollbar {
+  width: 6px;
+}
+.result-large-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.result-large-content::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.25);
+  border-radius: 10px;
+}
+.result-large-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(139, 92, 246, 0.45);
 }
 
 .result-tab-bar {
@@ -1414,20 +1439,21 @@ input:checked + .slider:before {
   background-color: #F1F5F9;
   padding: 4px;
   border-radius: 12px;
-  margin-bottom: 6px;
+  margin-top: 2px;
+  margin-bottom: 10px;
   width: 100%;
-  max-width: 320px;
-  gap: 4px;
+  max-width: 340px;
+  gap: 6px;
   flex-shrink: 0;
 }
 
 .result-tab-btn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 9px 12px;
   border: none;
   background: transparent;
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: #64748B;
   cursor: pointer;
@@ -1444,14 +1470,13 @@ input:checked + .slider:before {
 }
 
 .large-frame-viewport {
-  flex: 1;
   width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
-  overflow: hidden;
+  overflow: visible;
   position: relative;
-  min-height: 0; /* flex 축소 허용 */
+  flex-shrink: 0;
 }
 
 .large-frame-card {
@@ -1459,8 +1484,8 @@ input:checked + .slider:before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
   width: 100%;
+  height: auto;
 }
 
 .large-frame-card.active {
@@ -1472,39 +1497,44 @@ input:checked + .slider:before {
   font-weight: 700;
   color: #8B5CF6;
   background: #F5F3FF;
-  padding: 3px 12px;
+  padding: 4px 14px;
   border-radius: 20px;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   border: 1px solid #DDD6FE;
   flex-shrink: 0;
 }
 
 .four-cut-frame-large {
-  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
-  max-height: calc(100vh - 220px);
   width: 100%;
   padding: 2px;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .four-cut-frame-large img {
-  height: 100%;
-  max-height: calc(100vh - 220px);
+  height: auto;
+  max-height: 500px;
   width: auto;
-  max-width: 100%;
-  object-fit: contain; /* 가로세로 비율 유지하며 화면 안에 4컷 전체가 쏙 들어가도록 */
+  max-width: 90%;
+  object-fit: contain; /* 가로세로 비율 유지 */
   border-radius: 8px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
   background-color: #ffffff;
 }
 
+@media (max-height: 700px) {
+  .four-cut-frame-large img {
+    max-height: 380px;
+  }
+}
+
 .frame-choice-status {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   color: #64748B;
-  margin-top: 4px;
+  margin-top: 8px;
+  margin-bottom: 16px;
   font-weight: 600;
   flex-shrink: 0;
 }
