@@ -2,16 +2,18 @@ Ultra-realistic studio portrait of the people in the input photograph transforme
 
 The input photograph may contain one or more people. The number of people can vary from photo to photo. Identify every visible person in the input image and transform each person into an age-appropriate teenager while strictly anchoring their individual facial identity and bone structure.
 
-CRITICAL ANATOMICAL IDENTITY & BONE STRUCTURE PRESERVATION:
+CRITICAL MULTI-PERSON INDIVIDUAL SUBJECT PRESERVATION:
 - Preserve the exact number of people visible in the input image.
 - Do not add any new people.
 - Do not remove any existing people.
 - Do not duplicate anyone.
 - Do not merge two people into one person.
+- RECOGNIZE AND TREAT EVERY SINGLE PERSON AS AN INDEPENDENT PRIMARY SUBJECT: If there are multiple people (e.g. 2 or more people), every individual must be individually identified and transformed into their own teenage counterpart with equal clarity, detail, and anatomical fidelity.
 - Preserve each person's individual gender.
-- Strictly anchor and preserve each person's unique facial bone structure, jawline contours, cheekbones, distinctive eye shape, eyelid creases, eyebrow curve, nose bridge and nostril shape, and lip contours directly derived from the input photograph.
-- The teenager MUST be undeniably and recognizably the EXACT same individual during their high school years, maintaining their personal facial features and biometric proportions. Do NOT substitute or alter with a generic idol, model, or anime face.
+- Strictly anchor and preserve each person's unique facial bone structure, jawline contours, cheekbones, distinctive eye shape, eyelid creases, eyebrow curve, nose bridge and nostril shape, and lip contours directly derived from their respective face in the input photograph.
+- The teenagers MUST be undeniably and recognizably the EXACT same individuals during their high school years, maintaining their personal facial features and biometric proportions. Do NOT substitute or alter with generic idol, model, or anime faces.
 - If wearing glasses, preserve the exact glasses frame, shape, color, and placement naturally on their face.
+- DEBLUR & SHARPEN RESTORATION: If any person in the input photo exhibits motion blur, soft focus, or camera blur, actively deblur, sharpen, and restore their facial features, eyes, and skin texture into crisp, crystal-clear focus. No person should be left blurry.
 - Do not assume that the people in this image are the same people as in any other image.
 
 HYPER-REALISTIC SKIN TEXTURE (ZERO OVER-SMOOTHING):
@@ -35,14 +37,15 @@ Preserve the original photograph's composition as much as possible:
 - If people are touching, hugging, or interacting, preserve the interaction.
 - Do not rearrange the people.
 
-BACKGROUND & LIGHTING:
-- Clean, neutral seamless photography studio background with soft neutral lighting (subtle light gray and soft beige tones).
-- Do not automatically change the background into a busy classroom or outdoor campus.
+SEAMLESS STUDIO BACKDROP & THREE-POINT LIGHTING (ZERO OPTICAL BLUR):
+- Background is a completely clean, solid, seamless photography studio cyclorama wall in subtle elegant light-gray and soft beige tones.
+- ABSOLUTELY ZERO OPTICAL BLUR, ZERO BOKEH, NO SHALLOW DEPTH OF FIELD. Dimensional subject separation is achieved purely through directional studio key lighting, balanced ambient fill, natural catchlights in every pupil, and tonal contrast against the solid wall, NOT through lens blurring.
 
-STUDIO DSLR PHOTOGRAPHY SPECIFICATIONS:
-- Shot on professional full-frame DSLR camera, 85mm prime portrait lens, f/2.8 aperture.
-- Soft directional key light with gentle falloff, clean neutral illumination, sharp focus on facial features and eyes, shallow depth of field, authentic true-to-life colors.
+STUDIO OPTICS & FULL PAN-FOCUS SPECIFICATIONS:
+- Shot on professional full-frame studio camera, f/8 group portrait aperture, deep pan-focus across ALL subjects in the frame.
+- Uniform, razor-sharp optical focus across EVERY person from edge to edge without any out-of-focus areas.
+- Soft directional key light with gentle falloff, clean neutral illumination, balanced fill, authentic true-to-life colors.
 - The final image should look like an authentic, high-resolution DSLR photograph of the people during their teenage high-school years (approximately 15–18 years old).
 
 STRICT EXCLUSIONS & NEGATIVE CONSTRAINTS:
-- plastic skin, porcelain doll face, airbrushed smoothness, heavy retouching, beauty filter, over-smoothed skin, generic anime/idol face, altered bone structure, CGI, 3D render, cartoon, digital painting, blur, distortion, adult or child appearance.
+- plastic skin, porcelain doll face, airbrushed smoothness, heavy retouching, beauty filter, over-smoothed skin, generic anime/idol face, altered bone structure, CGI, 3D render, cartoon, digital painting, adult or child appearance, bokeh, shallow depth of field, background blur, out-of-focus blur, blurry background, artificial blurring, lens blur, selective focus blurring other people, out-of-focus background person, blurry secondary face, motion blur, partial blur on human bodies, depth-of-field blur on faces.

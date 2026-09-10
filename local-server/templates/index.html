@@ -205,9 +205,9 @@
         <div class="header-desc">카메라를 보고 매 컷마다 멋진 포즈를 취해 보세요!</div>
       </header>
 
-      <div class="screen-content flex-column-content">
+      <div class="screen-content scrollable-content shoot-scrollable-content">
         <!-- 현재 적용 테마 뱃지 -->
-        <div style="text-align: center;">
+        <div style="text-align: center; width: 100%;">
           <div id="shoot-current-theme" class="current-theme-badge">⏳ 콘셉트: 인생 사계절 (연령 변환)</div>
         </div>
 
@@ -232,6 +232,18 @@
           </div>
         </div>
 
+        <!-- 다인원 또렷한 촬영 및 Windows 배경 흐림 해제 안내 배너 -->
+        <div class="camera-help-box">
+          <div class="camera-help-item">
+            <span class="help-icon">⚠️</span>
+            <span><strong>배경이 뿌옇게 흐린가요?</strong> Windows 우측 하단 빠른설정(<code>Win + A</code>)에서 <strong>'스튜디오 효과(배경 흐림)'</strong>를 끄시면 전원 선명하게 촬영됩니다!</span>
+          </div>
+          <div class="camera-help-item sub">
+            <span class="help-icon">👥</span>
+            <span><strong>다인원 꿀팁:</strong> 프레임 안쪽으로 가깝게 모여 서주시면 모든 분이 또렷하게 변환됩니다.</span>
+          </div>
+        </div>
+
         <!-- 촬영 화면 고퀄리티 모드 토글 스위치 바 -->
         <div class="shoot-quality-toggle-box">
           <span class="shoot-quality-label">💎 고퀄리티 모드 (gpt-image-2)</span>
@@ -241,7 +253,7 @@
           </label>
         </div>
 
-        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full">🚀 4컷 연사 시작</button>
+        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full btn-shoot-trigger">🚀 4컷 연사 시작</button>
       </div>
     </section>
 
@@ -698,10 +710,31 @@
       await initWebcam();
     });
 
-    // 웹캠 및 MediaRecorder 초기화
+    // 웹캠 및 MediaRecorder 초기화 (다인원 전체 선명도 보장 & OS/하드웨어 단 인위적 블러 차단)
     async function initWebcam() {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
+        const constraints = {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 960 },
+            // OS(Windows Studio Effects)/하드웨어의 단일인물 배경 블러 억제 및 연속 초점 제약
+            advanced: [
+              { backgroundBlur: false },
+              { focusMode: "continuous" },
+              { exposureMode: "continuous" }
+            ]
+          },
+          audio: false
+        };
+
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (constraintErr) {
+          // advanced 제약 미지원 브라우저/환경 호환 fallback
+          console.warn('Advanced constraints not supported, fallback to standard mode:', constraintErr);
+          mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
+        }
+
         const videoElem = document.getElementById('webcam-preview');
         videoElem.srcObject = mediaStream;
 
@@ -885,41 +918,75 @@
       const progText = document.getElementById('progress-percent-text');
 
       if (mainTitle) mainTitle.innerText = 'AI 인생 4컷 변환 중...';
-      if (statusText) statusText.innerText = '인화 준비 및 4컷 변환 진행 중...';
-      if (timerRemaining) timerRemaining.innerText = '⏳ 예상 남은 시간: 약 45초';
+      if (statusText) statusText.innerText = '다인원 안면 및 포즈 분석을 준비하고 있습니다...';
+      if (timerRemaining) timerRemaining.innerText = isHighQuality ? '⏳ 예상 소요 시간: 약 75~85초' : '⏳ 예상 소요 시간: 약 60~70초';
       if (completeBanner) completeBanner.style.display = 'none';
       if (progFill) progFill.style.width = '10%';
       if (progText) progText.innerText = '10%';
 
       if (statusPollInterval) clearInterval(statusPollInterval);
 
+      let currentDisplayProgress = 10;
+      // 다인원 및 고화질 모드 고려 기준 기본 기대 시간 (초)
+      const expectedTotalSec = isHighQuality ? 85 : 70;
+
       statusPollInterval = setInterval(async () => {
         const elapsedSec = Math.floor((Date.now() - pollStartTime) / 1000);
         
-        // 예상 남은 시간 계산 (기본 60초 기준 점진적 감소, 최소 5초)
-        const remainSec = Math.max(5, 60 - elapsedSec);
-        if (timerRemaining) {
-          timerRemaining.innerText = `⏳ 예상 남은 시간: 약 ${remainSec}초`;
-        }
+        let serverProg = 10;
+        let stepName = "";
+        let serverMsg = "";
 
         try {
           const res = await fetch(`/api/transform_status/${sId}`);
           if (res.ok) {
             const st = await res.json();
-            const prog = Math.min(98, Math.max(st.progress || 10, Math.min(95, Math.floor(elapsedSec * 1.6))));
-            if (progFill) progFill.style.width = `${prog}%`;
-            if (progText) progText.innerText = `${prog}%`;
-            
-            if (statusText) {
-              if (st.step_name) {
-                statusText.innerText = `${st.step_name} (${prog}%)`;
-              } else if (st.message) {
-                statusText.innerText = st.message;
-              }
-            }
+            serverProg = st.progress || 10;
+            stepName = st.step_name || "";
+            serverMsg = st.message || "";
           }
         } catch (e) {
           console.log('Status polling error:', e);
+        }
+
+        // 지능형 프로그레스 계산:
+        // 서버의 실제 진행률과 시간 경과 기반 진행률을 부드럽게 결합
+        const timeRatio = Math.min(0.96, elapsedSec / expectedTotalSec);
+        const timeBasedProg = Math.floor(10 + timeRatio * 85); // 최대 95%
+        
+        // 서버 진행률과 시간 기반 진행률 중 더 높은 값으로 전진 (절대 뒤로 가지 않음)
+        const targetProgress = Math.max(serverProg, timeBasedProg);
+        if (targetProgress > currentDisplayProgress) {
+          currentDisplayProgress = Math.min(98, currentDisplayProgress + Math.max(1, Math.floor((targetProgress - currentDisplayProgress) * 0.4)));
+        } else if (elapsedSec > expectedTotalSec && currentDisplayProgress < 98) {
+          // 기대 시간 초과 시 96% -> 97% -> 98%로 미세 전진 (멈춤 느낌 방지)
+          if (Math.random() > 0.4) currentDisplayProgress = Math.min(98, currentDisplayProgress + 1);
+        }
+
+        if (progFill) progFill.style.width = `${currentDisplayProgress}%`;
+        if (progText) progText.innerText = `${currentDisplayProgress}%`;
+
+        // 지능형 남은 시간 (Smart ETA) 표기: 5초에서 고정되지 않고 세밀하게 피드백
+        if (timerRemaining) {
+          if (currentDisplayProgress >= 95 || elapsedSec >= expectedTotalSec) {
+            timerRemaining.innerText = `✨ 다인원 고화질 렌더링 마무리 중... (잠시만 기다려주세요)`;
+          } else {
+            const estRemain = Math.max(6, expectedTotalSec - elapsedSec);
+            timerRemaining.innerText = `⏳ 예상 남은 시간: 약 ${estRemain}초`;
+          }
+        }
+
+        // 상태 메시지 갱신 (중복 퍼센트 표기 제거하고 명료한 단계 안내)
+        if (statusText) {
+          if (stepName && serverMsg) {
+            statusText.innerText = `${stepName} — ${serverMsg}`;
+          } else if (stepName) {
+            statusText.innerText = stepName;
+          } else if (serverMsg) {
+            statusText.innerText = serverMsg;
+          } else {
+            statusText.innerText = 'AI 생애 주기 변환을 진행 중입니다...';
+          }
         }
       }, 1000);
     }

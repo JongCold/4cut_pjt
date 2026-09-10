@@ -301,6 +301,8 @@
     const urlParams = new URLSearchParams(window.location.search);
     const imgId = urlParams.get('img');
     const vidId = urlParams.get('vid');
+    const gDriveImgId = urlParams.get('gid');
+    const gDriveVidId = urlParams.get('gvid');
     const sessionIdParam = urlParams.get('sid');
     const serverOrigin = urlParams.get('srv') || '';
 
@@ -313,6 +315,16 @@
     let imageFileName = 'ai_4cut_photo.jpg';
     let videoFileName = 'behind_video.mp4';
     let cleanupScheduled = false;
+
+    // 동영상 2배속 자동 가속 이벤트
+    if (videoElem) {
+      videoElem.addEventListener('loadedmetadata', () => {
+        videoElem.playbackRate = 2.0;
+      });
+      videoElem.addEventListener('play', () => {
+        videoElem.playbackRate = 2.0;
+      });
+    }
 
     // 다운로드 완료 시 서버 세션 파일 자동 파기 요청 (사진과 영상 둘 다 받을 수 있도록 60초 유예 후 삭제)
     function scheduleDownloadCleanup() {
@@ -387,7 +399,7 @@
       }, 100);
     }
 
-    // 1-Click 다이렉트 즉시 저장 함수 (구글 로그인/계정 선택/점 3개 메뉴 완전 우회)
+    // 1-Click 다이렉트 즉시 저장 함수
     function downloadMedia(type) {
       if (type === 'photo') {
         if (!imageBlobUrl) {
@@ -419,69 +431,83 @@
       }, 500);
     }
 
-    // 1. 완성본 4컷 사진 로딩 (Blob 메모리 로딩)
+    // 1. 완성본 4컷 사진 로딩 (로컬 서버 우선 시도 후 Google Drive 클라우드 자동 Fallback)
     async function loadPhoto() {
-      if (!imgId) return;
-      imageFileName = imgId.endsWith('.jpg') ? imgId : `${imgId}.jpg`;
+      const effectiveImgId = gDriveImgId || imgId;
+      if (!effectiveImgId) return;
+      imageFileName = effectiveImgId.endsWith('.jpg') ? effectiveImgId : `${effectiveImgId}.jpg`;
 
-      if (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_') || imgId.endsWith('.jpg')) {
-        const baseUrl = serverOrigin ? serverOrigin : '';
-        const targetUrl = `${baseUrl}/uploads/${imgId}`;
-        
+      // 1) 로컬 서버 URL이 제공되고 로컬 파일명인 경우
+      if (serverOrigin && (imgId && (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')))) {
+        const targetUrl = `${serverOrigin}/uploads/${imgId}`;
         try {
-          const response = await fetch(targetUrl, {
-            headers: { 'ngrok-skip-browser-warning': 'true' }
-          });
-          const blob = await response.blob();
-          imageBlobUrl = URL.createObjectURL(blob);
-          imgElem.src = imageBlobUrl;
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5초 내 응답 없으면 클라우드로 전환
+          const response = await fetch(targetUrl, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (response.ok) {
+            const blob = await response.blob();
+            imageBlobUrl = URL.createObjectURL(blob);
+            imgElem.src = imageBlobUrl;
+            return;
+          }
         } catch (err) {
-          console.error('사진 로딩 실패:', err);
-          imgElem.src = targetUrl;
-          imageBlobUrl = targetUrl;
+          console.warn('로컬 서버 접속 불가, 클라우드 스토리지(Google Drive)로 자동 전환합니다.', err);
         }
-      } else {
-        // 구글 드라이브 ID 방식인 경우에도 다이렉트 썸네일 스트림 수신
-        const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${imgId}`;
+      }
+
+      // 2) Google Drive 클라우드 스트림 모드 (LTE/5G 외부 공유 핵심)
+      const targetGid = gDriveImgId || (imgId && !imgId.includes('_') ? imgId : null);
+      if (targetGid) {
+        const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${targetGid}`;
         imgElem.src = gdriveCdnUrl;
         imageBlobUrl = gdriveCdnUrl;
+        
+        // 인메모리 Blob 다운로드 백그라운드 준비
+        fetch(gdriveCdnUrl)
+          .then(res => res.blob())
+          .then(blob => { imageBlobUrl = URL.createObjectURL(blob); })
+          .catch(() => {});
+
         imgElem.onerror = () => {
-          imgElem.src = `https://drive.google.com/thumbnail?id=${imgId}&sz=w1600`;
-          imageBlobUrl = imgElem.src;
+          const fallbackUrl = `https://drive.google.com/thumbnail?id=${targetGid}&sz=w1600`;
+          imgElem.src = fallbackUrl;
+          imageBlobUrl = fallbackUrl;
         };
       }
     }
 
-    // 2. 전 과정 비하인드 동영상 로딩 (Blob 메모리 로딩)
+    // 2. 전 과정 비하인드 동영상 로딩 (로컬 서버 우선 시도 후 Google Drive 클라우드 자동 Fallback)
     async function loadVideo() {
-      if (!vidId) return;
-      videoFileName = vidId.endsWith('.mp4') ? vidId : `${vidId}.mp4`;
+      const effectiveVidId = gDriveVidId || vidId;
+      if (!effectiveVidId) return;
+      videoFileName = effectiveVidId.endsWith('.mp4') ? effectiveVidId : `${effectiveVidId}.mp4`;
 
-      if (vidId.startsWith('behind_video_') || vidId.endsWith('.mp4') || vidId.endsWith('.webm')) {
-        const baseUrl = serverOrigin ? serverOrigin : '';
-        const targetUrl = `${baseUrl}/uploads/${vidId}`;
-
-        // 직접 URL을 video 태그의 src로 먼저 지정하여 즉시 스트리밍 및 버퍼링 지원
-        videoElem.src = targetUrl;
-        videoSource.src = targetUrl;
-        videoBlobUrl = targetUrl;
-        
+      // 1) 로컬 서버 URL이 제공되고 로컬 파일명인 경우
+      if (serverOrigin && (vidId && (vidId.startsWith('behind_video_') || vidId.endsWith('.mp4')))) {
+        const targetUrl = `${serverOrigin}/uploads/${vidId}`;
         try {
-          // 비동기 fetch를 통해 다운로드용 Blob도 백그라운드 준비
-          fetch(targetUrl, { headers: { 'ngrok-skip-browser-warning': 'true' } })
-            .then(res => res.blob())
-            .then(blob => {
-              videoBlobUrl = URL.createObjectURL(blob);
-            }).catch(e => console.log('Blob fetch fallback to direct URL:', e));
-          
-          videoElem.load();
-          videoElem.play().catch(e => console.log('Auto-play suppressed by browser:', e));
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 2500);
+          const headRes = await fetch(targetUrl, { method: 'HEAD', signal: controller.signal });
+          clearTimeout(timeoutId);
+          if (headRes.ok) {
+            videoElem.src = targetUrl;
+            videoSource.src = targetUrl;
+            videoBlobUrl = targetUrl;
+            videoElem.load();
+            videoElem.play().catch(e => console.log('Auto-play suppressed:', e));
+            return;
+          }
         } catch (err) {
-          console.error('동영상 로딩 예외:', err);
-          videoElem.src = targetUrl;
+          console.warn('로컬 서버 비디오 접근 불가, 클라우드 모드로 전환합니다.');
         }
-      } else {
-        const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${vidId}`;
+      }
+
+      // 2) Google Drive 클라우드 모드
+      const targetGvid = gDriveVidId || (vidId && !vidId.includes('_') ? vidId : null);
+      if (targetGvid) {
+        const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${targetGvid}`;
         videoElem.src = gdriveVidUrl;
         videoSource.src = gdriveVidUrl;
         videoBlobUrl = gdriveVidUrl;

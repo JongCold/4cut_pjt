@@ -644,13 +644,10 @@ async def api_transform_four_cut(
         single_orig_filenames.append(item["single_filename"])
         single_orig_paths.append(item["single_path"])
         
-        # AI 변환 완료 대기 (비동기 처리)
-        transformed_img = await item["task"]
-        transformed_pil_images.append(transformed_img)
-
-        # 각 컷 변환 완료 시 실시간 상태 갱신
-        s_num, s_prog, s_title, s_desc = cut_finish_msgs.get(idx, (idx+1, 20*(idx+1), "완료", "처리 중"))
-        set_progress(session_id, s_num, s_prog, s_title, s_desc)
+    # AI 4컷 변환 결과 병렬 동시 취합 (지연 최소화)
+    tasks = [TRANSFORM_TASKS[session_id][idx]["task"] for idx in range(4)]
+    transformed_pil_images = await asyncio.gather(*tasks)
+    set_progress(session_id, 4, 82, "AI 4컷 실사 변환 완료", "다인원 생애 사계절 고화질 변환 수집 완료")
         
     # 메모리 정리
     del TRANSFORM_TASKS[session_id]
@@ -739,13 +736,22 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (스마트폰 직결 LAN IP 지원)
+    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (스마트폰 직결 LAN IP 및 Vercel 외부 도메인 자동 전환)
     lan_ip = get_host_lan_ip()
     port = request.base_url.port or 8000
     server_origin = f"http://{lan_ip}:{port}"
     
-    download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
-    local_download_url = download_url
+    # Vercel 외부 공유 도메인 설정 (환경변수 VERCEL_PUBLIC_URL 지원, 기본값: https://4cut-pjt.vercel.app)
+    vercel_domain = os.environ.get("VERCEL_PUBLIC_URL", "https://4cut-pjt.vercel.app").rstrip("/")
+    
+    # 구글 드라이브 클라우드 업로드 성공 시: 전 세계 어디서나(LTE/5G) 열리는 Vercel 외부 공유 URL 우선 발급
+    if img_drive_id or vid_drive_id:
+        download_url = f"{vercel_domain}/download.html?gid={img_drive_id or ''}&gvid={vid_drive_id or ''}&img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+    else:
+        # 로컬 Fallback 시: 동일 Wi-Fi LAN IP 주소 발급
+        download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+        
+    local_download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AI 4-CUT STUDIO | 태블릿 & 노트북 Kiosk 포토부스</title>
+  <title>AI 4-CUT STUDIO | 인생 4컷 포토부스</title>
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,78 +12,47 @@
   
   <!-- CSS 스타일 가이드 연동 -->
   <link rel="stylesheet" href="./style.css">
-  <style>
-    .server-config-bar {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      z-index: 150;
-    }
-    .btn-config {
-      background: rgba(255, 255, 255, 0.85);
-      border: 1px solid var(--color-divider);
-      border-radius: 20px;
-      padding: 6px 12px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--color-text-main);
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-    }
-    .config-modal {
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 300;
-      padding: 20px;
-    }
-    .config-modal.active {
-      display: flex;
-    }
-    .config-card {
-      background: white;
-      padding: 24px;
-      border-radius: 20px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-    .config-input {
-      width: 100%;
-      padding: 10px 14px;
-      border: 1px solid var(--color-divider);
-      border-radius: 10px;
-      font-size: 0.9rem;
-      margin: 10px 0 16px 0;
-    }
-  </style>
 </head>
 <body>
 
   <div class="app-container">
 
-    <!-- 서버 API 설정 버튼 -->
+    <!-- 서버 API 설정 버튼 (Vercel 태블릿 연동) -->
     <div class="server-config-bar">
-      <button id="btn-open-config" class="btn-config">⚙️ 백엔드 연동 설정</button>
+      <button id="btn-open-config" class="btn-config">⚙️ 백엔드 연동</button>
     </div>
     
     <!-- 서버 API 설정 모달 -->
     <div id="config-modal" class="config-modal">
       <div class="config-card">
-        <h3 style="font-size: 1.1rem; margin-bottom: 6px;">🌐 백엔드 서버 URL 설정</h3>
-        <p style="font-size: 0.8rem; color: #64748B; line-height: 1.4;">
-          로컬 PC에서 실행 중인 FastAPI 서버 주소를 입력하세요.<br>
-          (예: http://localhost:8000 또는 https://xxxx.ngrok-free.app)
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+          <h3 style="font-size: 1.15rem; font-weight: 800; color: #1E293B;">🌐 백엔드 서버 연동 설정</h3>
+          <button id="btn-close-config" style="background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #94A3B8;">✕</button>
+        </div>
+        <p style="font-size: 0.82rem; color: #64748B; line-height: 1.5; margin-bottom: 12px;">
+          현장 Host PC(FastAPI) 주소를 입력하세요.<br>
+          • <strong>동일 Wi-Fi:</strong> <code>http://192.168.X.X:8000</code><br>
+          • <strong>외부 터널링:</strong> <code>https://xxxx.trycloudflare.com</code> 또는 <code>https://xxxx.ngrok-free.app</code>
         </p>
-        <input type="text" id="api-base-url" class="config-input" value="http://localhost:8000" placeholder="http://localhost:8000">
-        <button id="btn-save-config" class="btn btn-primary btn-large w-full">저장 및 연동하기</button>
+        
+        <div id="config-conn-status" class="config-status-badge offline">
+          <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:currentColor;"></span>
+          <span id="config-conn-text">연결 확인 필요</span>
+        </div>
+
+        <input type="text" id="api-base-url" class="config-input" placeholder="http://192.168.0.x:8000 또는 https://xxxx.trycloudflare.com">
+
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-test-config" class="btn btn-secondary" style="flex: 1; padding: 12px; font-size: 0.9rem;">⚡ 연결 테스트</button>
+          <button id="btn-save-config" class="btn btn-primary" style="flex: 1.5; padding: 12px; font-size: 0.9rem;">💾 저장 및 연동</button>
+        </div>
+        
+        <p style="font-size: 0.72rem; color: #94A3B8; margin-top: 14px; line-height: 1.4;">
+          * 태블릿 브라우저에서 '안전하지 않은 콘텐츠 허용' 설정을 권장하며, Cloudflare Tunnel을 사용하시면 HTTPS 환경에서도 보안 경고 없이 100% 매끄럽게 통신됩니다.
+        </p>
       </div>
     </div>
-
+    
     <!-- 필터 미선택 경고 토스트 알림 -->
     <div id="toast-alert" class="toast-alert">
       <div class="toast-content">
@@ -92,12 +61,36 @@
       </div>
     </div>
 
-    <!-- AI 변환 로딩 오버레이 -->
+    <!-- AI 변환 & 인화 실시간 간결 로딩 오버레이 (미니멀 프리미엄 UI) -->
     <div id="loading-overlay" class="loading-overlay">
-      <div class="loading-spinner-box">
-        <div class="quantum-spinner"></div>
-        <div class="loading-title">AI 4컷 이미지를 생성 중입니다</div>
-        <div class="loading-desc">오픈소스 Stable Diffusion 파이프라인으로 화질을 높이고 스타일을 전이하는 중...</div>
+      <div class="dynamic-loading-card simple-loading-card">
+        <!-- 상단 헤더 & 회전 스피너 -->
+        <div class="loading-header-area">
+          <div class="quantum-spinner-wrap">
+            <div class="quantum-spinner"></div>
+            <div class="camera-center-icon">✨</div>
+          </div>
+          <h2 id="loading-main-title" class="loading-dynamic-title">AI 인생 4컷 변환 중...</h2>
+        </div>
+
+        <!-- 실시간 프로그레스 게이지 & 남은 시간 -->
+        <div class="progress-section">
+          <div class="progress-meta-row">
+            <span id="loading-status-text" class="progress-status-highlight">인화 준비 및 4컷 변환 중...</span>
+            <span id="progress-percent-text" class="progress-percent-text font-mono">10%</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 10%;"></div>
+          </div>
+          <div class="time-meta-row simple-time-row">
+            <span id="loading-timer-remaining" class="timer-badge highlight">⏳ 예상 남은 시간: 약 45초</span>
+          </div>
+        </div>
+
+        <!-- 변환 완료 이벤트성 배너 (100% 도달 시 노출) -->
+        <div id="loading-complete-banner" class="loading-complete-banner" style="display: none;">
+          <div class="complete-badge">🎉 AI 4컷 변환 완료!</div>
+        </div>
       </div>
     </div>
 
@@ -107,13 +100,20 @@
     <section id="screen-home" class="screen active">
       <div class="hero-section">
         <div class="logo-area">
+          <div class="header-top-status-bar">
+            <button id="btn-open-diagnostics" class="diagnostics-status-pill" title="현장 네트워크 & IoT 연동 상태 진단">
+              <span class="status-indicator-dot online"></span>
+              <span id="quick-status-text">네트워크 정상 (0ms)</span>
+              <span class="gear-icon">⚙️</span>
+            </button>
+          </div>
           <div class="logo-icon-wrap">
             <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 Z" fill="currentColor"/>
+              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor"/>
             </svg>
           </div>
           <h1 class="brand-title">AI 4-CUT STUDIO</h1>
-          <p class="brand-subtitle">태블릿 & 노트북 브라우저 카메라 연동 포토부스</p>
+          <p class="brand-subtitle">나만의 프롬프트로 완성하는 감성 인생 4컷 포토부스</p>
         </div>
 
         <div class="hero-visual">
@@ -148,10 +148,40 @@
       </header>
 
       <div class="screen-content">
+        <!-- 상단 고퀄리티 모드 토글 바 -->
+        <div class="quality-toggle-bar">
+          <div class="quality-info">
+            <span class="quality-icon">💎</span>
+            <div>
+              <div class="quality-title">고퀄리티 AI 생성 모드</div>
+              <div class="quality-subtitle" id="quality-desc-text">초고속 gpt-image-1.5 모델 가동 중</div>
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="toggle-high-quality">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
         <div class="filter-carousel-wrapper scrollable-content">
           <div class="filter-carousel">
             
-            <div class="filter-card selected" data-style="original">
+            <!-- [신규 대표 테마] ⏳ 인생 사계절 (연령 변환) -->
+            <div class="filter-card selected" data-style="time_travel">
+              <div class="filter-badge-popular">👑 BEST 인기</div>
+              <div class="filter-img-holder">
+                <div class="time-travel-preview">
+                  <div class="time-slice slice-child">👶<br>유년기</div>
+                  <div class="time-slice slice-teen">🧑‍🎓<br>학창시절</div>
+                  <div class="time-slice slice-adult">✨<br>현재모습</div>
+                  <div class="time-slice slice-elder">👵<br>노년기</div>
+                </div>
+              </div>
+              <div class="filter-name">⏳ 인생 사계절 (연령 변환)</div>
+              <div class="filter-subdesc">어린이부터 노년까지 한눈에</div>
+            </div>
+
+            <div class="filter-card" data-style="original">
               <div class="filter-img-holder">
                 <div style="width:100%;height:100%;background:linear-gradient(135deg, #E2E8F0, #CBD5E1);display:flex;align-items:center;justify-content:center;font-size:2rem;">📷</div>
               </div>
@@ -208,10 +238,15 @@
     <section id="screen-shoot" class="screen">
       <header class="fixed-header">
         <div class="header-title">사진 촬영</div>
-        <div class="header-desc">태블릿/노트북 카메라를 보고 연속 촬영을 진행하세요!</div>
+        <div class="header-desc">카메라를 보고 매 컷마다 멋진 포즈를 취해 보세요!</div>
       </header>
 
-      <div class="screen-content flex-column-content">
+      <div class="screen-content scrollable-content shoot-scrollable-content">
+        <!-- 현재 적용 테마 뱃지 -->
+        <div style="text-align: center; width: 100%;">
+          <div id="shoot-current-theme" class="current-theme-badge">⏳ 콘셉트: 인생 사계절 (연령 변환)</div>
+        </div>
+
         <div class="timer-container">
           <div class="shoot-timer-wrap">
             <svg class="timer-svg" viewBox="0 0 100 100">
@@ -223,6 +258,9 @@
           <div id="shoot-counter-badge" class="shoot-counter-badge">1 / 4 컷</div>
         </div>
 
+        <!-- 컷별 실시간 변환 가이드 뱃지 -->
+        <div id="shoot-cut-guide" class="cut-guide-badge">👶 1컷 준비: 어린이(유년기) 변환 예정</div>
+
         <div class="camera-viewport-container">
           <div class="camera-viewport">
             <video id="webcam-preview" autoplay playsinline muted></video>
@@ -230,7 +268,28 @@
           </div>
         </div>
 
-        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full">🚀 4컷 연사 시작</button>
+        <!-- 다인원 또렷한 촬영 및 Windows 배경 흐림 해제 안내 배너 -->
+        <div class="camera-help-box">
+          <div class="camera-help-item">
+            <span class="help-icon">⚠️</span>
+            <span><strong>배경이 뿌옇게 흐린가요?</strong> Windows 우측 하단 빠른설정(<code>Win + A</code>)에서 <strong>'스튜디오 효과(배경 흐림)'</strong>를 끄시면 전원 선명하게 촬영됩니다!</span>
+          </div>
+          <div class="camera-help-item sub">
+            <span class="help-icon">👥</span>
+            <span><strong>다인원 꿀팁:</strong> 프레임 안쪽으로 가깝게 모여 서주시면 모든 분이 또렷하게 변환됩니다.</span>
+          </div>
+        </div>
+
+        <!-- 촬영 화면 고퀄리티 모드 토글 스위치 바 -->
+        <div class="shoot-quality-toggle-box">
+          <span class="shoot-quality-label">💎 고퀄리티 모드 (gpt-image-2)</span>
+          <label class="switch">
+            <input type="checkbox" id="toggle-shoot-high-quality">
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full btn-shoot-trigger">🚀 4컷 연사 시작</button>
       </div>
     </section>
 
@@ -272,6 +331,9 @@
       </footer>
     </section>
 
+    <!-- ==========================================
+         [화면 5/6] 생성 결과 비교 (AI vs 원본)
+         ========================================== -->
     <!-- ==========================================
          [화면 5/6] 변환 완료 상세 뷰 (AI vs 원본 대형 개별 탭 뷰)
          ========================================== -->
@@ -328,60 +390,362 @@
         <div class="header-desc">QR 코드를 스캔하여 완성본과 비하인드 영상을 받으세요!</div>
       </header>
 
-      <div class="screen-content center-content">
+      <div class="screen-content center-content finish-scrollable">
         <div class="finish-panel">
+          <!-- 미디어 프리뷰 2열 그리드 (4컷 사진 + 2배속 영상) -->
+          <div class="finish-media-preview-grid">
+            <div id="btn-thumb-preview-card" class="preview-mini-card clickable-thumb" title="클릭하면 4컷을 큰 화면으로 다시 봅니다">
+              <div class="mini-card-badge">📸 4컷 완성본 <span class="badge-zoom-hint">(크게 보기 🔍)</span></div>
+              <div class="mini-thumb-box">
+                <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
+              </div>
+            </div>
+            <div class="preview-mini-card">
+              <div class="mini-card-badge">⚡ 2배속 비하인드 캠</div>
+              <div class="mini-video-box">
+                <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
+                  <source id="kiosk-video-source" src="" type="video/mp4">
+                </video>
+              </div>
+            </div>
+          </div>
+
           <div class="qr-container-box">
             <div class="qrcode-wrapper">
-              <img id="qr-code-img" width="180" height="180" src="" alt="QR Code">
+              <img id="qr-code-img" width="160" height="160" src="" alt="QR Code">
             </div>
             <p class="qr-info-text">
-              스마트폰 카메라로 QR 코드를 스캔하면<br>
-              <strong>구글 드라이브(사진/영상)</strong>에서<br>
-              완성본을 모바일로 다운로드할 수 있습니다.<br>
-              <span style="font-size:0.78rem;color:#94A3B8;">(개인정보 보호법에 의거 24시간 후 자동 파기)</span>
+              스마트폰 카메라로 <strong>QR 코드를 스캔</strong>하면<br>
+              <strong>4컷 완성본 사진</strong>과 <strong>2배속 비하인드 영상</strong>을<br>
+              로그인 없이 1초 만에 스마트폰에 즉시 다운로드할 수 있습니다.<br>
+              <span style="font-size:0.75rem;color:#94A3B8;">(개인정보 보호법 준수 24시간 후 자동 영구 파기)</span>
             </p>
           </div>
         </div>
       </div>
 
-      <footer class="fixed-footer">
-        <div class="split-buttons">
-          <button id="btn-print-modal" class="btn btn-secondary">🖨️ 인화 출력</button>
-          <button id="btn-reset-home" class="btn btn-primary">🏠 처음으로</button>
+      <footer class="fixed-footer finish-fixed-footer">
+        <div class="finish-action-grid">
+          <!-- 1행: 4컷 다시보기 & 엽서 인화 출력 (50:50 분할) -->
+          <div class="finish-dual-btn-row">
+            <button id="btn-back-to-result" class="btn btn-action-dual btn-back-dual">
+              ◀ 4컷 다시보기
+            </button>
+            <button id="btn-print-modal" class="btn btn-action-dual btn-print-dual">
+              🖨️ 엽서 인화 출력
+            </button>
+          </div>
+          <!-- 2행: 처음으로 (새로운 촬영) 전폭 버튼 -->
+          <button id="btn-reset-home" class="btn btn-home-full">
+            🏠 처음으로 (새로운 촬영)
+          </button>
         </div>
       </footer>
     </section>
+
+    <!-- Canon SELPHY CP1500 무선 인화 모달 -->
+    <div id="modal-print" class="modal-overlay">
+      <div class="modal-card print-kiosk-modal">
+        <button id="modal-close" class="modal-close-btn" disabled>✕</button>
+        
+        <div class="modal-header">
+          <div class="print-animation">
+            <div class="printer-pulse">🖨️</div>
+          </div>
+          <h3 class="print-modal-title">Canon SELPHY CP1500 무선 인화 중</h3>
+          <p class="print-modal-sub">4x6 엽서 (1200x1800 300DPI) 듀얼 스트립 출력</p>
+        </div>
+
+        <div class="modal-body">
+          <!-- 45초 카운트다운 프로그레스 바 -->
+          <div class="print-timer-card">
+            <div class="print-timer-meta">
+              <span id="print-pass-status" class="print-pass-badge">🟡 1차 왕복: Yellow(노랑) 현색 중</span>
+              <span id="print-countdown-text" class="print-countdown-text">45초</span>
+            </div>
+            <div class="print-progress-track">
+              <div id="print-progress-bar" class="print-progress-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+
+          <!-- 4-Pass 실시간 왕복 상태 인디케이터 -->
+          <div class="four-pass-stepper">
+            <div class="pass-chip active" id="pass-chip-1">
+              <div class="pass-chip-circle" style="background:#FACC15;"></div>
+              <span>1. 노랑</span>
+            </div>
+            <div class="pass-chip" id="pass-chip-2">
+              <div class="pass-chip-circle" style="background:#F43F5E;"></div>
+              <span>2. 빨강</span>
+            </div>
+            <div class="pass-chip" id="pass-chip-3">
+              <div class="pass-chip-circle" style="background:#0EA5E9;"></div>
+              <span>3. 파랑</span>
+            </div>
+            <div class="pass-chip" id="pass-chip-4">
+              <div class="pass-chip-circle" style="background:#A855F7;"></div>
+              <span>4. 코팅</span>
+            </div>
+          </div>
+
+          <!-- 하드웨어 고장 방지 필수 안전 경고 배너 -->
+          <div class="hardware-safety-alert">
+            <div class="safety-icon-pulse">⚠️</div>
+            <div class="safety-text-group">
+              <strong>사진이 앞뒤로 4번 왕복합니다!</strong>
+              <p>인화가 완전히 끝나 트레이에 멈출 때까지 <u>절대 손으로 잡아당기거나 만지지 마세요.</u> (기기 기어 파손 방지)</p>
+            </div>
+          </div>
+
+          <!-- 카세트 18매 용지 잔여량 정보 -->
+          <div class="cartridge-status-row">
+            <span class="cartridge-label">📄 용지 카세트 상태:</span>
+            <span id="cartridge-sheet-badge" class="cartridge-badge">잔여 18 / 18매 (정상)</span>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-print-confirm" class="btn btn-primary w-full" disabled>
+            ⏳ 인화가 진행 중입니다... (약 45초)
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 현장 네트워크 & IoT 연동 진단 모달 (모니터링 대시보드) -->
+    <div id="modal-diagnostics" class="modal-overlay">
+      <div class="modal-card diagnostics-modal">
+        <button id="diagnostics-close" class="modal-close-btn">✕</button>
+
+        <div class="modal-header">
+          <div class="diagnostics-icon-wrap">🛠️</div>
+          <h3 class="diagnostics-title">현장 네트워크 & IoT 연동 진단기</h3>
+          <p class="diagnostics-sub">태블릿 ⇄ Host PC ⇄ Canon CP1500 통신 상태 모니터링</p>
+        </div>
+
+        <div class="modal-body diagnostics-body">
+          <!-- 1. 태블릿 ⇄ Host PC 통신 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">📱</span>
+                <strong>태블릿 ⇄ Host PC 통신</strong>
+              </div>
+              <span id="diag-ping-badge" class="diag-badge badge-green">측정 중...</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">Host PC 서버 IP:</span>
+                <span id="diag-host-ip" class="diag-val font-mono">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">태블릿 클라이언트 IP:</span>
+                <span id="diag-client-ip" class="diag-val font-mono">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">동일 서브넷 (동일 Wi-Fi):</span>
+                <span id="diag-subnet-status" class="diag-val font-bold text-green">확인 중...</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">API 왕복 응답 지연 (Latency):</span>
+                <span id="diag-latency-val" class="diag-val font-mono font-bold">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Canon SELPHY CP1500 인화기 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">🖨️</span>
+                <strong>Canon SELPHY CP1500 인화기</strong>
+              </div>
+              <span id="diag-printer-badge" class="diag-badge badge-green">감지 중...</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">드라이버 감지:</span>
+                <span id="diag-printer-name" class="diag-val font-bold">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">용지 카세트 잔여량:</span>
+                <span id="diag-cartridge-sheets" class="diag-val font-bold text-green">-</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">출력 용지 규격:</span>
+                <span class="diag-val">4x6 엽서 (1200x1800 300DPI 2분할)</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">누적 인쇄 성공:</span>
+                <span id="diag-print-total" class="diag-val font-mono">0회</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. 클라우드 및 인터넷 통신 카드 -->
+          <div class="diag-card">
+            <div class="diag-card-header">
+              <div class="diag-card-title">
+                <span class="diag-bullet">☁️</span>
+                <strong>클라우드 & AI API 연동</strong>
+              </div>
+              <span id="diag-cloud-badge" class="diag-badge badge-green">정상</span>
+            </div>
+            <div class="diag-card-content">
+              <div class="diag-row">
+                <span class="diag-label">Google Drive 백업:</span>
+                <span id="diag-gdrive-status" class="diag-val text-green font-bold">연결됨</span>
+              </div>
+              <div class="diag-row">
+                <span class="diag-label">OpenAI 연령 변환 모델:</span>
+                <span id="diag-openai-status" class="diag-val text-green font-bold">정상 구성</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 현장 1장 시험 인쇄 액션 영역 -->
+          <div class="diag-test-print-box">
+            <div class="test-print-desc">
+              <strong>🧪 현장 테스트 인쇄 (1장)</strong>
+              <p>행사 시작 전 CP1500의 4색 컬러 밴드 발색과 300 DPI 엽서 정렬 상태를 즉시 시험 출력합니다.</p>
+            </div>
+            <button id="btn-diag-test-print" class="btn btn-primary btn-sm">
+              🖨️ 테스트 엽서 1장 출력
+            </button>
+          </div>
+        </div>
+
+        <div class="modal-footer diagnostics-footer">
+          <button id="btn-refresh-diagnostics" class="btn btn-outline-purple w-full">
+            🔄 실시간 통신 상태 다시 확인 (Ping)
+          </button>
+        </div>
+      </div>
+    </div>
 
   </div>
 
   <!-- JavaScript 연동 -->
   <script>
+    // ==========================================================================
+    // [Vercel & 태블릿 특화] 백엔드 API 서버 연동 관리 모듈
+    // ==========================================================================
+    const DEFAULT_LOCAL_API = 'http://localhost:8000';
+    
+    function getApiBaseUrl() {
+      // 로컬 포트(8000번 등 백엔드에서 직접 서빙된 경우)는 상대경로 우선
+      if (window.location.port === '8000') {
+        return '';
+      }
+      const saved = localStorage.getItem('fourcuts_backend_url');
+      if (saved && saved.trim()) {
+        return saved.trim().replace(/\/+$/, '');
+      }
+      return DEFAULT_LOCAL_API;
+    }
+
+    function setApiBaseUrl(url) {
+      const trimmed = (url || '').trim().replace(/\/+$/, '');
+      if (trimmed) {
+        localStorage.setItem('fourcuts_backend_url', trimmed);
+      } else {
+        localStorage.removeItem('fourcuts_backend_url');
+      }
+    }
+
+    // 백엔드 설정 모달 DOM 바인딩
+    const configModal = document.getElementById('config-modal');
+    const btnOpenConfig = document.getElementById('btn-open-config');
+    const btnCloseConfig = document.getElementById('btn-close-config');
+    const inputApiUrl = document.getElementById('api-base-url');
+    const btnTestConfig = document.getElementById('btn-test-config');
+    const btnSaveConfig = document.getElementById('btn-save-config');
+    const connStatus = document.getElementById('config-conn-status');
+    const connText = document.getElementById('config-conn-text');
+
+    function updateConfigModalStatus(online, message) {
+      if (connStatus) {
+        connStatus.className = 'config-status-badge ' + (online ? 'online' : 'offline');
+      }
+      if (connText) {
+        connText.innerText = message || (online ? '백엔드 정상 연결됨' : '연결 안 됨');
+      }
+    }
+
+    async function testBackendConnection(urlToTest) {
+      const target = (urlToTest || '').trim().replace(/\/+$/, '');
+      if (!target) {
+        updateConfigModalStatus(false, '서버 주소를 입력하세요');
+        return false;
+      }
+      if (connText) connText.innerText = '연결 확인 중...';
+      try {
+        const testRes = await fetch(`${target}/api/diagnostics/health`, { method: 'GET', mode: 'cors' });
+        if (testRes.ok) {
+          updateConfigModalStatus(true, '✅ 백엔드 정상 연결됨');
+          return true;
+        } else {
+          updateConfigModalStatus(false, `서버 응답 오류 (HTTP ${testRes.status})`);
+          return false;
+        }
+      } catch (err) {
+        console.warn('Backend connection failed:', err);
+        updateConfigModalStatus(false, '연결 실패 (IP 또는 터널 주소를 확인하세요)');
+        return false;
+      }
+    }
+
+    if (btnOpenConfig) {
+      btnOpenConfig.addEventListener('click', () => {
+        configModal.classList.add('active');
+        inputApiUrl.value = getApiBaseUrl();
+        testBackendConnection(inputApiUrl.value);
+      });
+    }
+
+    if (btnCloseConfig) {
+      btnCloseConfig.addEventListener('click', () => {
+        configModal.classList.remove('active');
+      });
+    }
+
+    if (btnTestConfig) {
+      btnTestConfig.addEventListener('click', () => {
+        testBackendConnection(inputApiUrl.value);
+      });
+    }
+
+    if (btnSaveConfig) {
+      btnSaveConfig.addEventListener('click', async () => {
+        const val = inputApiUrl.value;
+        const ok = await testBackendConnection(val);
+        setApiBaseUrl(val);
+        showToast(ok ? '✅ 백엔드 서버가 성공적으로 연동되었습니다!' : '⚠️ 백엔드 주소가 저장되었으나 연결을 확인해 주세요.');
+        setTimeout(() => configModal.classList.remove('active'), 800);
+        checkSystemHealth(false);
+      });
+    }
+
     // 전역 상태 변수
     let currentScreen = 'screen-home';
-    let selectedStyle = 'original';
+    let selectedStyle = 'time_travel'; // 기본값: 연령 변환 테마
     let mediaStream = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let capturedBlobs = [];
     let transformResult = null;
-    
-    // 백엔드 API URL 설정 (기본값)
-    let apiBaseUrl = localStorage.getItem('4cut_api_url') || 'http://localhost:8000';
-    document.getElementById('api-base-url').value = apiBaseUrl;
+    let isHighQuality = false;
 
-    // 백엔드 설정 모달 컨트롤
-    document.getElementById('btn-open-config').addEventListener('click', () => {
-      document.getElementById('config-modal').classList.add('active');
-    });
-
-    document.getElementById('btn-save-config').addEventListener('click', () => {
-      let val = document.getElementById('api-base-url').value.trim();
-      if (val.endsWith('/')) val = val.slice(0, -1);
-      apiBaseUrl = val;
-      localStorage.setItem('4cut_api_url', apiBaseUrl);
-      document.getElementById('config-modal').classList.remove('active');
-      showToast('백엔드 URL이 저장되었습니다: ' + apiBaseUrl);
-    });
+    // 스타일 표시명 매핑
+    const styleNames = {
+      'time_travel': '⏳ 인생 사계절 (연령 변환)',
+      'original': '📷 오리지널 클래식',
+      'soft_cartoon': '🎨 소프트 카툰 (3D)',
+      'ghibli': '🌿 지브리 수채화',
+      'neon_fantasy': '🌆 네온 판타지',
+      'bw_cinema': '🎬 흑백 시네마',
+      'wizard': '🧙‍♂️ 마법 학교 (호그와트)'
+    };
 
     // DOM 요소
     const screens = {
@@ -411,12 +775,46 @@
       setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // 고퀄리티 모드 토글 양방향 동기화 함수
+    function updateQualityState(checked) {
+      isHighQuality = checked;
+      const t1 = document.getElementById('toggle-high-quality');
+      const t2 = document.getElementById('toggle-shoot-high-quality');
+      const bar = document.querySelector('.quality-toggle-bar');
+      const desc = document.getElementById('quality-desc-text');
+      if (t1) t1.checked = checked;
+      if (t2) t2.checked = checked;
+      if (bar) {
+        if (checked) {
+          bar.classList.add('active');
+          if (desc) desc.innerText = "초고화질 gpt-image-2 모델 가동 중 (극사실적 텍스처)";
+        } else {
+          bar.classList.remove('active');
+          if (desc) desc.innerText = "초고속 gpt-image-1.5 모델 가동 중 (빠른 반응 속도)";
+        }
+      }
+    }
+
+    // 토글 이벤트 리스너 바인딩
+    const tHighQuality = document.getElementById('toggle-high-quality');
+    if (tHighQuality) {
+      tHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
+    }
+    const tShootHighQuality = document.getElementById('toggle-shoot-high-quality');
+    if (tShootHighQuality) {
+      tShootHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
+    }
+
     // 필터 카루셀 선택 처리
     document.querySelectorAll('.filter-card').forEach(card => {
       card.addEventListener('click', () => {
         document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('selected'));
         card.classList.add('selected');
         selectedStyle = card.getAttribute('data-style');
+        const themeElem = document.getElementById('shoot-current-theme');
+        if (themeElem) {
+          themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
+        }
       });
     });
 
@@ -425,23 +823,57 @@
       navigateTo('screen-filter');
     });
 
-    // 2. 필터 -> 촬영 준비 (웹캠/카메라 활성화)
+    // 2. 필터 -> 촬영 준비 (웹캠 활성화)
     document.getElementById('btn-to-shoot').addEventListener('click', async () => {
       if (!selectedStyle) {
         showToast('AI 스타일을 먼저 선택해 주세요!');
         return;
       }
+      const themeElem = document.getElementById('shoot-current-theme');
+      if (themeElem) {
+        themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
+      }
+      const triggerBtn = document.getElementById('btn-manual-trigger');
+      if (triggerBtn) triggerBtn.style.display = 'block';
+      
+      const guideElem = document.getElementById('shoot-cut-guide');
+      if (guideElem) {
+        guideElem.innerText = selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 촬영 준비 중...';
+      }
+
       navigateTo('screen-shoot');
       await initWebcam();
     });
 
-    // 웹캠 및 MediaRecorder 초기화 (노트북/태블릿 카메라 지원)
+    // 웹캠 및 MediaRecorder 초기화 (다인원 전체 선명도 보장 & OS/하드웨어 단 인위적 블러 차단)
     async function initWebcam() {
       try {
-        mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
+        const constraints = {
+          video: {
+            width: { ideal: 1280 },
+            height: { ideal: 960 },
+            // OS(Windows Studio Effects)/하드웨어의 단일인물 배경 블러 억제 및 연속 초점 제약
+            advanced: [
+              { backgroundBlur: false },
+              { focusMode: "continuous" },
+              { exposureMode: "continuous" }
+            ]
+          },
+          audio: false
+        };
+
+        try {
+          mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+        } catch (constraintErr) {
+          // advanced 제약 미지원 브라우저/환경 호환 fallback
+          console.warn('Advanced constraints not supported, fallback to standard mode:', constraintErr);
+          mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
+        }
+
         const videoElem = document.getElementById('webcam-preview');
         videoElem.srcObject = mediaStream;
 
+        // MediaRecorder 준비
         recordedChunks = [];
         try {
           mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
@@ -454,8 +886,8 @@
           }
         };
       } catch (err) {
-        console.error('카메라 연결 실패:', err);
-        showToast('노트북/태블릿 카메라 권한을 확인해 주세요.');
+        console.error('웹캠 연결 실패:', err);
+        showToast('웹캠을 연결할 수 없습니다.');
       }
     }
 
@@ -465,29 +897,70 @@
       startShootingSequence();
     });
 
+    let sessionId = "";
+
     async function startShootingSequence() {
       capturedBlobs = [];
+      sessionId = Math.random().toString(36).substring(2, 10);
+      
       if (mediaRecorder && mediaRecorder.state === 'inactive') {
         mediaRecorder.start();
       }
 
+      const cutGuides = {
+        1: selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 준비 중...',
+        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 준비: 청소년·교복 AI 변환 예정' : '📸 2컷 준비 중...',
+        3: selectedStyle === 'time_travel' ? '✨ 3컷 준비: 현재 모습 100% 원본 유지' : '📸 3컷 준비 중...',
+        4: selectedStyle === 'time_travel' ? '👵 4컷 준비: 온화한 노년 AI 변환 예정' : '📸 4컷 준비 중...'
+      };
+
+      const cutGuidesShooting = {
+        1: selectedStyle === 'time_travel' ? '👶 1컷 촬영 완료! 어린이 AI 변환 시작 ➔' : '📸 1컷 촬영 완료!',
+        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 촬영 완료! 청소년 AI 변환 시작 ➔' : '📸 2컷 촬영 완료!',
+        3: selectedStyle === 'time_travel' ? '✨ 3컷 촬영 완료! 현재 모습 보존 ➔' : '📸 3컷 촬영 완료!',
+        4: selectedStyle === 'time_travel' ? '👵 4컷 촬영 완료! 노년 AI 변환 시작 ➔' : '📸 4컷 촬영 완료!'
+      };
+
       for (let cut = 1; cut <= 4; cut++) {
         document.getElementById('shoot-counter-badge').innerText = `${cut} / 4 컷`;
+        const guideElem = document.getElementById('shoot-cut-guide');
+        if (guideElem) guideElem.innerText = cutGuides[cut];
+
         await runCountdown(5);
-        await captureCanvasShot();
+        let blob = await captureCanvasShot();
+        
+        if (guideElem) guideElem.innerText = cutGuidesShooting[cut];
+
+        // 즉시 비동기 업로드 (AI 백그라운드 변환 시작)
+        let formData = new FormData();
+        formData.append('photo', blob, `photo_${cut-1}.jpg`);
+        formData.append('session_id', sessionId);
+        formData.append('cut_index', cut-1);
+        formData.append('style', selectedStyle);
+        formData.append('is_high_quality', isHighQuality ? "true" : "false");
+        
+        fetch(`${getApiBaseUrl()}/api/transform_single`, {
+          method: 'POST',
+          body: formData
+        }).catch(err => console.error('비동기 전송 에러:', err));
+        
+        // 셔터 플래시 효과
         const flash = document.getElementById('flash-effect');
         flash.classList.add('flash');
         setTimeout(() => flash.classList.remove('flash'), 300);
       }
 
+      // 녹화 종료
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
       }
 
+      // 웹캠 정지
       if (mediaStream) {
         mediaStream.getTracks().forEach(track => track.stop());
       }
 
+      // 촬영본 확인 화면으로 이동
       renderCapturedPreview();
       navigateTo('screen-select');
     }
@@ -522,9 +995,10 @@
         const video = document.getElementById('webcam-preview');
         const canvas = document.createElement('canvas');
         canvas.width = 640;
-        canvas.height = 800;
+        canvas.height = 800; // 4:5 비율
         const ctx = canvas.getContext('2d');
         
+        // 거울 반전 캡처
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -543,11 +1017,121 @@
       });
     }
 
+    // 재촬영 버튼
     document.getElementById('btn-retake').addEventListener('click', async () => {
       document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
       navigateTo('screen-shoot');
       await initWebcam();
     });
+
+    // 실시간 AI 변환 & 인화 상태 폴링 관리
+    let statusPollInterval = null;
+    let pollStartTime = 0;
+    const tipsList = [
+      "DSLR 85mm 렌즈의 섬세한 피부 질감과 본인 고유의 얼굴 골격을 살려 생애 사계절을 완성하고 있습니다.",
+      "과도한 플라스틱 스무딩을 배제하고 자연스러운 모공과 미세 주름을 디테일하게 묘사하고 있습니다.",
+      "곧 2배속 비하인드 동영상과 고해상도 4컷 포토 프레임이 완성됩니다. 잠시만 기다려주세요!",
+      "촬영 중 담긴 따뜻한 미소와 손동작이 연령대별로 생생하게 연결되고 있습니다."
+    ];
+    let tipIndex = 0;
+
+    function formatTime(seconds) {
+      const m = Math.floor(seconds / 60);
+      const s = seconds % 60;
+      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+
+    function startStatusPolling(sId) {
+      pollStartTime = Date.now();
+      
+      // 초기 상태 리셋
+      const mainTitle = document.getElementById('loading-main-title');
+      const statusText = document.getElementById('loading-status-text');
+      const timerRemaining = document.getElementById('loading-timer-remaining');
+      const completeBanner = document.getElementById('loading-complete-banner');
+      const progFill = document.getElementById('progress-bar-fill');
+      const progText = document.getElementById('progress-percent-text');
+
+      if (mainTitle) mainTitle.innerText = 'AI 인생 4컷 변환 중...';
+      if (statusText) statusText.innerText = '다인원 안면 및 포즈 분석을 준비하고 있습니다...';
+      if (timerRemaining) timerRemaining.innerText = isHighQuality ? '⏳ 예상 소요 시간: 약 75~85초' : '⏳ 예상 소요 시간: 약 60~70초';
+      if (completeBanner) completeBanner.style.display = 'none';
+      if (progFill) progFill.style.width = '10%';
+      if (progText) progText.innerText = '10%';
+
+      if (statusPollInterval) clearInterval(statusPollInterval);
+
+      let currentDisplayProgress = 10;
+      // 다인원 및 고화질 모드 고려 기준 기본 기대 시간 (초)
+      const expectedTotalSec = isHighQuality ? 85 : 70;
+
+      statusPollInterval = setInterval(async () => {
+        const elapsedSec = Math.floor((Date.now() - pollStartTime) / 1000);
+        
+        let serverProg = 10;
+        let stepName = "";
+        let serverMsg = "";
+
+        try {
+          const res = await fetch(`${getApiBaseUrl()}/api/transform_status/${sId}`);
+          if (res.ok) {
+            const st = await res.json();
+            serverProg = st.progress || 10;
+            stepName = st.step_name || "";
+            serverMsg = st.message || "";
+          }
+        } catch (e) {
+          console.log('Status polling error:', e);
+        }
+
+        // 지능형 프로그레스 계산:
+        // 서버의 실제 진행률과 시간 경과 기반 진행률을 부드럽게 결합
+        const timeRatio = Math.min(0.96, elapsedSec / expectedTotalSec);
+        const timeBasedProg = Math.floor(10 + timeRatio * 85); // 최대 95%
+        
+        // 서버 진행률과 시간 기반 진행률 중 더 높은 값으로 전진 (절대 뒤로 가지 않음)
+        const targetProgress = Math.max(serverProg, timeBasedProg);
+        if (targetProgress > currentDisplayProgress) {
+          currentDisplayProgress = Math.min(98, currentDisplayProgress + Math.max(1, Math.floor((targetProgress - currentDisplayProgress) * 0.4)));
+        } else if (elapsedSec > expectedTotalSec && currentDisplayProgress < 98) {
+          // 기대 시간 초과 시 96% -> 97% -> 98%로 미세 전진 (멈춤 느낌 방지)
+          if (Math.random() > 0.4) currentDisplayProgress = Math.min(98, currentDisplayProgress + 1);
+        }
+
+        if (progFill) progFill.style.width = `${currentDisplayProgress}%`;
+        if (progText) progText.innerText = `${currentDisplayProgress}%`;
+
+        // 지능형 남은 시간 (Smart ETA) 표기: 5초에서 고정되지 않고 세밀하게 피드백
+        if (timerRemaining) {
+          if (currentDisplayProgress >= 95 || elapsedSec >= expectedTotalSec) {
+            timerRemaining.innerText = `✨ 다인원 고화질 렌더링 마무리 중... (잠시만 기다려주세요)`;
+          } else {
+            const estRemain = Math.max(6, expectedTotalSec - elapsedSec);
+            timerRemaining.innerText = `⏳ 예상 남은 시간: 약 ${estRemain}초`;
+          }
+        }
+
+        // 상태 메시지 갱신 (중복 퍼센트 표기 제거하고 명료한 단계 안내)
+        if (statusText) {
+          if (stepName && serverMsg) {
+            statusText.innerText = `${stepName} — ${serverMsg}`;
+          } else if (stepName) {
+            statusText.innerText = stepName;
+          } else if (serverMsg) {
+            statusText.innerText = serverMsg;
+          } else {
+            statusText.innerText = 'AI 생애 주기 변환을 진행 중입니다...';
+          }
+        }
+      }, 1000);
+    }
+
+    function stopStatusPolling() {
+      if (statusPollInterval) {
+        clearInterval(statusPollInterval);
+        statusPollInterval = null;
+      }
+    }
 
     // 4. AI 변환 생성 API 호출
     document.getElementById('btn-transform').addEventListener('click', async () => {
@@ -559,52 +1143,69 @@
       const overlay = document.getElementById('loading-overlay');
       overlay.classList.add('active');
 
+      // 실시간 동적 프로그레스 폴링 시작
+      startStatusPolling(sessionId);
+
       const formData = new FormData();
-      capturedBlobs.forEach((blob, index) => {
-        formData.append('photos', blob, `photo_${index}.jpg`);
-      });
+      formData.append('session_id', sessionId);
+      formData.append('style', selectedStyle);
 
       if (recordedChunks.length > 0) {
         const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
         formData.append('video', videoBlob, 'behind_video.webm');
       }
-      formData.append('style', selectedStyle);
 
       try {
-        const res = await fetch(`${apiBaseUrl}/api/transform`, {
+        const res = await fetch(`${getApiBaseUrl()}/api/transform`, {
           method: 'POST',
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          },
           body: formData
         });
         const data = await res.json();
         
         if (data.status === 'success') {
           transformResult = data;
+          const apiBase = getApiBaseUrl();
+          const resolveUrl = (url) => url ? (url.startsWith('http') || url.startsWith('data:') ? url : `${apiBase}${url}`) : '';
           
-          // 백엔드 상대경로인 경우 apiBaseUrl 추가 (구버전 백엔드 호환성 유지)
-          const formatUrl = (url) => url.startsWith('http') ? url : `${apiBaseUrl}${url}`;
-
-          // Base64 이미지가 있으면 ngrok 경고 페이지 우회하여 즉시 렌더링
-          document.getElementById('ai-frame-preview').src = data.ai_frame_base64 || formatUrl(data.ai_frame_url);
-          document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || formatUrl(data.orig_frame_url);
+          document.getElementById('ai-frame-preview').src = data.ai_frame_base64 || resolveUrl(data.ai_frame_url);
+          document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || resolveUrl(data.orig_frame_url);
           document.getElementById('qr-code-img').src = data.qr_code_base64;
 
-          overlay.classList.remove('active');
-          navigateTo('screen-result');
+          stopStatusPolling();
+
+          // ✨ 100% 완료 및 이벤트성 완료 애니메이션 노출
+          const progFill = document.getElementById('progress-bar-fill');
+          const progText = document.getElementById('progress-percent-text');
+          const mainTitle = document.getElementById('loading-main-title');
+          const statusText = document.getElementById('loading-status-text');
+          const timerRemaining = document.getElementById('loading-timer-remaining');
+          const completeBanner = document.getElementById('loading-complete-banner');
+
+          if (progFill) progFill.style.width = '100%';
+          if (progText) progText.innerText = '100%';
+          if (mainTitle) mainTitle.innerText = '✨ 변환 완료!';
+          if (statusText) statusText.innerText = '완성된 4컷 사진을 불러옵니다...';
+          if (timerRemaining) timerRemaining.innerText = '✅ 준비 완료!';
+          if (completeBanner) completeBanner.style.display = 'block';
+
+          // 0.8초 후 화면 전환
+          setTimeout(() => {
+            overlay.classList.remove('active');
+            navigateTo('screen-result');
+          }, 800);
         } else {
           throw new Error('변환 실패');
         }
       } catch (err) {
         console.error('AI 변환 오류:', err);
+        stopStatusPolling();
         overlay.classList.remove('active');
-        showToast('AI 변환 중 오류가 발생했습니다. 백엔드 URL 설정을 확인하세요.');
+        showToast('AI 변환 중 오류가 발생했습니다.');
       }
     });
 
     // 4.5 탭 전환 이벤트 리스너 (대형 개별 탭 뷰)
-    let selectedFrameChoice = 'ai'; // 'ai' or 'orig'
+    let selectedFrameChoice = 'ai';
 
     document.getElementById('tab-ai-frame').addEventListener('click', () => {
       selectedFrameChoice = 'ai';
@@ -622,16 +1223,331 @@
       document.getElementById('view-ai-frame').classList.remove('active');
     });
 
-    // 5. Finish (QR)
+    // 5. 결과 확인 -> Finish (QR)
     document.getElementById('btn-to-finish').addEventListener('click', () => {
+      // 선택된 프레임(AI 또는 원본) 썸네일 설정
+      const thumbImg = document.getElementById('kiosk-finish-thumb');
+      const activeFrameImg = selectedFrameChoice === 'ai' 
+        ? document.getElementById('ai-frame-preview')
+        : document.getElementById('orig-frame-preview');
+      if (thumbImg && activeFrameImg) {
+        thumbImg.src = activeFrameImg.src;
+      }
+
+      // 2배속 비하인드 동영상 플레이어 연동
+      if (transformResult && transformResult.video_url) {
+        const kioskVideo = document.getElementById('kiosk-behind-video');
+        const kioskSource = document.getElementById('kiosk-video-source');
+        if (kioskVideo && kioskSource) {
+          const apiBase = getApiBaseUrl();
+          const vUrl = transformResult.video_url.startsWith('http') ? transformResult.video_url : `${apiBase}${transformResult.video_url}`;
+          kioskVideo.src = vUrl;
+          kioskSource.src = vUrl;
+          kioskVideo.load();
+          kioskVideo.play().catch(e => console.log('Kiosk video autoplay:', e));
+        }
+      }
+
       navigateTo('screen-finish');
     });
 
-    // 처음으로 버튼
+    // 5.1 [UX 개선] 완성본 큰 화면 다시보기 (뒤로가기 버튼 & 썸네일 클릭)
+    document.getElementById('btn-back-to-result').addEventListener('click', () => {
+      navigateTo('screen-result');
+    });
+
+    const thumbCard = document.getElementById('btn-thumb-preview-card');
+    if (thumbCard) {
+      thumbCard.addEventListener('click', () => {
+        navigateTo('screen-result');
+      });
+    }
+
+    // 5.2 [IoT 연동] Canon SELPHY CP1500 실제 무선 인화 및 45초 4-Pass 안전 카운트다운
+    let printCountdownInterval = null;
+
+    document.getElementById('btn-print-modal').addEventListener('click', async () => {
+      if (!transformResult || !transformResult.session_id) {
+        showToast('인쇄할 4컷 사진 데이터가 없습니다.');
+        return;
+      }
+
+      const modal = document.getElementById('modal-print');
+      const closeBtn = document.getElementById('modal-close');
+      const confirmBtn = document.getElementById('btn-print-confirm');
+      const passStatus = document.getElementById('print-pass-status');
+      const countdownText = document.getElementById('print-countdown-text');
+      const progressBar = document.getElementById('print-progress-bar');
+      const cartridgeBadge = document.getElementById('cartridge-sheet-badge');
+
+      // 1. 모달 활성화 및 안전 초기화 (인쇄 도중 닫기 차단)
+      modal.classList.add('active');
+      closeBtn.disabled = true;
+      confirmBtn.disabled = true;
+      confirmBtn.innerText = '⏳ 사진이 인화기에 전송되어 출력 중입니다...';
+
+      let remainSeconds = 45;
+      progressBar.style.width = '0%';
+      countdownText.innerText = '45초';
+
+      // 4-Pass 칩 리셋
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`pass-chip-${i}`).className = 'pass-chip' + (i === 1 ? ' active' : '');
+      }
+
+      // 2. 실제 백엔드 Wi-Fi 인쇄 API 호출
+      try {
+        fetch(`${getApiBaseUrl()}/api/print`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: transformResult.session_id,
+            frame_type: selectedFrameChoice || 'ai',
+            printer_name: 'Canon SELPHY CP1500'
+          })
+        }).then(res => res.json()).then(data => {
+          if (data && data.remaining_sheets !== undefined) {
+            cartridgeBadge.innerText = `잔여 ${data.remaining_sheets} / 18매` + (data.low_paper ? ' ⚠️ (용지 부족 경고)' : ' (정상)');
+            if (data.low_paper) {
+              cartridgeBadge.classList.add('low-paper');
+            }
+          }
+        }).catch(err => {
+          console.log('[Print API Notice]', err);
+        });
+      } catch (e) {
+        console.error('Print request trigger error:', e);
+      }
+
+      // 3. 45초 4-Pass 인터랙티브 카운트다운 타이머 가동
+      if (printCountdownInterval) clearInterval(printCountdownInterval);
+
+      const passMessages = [
+        { time: 34, chip: 1, text: '🟡 1차 왕복: Yellow (노랑) 염료 승화 중...' },
+        { time: 23, chip: 2, text: '🔴 2차 왕복: Magenta (빨강) 염료 승화 중...' },
+        { time: 12, chip: 3, text: '🔵 3차 왕복: Cyan (파랑) 염료 승화 중...' },
+        { time: 0,  chip: 4, text: '✨ 4차 왕복: Overcoat 투명 보호막 코팅 중...' }
+      ];
+
+      printCountdownInterval = setInterval(() => {
+        remainSeconds--;
+        const elapsed = 45 - remainSeconds;
+        const percent = Math.min(100, Math.floor((elapsed / 45) * 100));
+
+        progressBar.style.width = `${percent}%`;
+        countdownText.innerText = `${Math.max(0, remainSeconds)}초`;
+
+        // Pass 단계별 칩 및 메시지 전환
+        let currentPass = 4;
+        if (remainSeconds > 33) currentPass = 1;
+        else if (remainSeconds > 22) currentPass = 2;
+        else if (remainSeconds > 11) currentPass = 3;
+
+        for (let i = 1; i <= 4; i++) {
+          const chip = document.getElementById(`pass-chip-${i}`);
+          if (!chip) continue;
+          if (i < currentPass) {
+            chip.className = 'pass-chip completed';
+          } else if (i === currentPass) {
+            chip.className = 'pass-chip active';
+          } else {
+            chip.className = 'pass-chip';
+          }
+        }
+
+        const msgObj = passMessages.find(p => remainSeconds >= p.time) || passMessages[3];
+        passStatus.innerText = msgObj.text;
+
+        // 45초 인화 완료 처리
+        if (remainSeconds <= 0) {
+          clearInterval(printCountdownInterval);
+          progressBar.style.width = '100%';
+          countdownText.innerText = '완료!';
+          passStatus.innerText = '✅ 인화 완료! 4x6 엽서가 배출구에 안착했습니다.';
+
+          for (let i = 1; i <= 4; i++) {
+            const chip = document.getElementById(`pass-chip-${i}`);
+            if (chip) chip.className = 'pass-chip completed';
+          }
+
+          // 닫기 버튼 활성화
+          closeBtn.disabled = false;
+          confirmBtn.disabled = false;
+          confirmBtn.innerText = '🎉 인화 완료! 사진을 수령하세요 (창 닫기)';
+          showToast('🎉 인화가 성공적으로 완료되었습니다!');
+        }
+      }, 1000);
+    });
+
+    document.getElementById('modal-close').addEventListener('click', () => {
+      document.getElementById('modal-print').classList.remove('active');
+    });
+
+    document.getElementById('btn-print-confirm').addEventListener('click', () => {
+      document.getElementById('modal-print').classList.remove('active');
+    });
+
+    // 처음으로 버튼 (상태 리셋)
     document.getElementById('btn-reset-home').addEventListener('click', () => {
       document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
       navigateTo('screen-home');
     });
+
+    // ==========================================================================
+    // 5.3 [현장 셋업 & 네트워크 진단 모니터링] Diagnostics 실시간 헬스체크 & 테스트 인쇄
+    // ==========================================================================
+    const diagModal = document.getElementById('modal-diagnostics');
+    const btnOpenDiag = document.getElementById('btn-open-diagnostics');
+    const btnCloseDiag = document.getElementById('diagnostics-close');
+    const btnRefreshDiag = document.getElementById('btn-refresh-diagnostics');
+    const btnDiagTestPrint = document.getElementById('btn-diag-test-print');
+    const quickStatusText = document.getElementById('quick-status-text');
+
+    async function checkSystemHealth(isManual = false) {
+      const startTime = performance.now();
+      try {
+        const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/health`);
+        const latency = Math.round(performance.now() - startTime);
+
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        // 1. 빠른 상단 헤더 뱃지 갱신
+        if (quickStatusText) {
+          quickStatusText.innerText = `네트워크 정상 (${latency}ms)`;
+        }
+
+        // 2. 모달 내 네트워크 상세 정보 갱신
+        const pingBadge = document.getElementById('diag-ping-badge');
+        const latencyVal = document.getElementById('diag-latency-val');
+        if (pingBadge && latencyVal) {
+          latencyVal.innerText = `${latency} ms`;
+          if (latency < 50) {
+            pingBadge.className = 'diag-badge badge-green';
+            pingBadge.innerText = '⚡ 매우 빠름';
+          } else if (latency < 150) {
+            pingBadge.className = 'diag-badge badge-green';
+            pingBadge.innerText = '🟢 정상 (양호)';
+          } else {
+            pingBadge.className = 'diag-badge badge-amber';
+            pingBadge.innerText = '⚠️ 지연 발생';
+          }
+        }
+
+        document.getElementById('diag-host-ip').innerText = data.network.host_ip + ':' + data.network.port;
+        document.getElementById('diag-client-ip').innerText = data.network.client_ip;
+        
+        const subnetEl = document.getElementById('diag-subnet-status');
+        if (subnetEl) {
+          if (data.network.same_subnet) {
+            subnetEl.className = 'diag-val font-bold text-green';
+            subnetEl.innerText = '✅ 동일 Wi-Fi 서브넷 일치';
+          } else {
+            subnetEl.className = 'diag-val font-bold text-amber';
+            subnetEl.innerText = '⚠️ 서로 다른 IP 대역 (라우터 점검 필요)';
+          }
+        }
+
+        // 3. 프린터 상태 갱신
+        const pBadge = document.getElementById('diag-printer-badge');
+        const pName = document.getElementById('diag-printer-name');
+        const pSheets = document.getElementById('diag-cartridge-sheets');
+        const pTotal = document.getElementById('diag-print-total');
+
+        if (pBadge && data.printer) {
+          if (data.printer.detected) {
+            pBadge.className = 'diag-badge badge-green';
+            pBadge.innerText = '🟢 온라인 (연결됨)';
+          } else {
+            pBadge.className = 'diag-badge badge-purple';
+            pBadge.innerText = '🟣 시뮬레이션 모드';
+          }
+          pName.innerText = data.printer.printer_name;
+          pSheets.innerText = `잔여 ${data.printer.remaining_sheets} / 18매` + (data.printer.low_paper ? ' ⚠️ (용지 부족)' : ' (정상)');
+          pSheets.className = data.printer.low_paper ? 'diag-val font-bold text-amber' : 'diag-val font-bold text-green';
+          pTotal.innerText = `${data.printer.print_count}회`;
+        }
+
+        // 4. 클라우드 연동 상태
+        const gdriveEl = document.getElementById('diag-gdrive-status');
+        const openaiEl = document.getElementById('diag-openai-status');
+        if (gdriveEl && data.cloud) {
+          gdriveEl.innerText = data.cloud.google_drive_connected ? '✅ 연결됨 (GAS/API)' : '⚠️ 로컬 저장 전용';
+        }
+        if (openaiEl && data.cloud) {
+          openaiEl.innerText = data.cloud.openai_api_configured ? '✅ API 키 정상' : '⚠️ 미등록';
+        }
+
+        if (isManual) {
+          showToast('진단 상태가 최신으로 갱신되었습니다.');
+        }
+      } catch (err) {
+        console.error('[Health Check Failed]', err);
+        if (quickStatusText) {
+          quickStatusText.innerText = '네트워크 점검 필요 ⚠️';
+        }
+        const pingBadge = document.getElementById('diag-ping-badge');
+        if (pingBadge) {
+          pingBadge.className = 'diag-badge badge-amber';
+          pingBadge.innerText = '❌ 응답 없음';
+        }
+      }
+    }
+
+    if (btnOpenDiag) {
+      btnOpenDiag.addEventListener('click', () => {
+        diagModal.classList.add('active');
+        checkSystemHealth(false);
+      });
+    }
+
+    if (btnCloseDiag) {
+      btnCloseDiag.addEventListener('click', () => {
+        diagModal.classList.remove('active');
+      });
+    }
+
+    if (btnRefreshDiag) {
+      btnRefreshDiag.addEventListener('click', () => {
+        btnRefreshDiag.disabled = true;
+        btnRefreshDiag.innerText = '⏳ 측정 중...';
+        checkSystemHealth(true).finally(() => {
+          btnRefreshDiag.disabled = false;
+          btnRefreshDiag.innerText = '🔄 실시간 통신 상태 다시 확인 (Ping)';
+        });
+      });
+    }
+
+    if (btnDiagTestPrint) {
+      btnDiagTestPrint.addEventListener('click', async () => {
+        if (!confirm('Canon SELPHY CP1500으로 4x6 엽서 진단 테스트 패턴을 1장 출력하시겠습니까?')) {
+          return;
+        }
+
+        btnDiagTestPrint.disabled = true;
+        btnDiagTestPrint.innerText = '⏳ 테스트 인화 전송 중...';
+
+        try {
+          const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/test-print`, { method: 'POST' });
+          const data = await res.json();
+          if (res.ok && data.status === 'success') {
+            showToast('🖨️ 테스트 엽서 인쇄 요청이 성공적으로 전송되었습니다!');
+            checkSystemHealth(false);
+          } else {
+            showToast('테스트 출력 전송 실패: ' + (data.detail || '오류'));
+          }
+        } catch (e) {
+          showToast('인화기 통신 오류 발생');
+        } finally {
+          btnDiagTestPrint.disabled = false;
+          btnDiagTestPrint.innerText = '🖨️ 테스트 엽서 1장 출력';
+        }
+      });
+    }
+
+    // 앱 기동 시 1회 및 15초 주기 백그라운드 헬스체크
+    setTimeout(() => checkSystemHealth(false), 1000);
+    setInterval(() => checkSystemHealth(false), 15000);
   </script>
 </body>
 </html>

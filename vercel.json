@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/vercel-frontend/index.html" },
+    { "source": "/download.html", "destination": "/vercel-frontend/download.html" },
+    { "source": "/style.css", "destination": "/vercel-frontend/style.css" },
+    { "source": "/(.*)", "destination": "/vercel-frontend/$1" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" }
+      ]
+    }
+  ]
+}

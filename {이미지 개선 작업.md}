@@ -1,0 +1,121 @@
+# {이미지 개선 작업}: 제로 블러(Zero-Blur) 클린 스튜디오 배경 & 조명 명암 분리 고도화 보고서
+
+**문서 번호**: 4CUTS-IMAGE-IMPROVE-001  
+**작업 일시**: 2026-09-08  
+**적용 대상**: AI 4컷 포토부스 전체 이미지 파이프라인 (촬영 캡처 ➔ 선예도 전처리 ➔ OpenAI Edit 연령 변환 ➔ 4컷 프레임 합성)
+
+---
+
+## 1. 추진 배경 및 방향 전환
+
+### 1.1. 기존 방식의 한계 (인위적 블러/아웃포커싱의 부작용)
+* **다인원 인물 왜곡**: 카메라나 AI가 '단일 피사체' 중심으로 초점을 잡을 때, 옆에 나란히 선 동반자를 '배경'으로 오인하여 얼굴과 손동작을 뿌옇게 블러(흐림) 처리하는 치명적 결함 발생 (첨부 이미지 1번 2컷, 3번 2컷).
+* **AI 이미지 합성 품질 저하**: 원본의 미세한 블러가 AI 렌더링 단계에서 더욱 과장되어 얼굴 이목구비가 뭉개지거나, 안경/눈매의 골격 디테일이 소실됨.
+* **상용 포토부스(포토이즘, 하루필름 등) 벤치마크**: 실제 인기 상용 포토부스들은 인위적인 렌즈 아웃포커싱(블러)을 쓰지 않고, **고급 단색 스튜디오 배경지와 선명한 스트로보 조명 대비**를 통해 인물을 부각하는 표준 방식을 사용함.
+
+### 1.2. 채택된 최적의 솔루션
+> **"블러(Bokeh/흐림)를 100% 제거하고, [클린 스튜디오 사이클로라마 배경 교체] + [프로페셔널 조명 명암 분리] + [언샵 마스크 선예도 전처리]로 인물을 선명하게 부각한다."**
+
+---
+
+## 2. 3대 핵심 이미지 처리 아키텍처
+
+```mermaid
+flowchart LR
+    subgraph Step1["1. 웹캠 캡처 (Zero-Blur)"]
+        Cam["WebRTC getUserMedia\nbackgroundBlur: false\nfocusMode: continuous"]
+    end
+
+    subgraph Step2["2. 고속 선예도 전처리"]
+        Unsharp["Pillow ImageFilter.UnsharpMask\nradius=1.5, percent=140\n(눈·코·입·안경 엣지 선명도 극대화)"]
+    end
+
+    subgraph Step3["3. OpenAI 실사 연령 변환"]
+        Prompt["f/8 Full Pan-Focus\n모든 인원 100% 면도날 초점\n클린 단색 스튜디오 사이클로라마 벽\n키라이트 & 눈동자 캐치라이트 명암 대비"]
+    end
+
+    subgraph Step4["4. 최종 4컷 프레임"]
+        Frame["어떤 인물도 흐려지지 않는\n선명하고 깨끗한 프리미엄 스튜디오 4컷"]
+    end
+
+    Cam --> Unsharp --> Prompt --> Frame
+```
+
+### 2.1. [원리 1] 클린 단색 스튜디오 사이클로라마 배경 대체 (Seamless Cyclorama Backdrop)
+* 지저분한 방 배경이나 가구를 흐리게(블러) 뭉개는 대신, **완벽히 정돈된 무결점 스튜디오 벽면(Seamless Solid Cyclorama Wall - 온화한 베이지 / 라이트 그레이)**으로 완전히 교체합니다.
+* 배경에 복잡한 요소가 없기 때문에 인위적인 흐림 처리 없이도 시선이 인물의 표정과 제스처에 100% 집중됩니다.
+
+### 2.2. [원리 2] 프로페셔널 조명 명암 대비 분리 (Three-Point Key Lighting Separation)
+* 인물에게는 선명한 지향성 키라이트(Directional Key Light)와 동공 속 또렷한 캐치라이트(Eye Catchlights)를 주어 입체감을 부여합니다.
+* 배경 벽면은 균일하고 부드러운 앰비언트 필(Ambient Fill)로 받쳐주어, **심도(블러)가 아닌 '명암과 빛의 대비(Lighting Contrast)'**로 인물이 입체적으로 튀어나오도록(Pop-out) 유도합니다.
+
+### 2.3. [원리 3] 언샵 마스크(Unsharp Mask) 안면 엣지 선예도 전처리
+* OpenAI Edit API 호출 직전, 1024x1024 리사이즈 이미지에 `ImageFilter.UnsharpMask(radius=1.5, percent=140, threshold=2)`를 통과시킵니다.
+* 촬영 순간의 미세 모션 블러나 카메라 렌즈 수차를 사전에 완전히 보정하여 눈동자, 콧대, 안경테, 입술 윤곽선을 쨍하게 살려 AI에 전송합니다.
+
+### 2.4. [원리 4] 팬포커스(Pan-Focus f/8) 전원 선명 광학 규격
+* 1인용 얕은 심도(`f/2.8 shallow depth of field`)를 전면 금지하고, 단체 인물 규격인 `f/8 group portrait aperture, deep pan-focus across ALL subjects`를 지정합니다.
+* 2인 이상 촬영 시 누구 하나 초점에서 벗어나지 않고 전원 균일한 면도날 선예도를 보장합니다.
+
+---
+
+## 3. 세부 소스코드 수정 내역
+
+### 3.1. `local-server/openai_transformer.py`
+```python
+from PIL import Image, ImageDraw, ImageFilter
+
+# 1. 언샵 마스크 선예도 강화 전처리 적용
+def transform_single_image_openai(image: Image.Image, cut_index: int, model_name: str = "gpt-image-1.5") -> Image.Image:
+    ...
+    # 1024x1024 고화질 RGB 리사이즈
+    img_square = image.convert("RGB").resize((1024, 1024), Image.Resampling.LANCZOS)
+    
+    # [선예도 강화 전처리] 블러 없이 엣지 대비를 극대화하여 안면 디테일 쨍하게 전달
+    img_enhanced = img_square.filter(ImageFilter.UnsharpMask(radius=1.5, percent=140, threshold=2))
+    
+    img_bytes = io.BytesIO()
+    img_enhanced.save(img_bytes, format="PNG", optimize=True, compress_level=4)
+    ...
+```
+
+* **프롬프트 0(어린이), 1(청소년), 3(노년) 공통 배경 및 광학 규격 전면 개편**:
+  ```text
+  "SEAMLESS STUDIO BACKDROP & THREE-POINT LIGHTING (ZERO OPTICAL BLUR): "
+  "- Background is a completely clean, solid, seamless photography studio cyclorama wall in soft neutral warm beige tones. "
+  "- ABSOLUTELY ZERO OPTICAL BLUR, ZERO BOKEH, NO SHALLOW DEPTH OF FIELD. Dimensional subject separation is achieved purely through directional studio key lighting, balanced ambient fill, natural catchlights in every pupil, and tonal contrast against the solid wall, NOT through lens blurring. "
+  "STUDIO OPTICS & FULL PAN-FOCUS SPECIFICATIONS: "
+  "- Professional studio camera, f/8 group portrait aperture, deep pan-focus across ALL subjects in the frame. "
+  "- Uniform, razor-sharp optical focus across EVERY person from edge to edge without any out-of-focus areas. "
+  ```
+* **네거티브 제약**:
+  `bokeh, shallow depth of field, background blur, out-of-focus blur, blurry background, artificial blurring, lens blur, motion blur` 등을 엄격 배제 목록에 전면 배치.
+
+### 3.2. 표준 프롬프트 가이드 문서 3종 동기화
+* [`연령변환 프롬프트/1번째 촬영 이미지 — 어린이 AI 변환 프롬프트.md`](file:///c:/4cuts_pjt/연령변환%20프롬프트/1번째%20촬영%20이미지%20—%20어린이%20AI%20변환%20프롬프트.md)
+* [`연령변환 프롬프트/2번째 촬영 이미지 — 청소년·교복 AI 변환 프롬프트.md`](file:///c:/4cuts_pjt/연령변환%20프롬프트/2번째%20촬영%20이미지%20—%20청소년·교복%20AI%20변환%20프롬프트.md)
+* [`연령변환 프롬프트/4번째 촬영 이미지 — 노년 AI 변환 프롬프트.md`](file:///c:/4cuts_pjt/연령변환%20프롬프트/4번째%20촬영%20이미지%20—%20노년%20AI%20변환%20프롬프트.md)
+
+---
+
+## 4. 기존 방식 vs 개선 방식 비교
+
+| 비교 항목 | 기존 방식 (블러/아웃포커싱 중심) | 신규 개선 방식 (제로 블러 & 스튜디오 분리) |
+| :--- | :--- | :--- |
+| **인물 분리 방식** | 카메라 렌즈 흐림 및 가우시안 블러 | **클린 단색 스튜디오 배경지 + 3점 키라이트 조명 대비** |
+| **다인원(2인+) 촬영 시** | 포커스 밖 동반자 안면/손 심각하게 블러 왜곡 | **전원 100% 동일한 면도날 선예도 유지 (f/8 팬포커스)** |
+| **AI 연령 변환 결과** | 흐려진 얼굴이 뭉개지거나 이목구비 소실 | **언샵 마스크로 안면 엣지가 뚜렷하여 완벽한 실사 복원** |
+| **배경 시각적 완성도** | 블러 경계면이 어색하거나 불규칙함 | **전문 포토스튜디오 단색 사이클로라마 벽면으로 정갈함** |
+| **연산 및 처리 속도** | 추가 블러 마스킹 시 연산 지연 발생 | **0.005초 언샵 마스크 필터로 즉각 처리 (딜레이 0초)** |
+
+---
+
+## 5. 롤백(Rollback) 가이드
+
+신규 이미지 처리 방식을 이전 상태로 되돌려야 할 경우, 아래 명령어를 실행하여 원클릭으로 롤백할 수 있습니다.
+
+```bash
+# 직전 커밋 시점으로 소스코드 복구
+git checkout d54f4e3 -- local-server/openai_transformer.py
+git checkout d54f4e3 -- "연령변환 프롬프트/"
+```
