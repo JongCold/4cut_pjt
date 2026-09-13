@@ -533,174 +533,304 @@ def transform_four_cut(images: List[Image.Image], style: str) -> List[Image.Imag
     return transformed
 
 
-def create_4cut_frame(images: List[Image.Image], brand_title: str = "AI 4-CUT STUDIO") -> Image.Image:
+def hex_to_rgb(hex_color: str, default: Tuple[int, int, int] = (255, 253, 249)) -> Tuple[int, int, int]:
+    """HEX 색상 문자열을 RGB 튜플로 변환"""
+    if not hex_color:
+        return default
+    s = hex_color.strip().lstrip('#')
+    if len(s) == 6:
+        try:
+            return (int(s[0:2], 16), int(s[2:4], 16), int(s[4:6], 16))
+        except Exception:
+            return default
+    return default
+
+
+def is_dark_color(rgb: Tuple[int, int, int]) -> bool:
+    """배경 밝기(Luminance) 판별: 어두운 배경일 경우 True"""
+    lum = 0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]
+    return lum < 140
+
+
+def draw_barcode_vector(draw: ImageDraw.ImageDraw, center_x: int, center_y: int, h: int, color: Tuple[int, int, int]):
+    """1번 프리뷰 이미지와 완벽히 동일한 세로 바코드 벡터 시뮬레이션 렌더링"""
+    bar_widths = [3, 1, 4, 2, 5, 2, 1, 4, 2, 4, 3, 5, 2, 1, 4, 2, 3, 1, 5, 2, 4, 1, 3, 2, 5, 1, 4]
+    sum_w = sum(bar_widths) + (len(bar_widths) - 1) * 3
+    start_x = center_x - (sum_w // 2)
+    top_y = center_y - (h // 2)
+    bot_y = center_y + (h // 2)
+    
+    cur_x = start_x
+    for bw in bar_widths:
+        draw.rectangle([cur_x, top_y, cur_x + bw, bot_y], fill=color)
+        cur_x += bw + 3
+
+
+def render_neobrutalism_4cut(
+    images: List[Image.Image],
+    canvas_w: int,
+    canvas_h: int,
+    brand_title: str = "AI 4-CUT STUDIO",
+    frame_color: str = "#FFFDF9",
+    text_color: Optional[str] = None
+) -> Image.Image:
     """
-    3:4 비율 (가로 900px, 세로 1200px) 인생네컷 프레임 합성
+    1번 웹 프리뷰 이미지와 100% 동일한 네오브루탈리즘 감성 인생4컷 프레임 렌더러
+    - 좌상단: 노란색 기울어진 '최종 인화본 ✨' 스티커 뱃지
+    - 우상단: 붉은색 원형 '通' 인장 도장 스탬프
+    - 카드 본체: 둥근 모서리, 볼드 잉크 라인, 하드 드롭 섀도우
+    - 2x2 슬롯: ImageOps.fit (상하/좌우 여백 0% 완벽 일치)
+    - 사진 하단: 테마 타이틀 & MEMORY PHOTO 일시
+    - 중간 티켓 점선 절취선 (Dashed Divider)
+    - 하단 푸터: '청년4컷 스튜디오' + 날짜 + 세로 바코드 + '서울청년센터 영등포 × 놀면뭐AI'
+    - 프레임 테두리 색상: 크림, 블랙, 레드, 네이비 등 사용자가 고른 색상 100% 반영
     """
-    canvas_w = 900
-    canvas_h = 1200
-    
-    frame = Image.new("RGB", (canvas_w, canvas_h), (255, 255, 255))
-    draw = ImageDraw.Draw(frame)
-    
-    top_margin = int(canvas_h * 0.04)     # 48px
-    side_margin = int(canvas_w * 0.06)    # 54px
-    bottom_margin = int(canvas_h * 0.13)  # 156px
-    gap = int(canvas_w * 0.02)            # 18px
-    
-    grid_w = canvas_w - (side_margin * 2) - gap
-    grid_h = canvas_h - top_margin - bottom_margin - gap
-    
-    slot_w = grid_w // 2
-    slot_h = grid_h // 2
-    
+    scale = canvas_w / 900.0  # 900px 기준 스케일 팩터
+
+    # 1. 폰트 로드
+    font_bold_lg = None
+    font_bold_md = None
+    font_bold_sm = None
+    font_sub = None
+    font_stamp = None
+
+    font_path = "C:/Windows/Fonts/malgunbd.ttf"
+    if not os.path.exists(font_path):
+        font_path = "C:/Windows/Fonts/malgun.ttf"
+
+    try:
+        font_bold_lg = ImageFont.truetype(font_path, int(24 * scale))
+        font_bold_md = ImageFont.truetype(font_path, int(20 * scale))
+        font_bold_sm = ImageFont.truetype(font_path, int(15 * scale))
+        font_sub = ImageFont.truetype(font_path, int(13 * scale))
+        font_stamp = ImageFont.truetype(font_path, int(26 * scale))
+    except Exception:
+        font_bold_lg = ImageFont.load_default()
+        font_bold_md = ImageFont.load_default()
+        font_bold_sm = ImageFont.load_default()
+        font_sub = ImageFont.load_default()
+        font_stamp = ImageFont.load_default()
+
+    # 2. 색상 설정
+    card_bg_rgb = hex_to_rgb(frame_color, (255, 253, 249))
+    dark_mode = is_dark_color(card_bg_rgb)
+
+    if text_color:
+        txt_main_rgb = hex_to_rgb(text_color, (255, 255, 255) if dark_mode else (30, 35, 42))
+    else:
+        txt_main_rgb = (255, 255, 255) if dark_mode else (30, 35, 42)
+
+    txt_sub_rgb = (200, 205, 215) if dark_mode else (120, 130, 145)
+    line_rgb = (255, 255, 255, 130) if dark_mode else (190, 205, 220)
+    slot_border_rgb = (255, 255, 255, 160) if dark_mode else (215, 220, 228)
+    ink_border_rgb = (28, 25, 23)
+    hard_shadow_rgb = (28, 25, 23)
+
+    # 3. 캔버스 생성 (은은한 크림 캔버스 + 도트 그리드)
+    canvas = Image.new("RGB", (canvas_w, canvas_h), (250, 246, 239))
+    c_draw = ImageDraw.Draw(canvas)
+
+    # 도트 그리드 백그라운드
+    dot_spacing = int(24 * scale)
+    dot_color = (222, 216, 204)
+    for x in range(dot_spacing // 2, canvas_w, dot_spacing):
+        for y in range(dot_spacing // 2, canvas_h, dot_spacing):
+            c_draw.point((x, y), fill=dot_color)
+
+    # 4. 네오브루탈리즘 카드 레이아웃 계산
+    card_margin_x = int(45 * scale)
+    card_margin_top = int(42 * scale)
+    card_w = canvas_w - (card_margin_x * 2)
+    card_h = canvas_h - (card_margin_top * 2) - int(10 * scale)
+
+    card_x = card_margin_x
+    card_y = card_margin_top
+    radius = int(22 * scale)
+    shadow_offset = int(8 * scale)
+    border_w = max(3, int(3.5 * scale))
+
+    # 하드 드롭 섀도우
+    c_draw.rounded_rectangle(
+        [card_x + shadow_offset, card_y + shadow_offset, card_x + card_w + shadow_offset, card_y + card_h + shadow_offset],
+        radius=radius,
+        fill=hard_shadow_rgb
+    )
+
+    # 카드 본체 배경 및 외곽 테두리
+    c_draw.rounded_rectangle(
+        [card_x, card_y, card_x + card_w, card_y + card_h],
+        radius=radius,
+        fill=card_bg_rgb,
+        outline=ink_border_rgb,
+        width=border_w
+    )
+
+    # 5. 2x2 사진 슬롯 계산
+    inner_pad_x = int(32 * scale)
+    inner_pad_top = int(40 * scale)
+    slot_gap = int(14 * scale)
+
+    photo_area_w = card_w - (inner_pad_x * 2)
+    slot_w = (photo_area_w - slot_gap) // 2
+    # 4:5에 최적화된 슬롯 높이 비율
+    slot_h = int(slot_w * 1.26)
+
     positions = [
-        (side_margin, top_margin),
-        (side_margin + slot_w + gap, top_margin),
-        (side_margin, top_margin + slot_h + gap),
-        (side_margin + slot_w + gap, top_margin + slot_h + gap)
+        (card_x + inner_pad_x, card_y + inner_pad_top),
+        (card_x + inner_pad_x + slot_w + slot_gap, card_y + inner_pad_top),
+        (card_x + inner_pad_x, card_y + inner_pad_top + slot_h + slot_gap),
+        (card_x + inner_pad_x + slot_w + slot_gap, card_y + inner_pad_top + slot_h + slot_gap)
     ]
-    
+
     for idx, img in enumerate(images[:4]):
         img_rgb = img.convert("RGB")
-        img_w, img_h = img_rgb.size
-        scale = min(slot_w / img_w, slot_h / img_h)
-        new_w = int(img_w * scale)
-        new_h = int(img_h * scale)
-        img_resized = img_rgb.resize((new_w, new_h), Image.Resampling.LANCZOS)
+        # 어떤 비율/해상도라도 1px 오차 없이 100% 꽉 차게 Center Crop Fit
+        img_fitted = ImageOps.fit(img_rgb, (slot_w, slot_h), method=Image.Resampling.LANCZOS, centering=(0.5, 0.5))
         
         pos = positions[idx]
         slot_x, slot_y = pos
-        
-        # 슬롯 배경 및 테두리
-        draw.rectangle(
+        canvas.paste(img_fitted, (slot_x, slot_y))
+
+        # 슬롯 테두리
+        c_draw.rectangle(
             [slot_x, slot_y, slot_x + slot_w, slot_y + slot_h],
-            fill=(255, 255, 255),
-            outline=(220, 225, 230),
-            width=2
+            outline=slot_border_rgb if not dark_mode else (255, 255, 255),
+            width=max(1, int(1.5 * scale))
         )
-        
-        # 전체 이미지를 온전히 중앙 배치 (크롭 잘림 및 왜곡 방지)
-        paste_x = slot_x + (slot_w - new_w) // 2
-        paste_y = slot_y + (slot_h - new_h) // 2
-        frame.paste(img_resized, (paste_x, paste_y))
-        
-    brand_font = None
-    sub_font = None
-    try:
-        font_path = "C:/Windows/Fonts/malgun.ttf"
-        if os.path.exists(font_path):
-            brand_font = ImageFont.truetype(font_path, 28)
-            sub_font = ImageFont.truetype(font_path, 16)
-        else:
-            brand_font = ImageFont.load_default()
-            sub_font = ImageFont.load_default()
-    except Exception:
-        brand_font = ImageFont.load_default()
-        sub_font = ImageFont.load_default()
-        
-    bottom_center_x = canvas_w // 2
-    text_y1 = canvas_h - int(bottom_margin * 0.72)
-    text_y2 = canvas_h - int(bottom_margin * 0.35)
-    
-    draw.text((bottom_center_x, text_y1), brand_title, fill=(30, 40, 55), font=brand_font, anchor="mm")
-    
+
+    # 6. 사진 하단 텍스트 (테마 타이틀 & 일시)
+    photo_area_bottom = card_y + inner_pad_top + (slot_h * 2) + slot_gap
+    text_center_x = card_x + (card_w // 2)
+
+    title_y = photo_area_bottom + int(34 * scale)
+    date_y = photo_area_bottom + int(60 * scale)
+
+    c_draw.text((text_center_x, title_y), brand_title, fill=txt_main_rgb, font=font_bold_md, anchor="mm")
+
     now_str = datetime.now().strftime("%Y.%m.%d | %H:%M")
-    draw.text((bottom_center_x, text_y2), f"MEMORY PHOTO • {now_str}", fill=(120, 130, 145), font=sub_font, anchor="mm")
+    c_draw.text((text_center_x, date_y), f"MEMORY PHOTO • {now_str}", fill=txt_sub_rgb, font=font_sub, anchor="mm")
+
+    # 7. 티켓 점선 절취선 (Dashed Line)
+    dash_y = photo_area_bottom + int(85 * scale)
+    dash_start_x = card_x + int(24 * scale)
+    dash_end_x = card_x + card_w - int(24 * scale)
+    dash_len = int(10 * scale)
+    dash_gap = int(7 * scale)
+
+    cur_x = dash_start_x
+    dash_col = (255, 255, 255) if dark_mode else (180, 195, 210)
+    while cur_x < dash_end_x:
+        next_x = min(cur_x + dash_len, dash_end_x)
+        c_draw.line([(cur_x, dash_y), (next_x, dash_y)], fill=dash_col, width=max(2, int(2.5 * scale)))
+        cur_x += dash_len + dash_gap
+
+    # 8. 하단 푸터 영역
+    footer_row1_y = dash_y + int(32 * scale)
+    left_label_x = card_x + int(36 * scale)
+    right_date_x = card_x + card_w - int(36 * scale)
+
+    # 8.1 좌측: '청년4컷 스튜디오', 우측: 현재 날짜 ('2026.09.12')
+    today_str = datetime.now().strftime("%Y.%m.%d")
+    c_draw.text((left_label_x, footer_row1_y), "청년4컷 스튜디오", fill=txt_main_rgb, font=font_bold_md, anchor="lm")
+    c_draw.text((right_date_x, footer_row1_y), today_str, fill=txt_sub_rgb, font=font_bold_sm, anchor="rm")
+
+    # 8.2 중앙: 세로 바코드 벡터 그래픽
+    barcode_y = footer_row1_y + int(35 * scale)
+    barcode_h = int(32 * scale)
+    barcode_color = (255, 255, 255) if dark_mode else (30, 35, 42)
+    draw_barcode_vector(c_draw, text_center_x, barcode_y, barcode_h, barcode_color)
+
+    # 8.3 하단 중앙: '서울청년센터 영등포 × 놀면뭐AI'
+    branding_y = barcode_y + int(34 * scale)
+    c_draw.text((text_center_x, branding_y), "서울청년센터 영등포 × 놀면뭐AI", fill=txt_sub_rgb, font=font_sub, anchor="mm")
+
+    # 9. 상단 장식 오버레이 (좌상단 '최종 인화본' 스티커 + 우상단 '通' 붉은 도장)
+    # 9.1 노란색 스티커 뱃지 (회전 -4도)
+    st_w = int(176 * scale)
+    st_h = int(46 * scale)
+    sticker_img = Image.new("RGBA", (st_w + 30, st_h + 30), (0, 0, 0, 0))
+    s_draw = ImageDraw.Draw(sticker_img)
     
-    return frame
+    s_box = [15, 15, 15 + st_w, 15 + st_h]
+    s_draw.rounded_rectangle(s_box, radius=int(8 * scale), fill=(255, 227, 112, 255), outline=ink_border_rgb, width=max(2, int(2.5 * scale)))
+    
+    # 텍스트 라벨 (폰트 이모지 깨짐 없는 한글 볼드 텍스트)
+    s_draw.text((15 + int(24 * scale), 15 + (st_h // 2) - int(1 * scale)), "최종 인화본", fill=ink_border_rgb, font=font_bold_sm, anchor="lm")
+    
+    # 반짝이 별(✨) 벡터 도형 렌더링
+    star_cx = 15 + st_w - int(30 * scale)
+    star_cy = 15 + (st_h // 2) - int(1 * scale)
+    star_r = int(9 * scale)
+    star_pts = [
+        (star_cx, star_cy - star_r),
+        (star_cx + int(star_r * 0.3), star_cy - int(star_r * 0.3)),
+        (star_cx + star_r, star_cy),
+        (star_cx + int(star_r * 0.3), star_cy + int(star_r * 0.3)),
+        (star_cx, star_cy + star_r),
+        (star_cx - int(star_r * 0.3), star_cy + int(star_r * 0.3)),
+        (star_cx - star_r, star_cy),
+        (star_cx - int(star_r * 0.3), star_cy - int(star_r * 0.3)),
+    ]
+    s_draw.polygon(star_pts, fill=(245, 166, 35, 255), outline=ink_border_rgb)
+    
+    sticker_rot = sticker_img.rotate(-4, resample=Image.Resampling.BICUBIC, expand=True)
+    sticker_pos = (card_x - int(10 * scale), card_y - int(16 * scale))
+    canvas.paste(sticker_rot, sticker_pos, sticker_rot)
+
+    # 9.2 우상단 '通' 붉은색 인장 도장
+    stamp_d = int(58 * scale)
+    stamp_img = Image.new("RGBA", (stamp_d, stamp_d), (0, 0, 0, 0))
+    st_draw = ImageDraw.Draw(stamp_img)
+    st_draw.ellipse([2, 2, stamp_d - 3, stamp_d - 3], fill=(185, 56, 38, 255), outline=ink_border_rgb, width=max(2, int(2.5 * scale)))
+    st_draw.ellipse([int(6 * scale), int(6 * scale), stamp_d - int(7 * scale), stamp_d - int(7 * scale)], outline=(255, 255, 255, 220), width=max(1, int(1.5 * scale)))
+    st_draw.text((stamp_d // 2, stamp_d // 2 - int(1 * scale)), "通", fill=(255, 255, 255, 255), font=font_stamp, anchor="mm")
+
+    stamp_pos = (card_x + card_w - stamp_d + int(10 * scale), card_y - int(10 * scale))
+    canvas.paste(stamp_img, stamp_pos, stamp_img)
+
+    return canvas
 
 
-def create_4cut_frame_postcard(images: List[Image.Image], brand_title: str = "AI 4-CUT STUDIO") -> Image.Image:
+def create_4cut_frame(
+    images: List[Image.Image],
+    brand_title: str = "AI 4-CUT STUDIO",
+    frame_color: str = "#FFFDF9",
+    text_color: Optional[str] = None
+) -> Image.Image:
+    """
+    3:4 ~ 2:3 비율 (가로 900px, 세로 1350px) 네오브루탈리즘 완성형 인생네컷 프레임 합성
+    - 1번 웹 프리뷰 이미지와 완벽히 동일한 디자인 & 컬러 반영
+    """
+    return render_neobrutalism_4cut(
+        images=images,
+        canvas_w=900,
+        canvas_h=1350,
+        brand_title=brand_title,
+        frame_color=frame_color,
+        text_color=text_color
+    )
+
+
+def create_4cut_frame_postcard(
+    images: List[Image.Image],
+    brand_title: str = "AI 4-CUT STUDIO",
+    frame_color: str = "#FFFDF9",
+    text_color: Optional[str] = None
+) -> Image.Image:
     """
     Canon SELPHY CP1500 엽서(Postcard 4x6인치) 300 DPI 규격 (1200 x 1800 px)
-    - 좌/우 2x6인치 2분할 듀얼 스트립 (2인이 1장씩 나눠 가질 수 있는 구조)
-    - 웹캠 세로 4:5 촬영 사진의 왜곡을 방지한 세로형 4컷 슬롯 (490 x 345 px)
-    - 중앙 절취 가이드 점선(Cutting Guide Line) 포함
-    - 고해상도 안티앨리어싱 TTF 폰트 렌더링
+    - 1번 웹 프리뷰와 100% 동일한 네오브루탈리즘 감성 인생4컷 카드 고해상도 출력용 프레임
+    - 선택된 프레임 테두리 색상(크림, 블랙, 레드, 네이비) 실시간 반영
     """
-    canvas_w = 1200
-    canvas_h = 1800
-    
-    frame = Image.new("RGB", (canvas_w, canvas_h), (255, 255, 255))
-    draw = ImageDraw.Draw(frame)
+    return render_neobrutalism_4cut(
+        images=images,
+        canvas_w=1200,
+        canvas_h=1800,
+        brand_title=brand_title,
+        frame_color=frame_color,
+        text_color=text_color
+    )
 
-    strip_w = 600
-    side_margin = 50   # 좌우 여백
-    photo_w = strip_w - (side_margin * 2)  # 500px
-    photo_h = 365      # 4컷 최적화 슬롯 높이 (365px)
-    top_margin = 48    # 상단 여백
-    gap = 18           # 컷 간격
-
-    # 폰트 로드 (고해상도 300DPI 출력에 최적화된 크기)
-    brand_font = None
-    sub_font = None
-    font_paths = [
-        "C:/Windows/Fonts/malgunbd.ttf", # 맑은 고딕 볼드
-        "C:/Windows/Fonts/malgun.ttf",   # 맑은 고딕
-        "C:/Windows/Fonts/arialbd.ttf",  # Arial Bold
-        "C:/Windows/Fonts/arial.ttf"
-    ]
-    for fp in font_paths:
-        if os.path.exists(fp):
-            try:
-                brand_font = ImageFont.truetype(fp, 32)
-                sub_font = ImageFont.truetype(fp, 18)
-                break
-            except Exception:
-                continue
-
-    if not brand_font:
-        brand_font = ImageFont.load_default()
-        sub_font = ImageFont.load_default()
-
-    now_str = datetime.now().strftime("%Y.%m.%d | %H:%M")
-
-    # 좌/우 2개 스트립(각 600px)에 동일한 4컷 및 브랜딩 렌더링
-    for offset_x in [0, strip_w]:
-        y_cursor = top_margin
-        for idx, img in enumerate(images[:4]):
-            img_rgb = img.convert("RGB")
-            img_w, img_h = img_rgb.size
-            
-            # 촬영된 실제 전체 이미지가 손실 없이 100% 보이도록 Aspect Fit (Contain) 적용
-            # 머리부터 어깨, 옷, 손동작까지 크롭으로 인한 얼굴 확대/잘림 원천 방지
-            scale = min(photo_w / img_w, photo_h / img_h)
-            new_w = int(img_w * scale)
-            new_h = int(img_h * scale)
-            img_resized = img_rgb.resize((new_w, new_h), Image.Resampling.LANCZOS)
-            
-            slot_x = offset_x + side_margin
-            slot_y = y_cursor
-            
-            # 슬롯 배경 및 부드러운 테두리
-            draw.rectangle(
-                [slot_x, slot_y, slot_x + photo_w, slot_y + photo_h],
-                fill=(255, 255, 255),
-                outline=(226, 232, 240),
-                width=2
-            )
-            
-            # 슬롯 정중앙 배치
-            paste_x = slot_x + (photo_w - new_w) // 2
-            paste_y = slot_y + (photo_h - new_h) // 2
-            frame.paste(img_resized, (paste_x, paste_y))
-            
-            y_cursor += photo_h + gap
-
-        # 하단 브랜드 텍스트 & 촬영 일시
-        strip_center_x = offset_x + (strip_w // 2)
-        text_y_brand = canvas_h - 150
-        text_y_date = canvas_h - 95
-
-        draw.text((strip_center_x, text_y_brand), brand_title, fill=(30, 41, 59), font=brand_font, anchor="mm")
-        draw.text((strip_center_x, text_y_date), f"MEMORY PHOTO • {now_str}", fill=(100, 116, 139), font=sub_font, anchor="mm")
-
-    # 중앙 절취 안내선 (점선: 15px 선, 15px 공백)
-    for y in range(30, canvas_h - 30, 30):
-        draw.line([(strip_w, y), (strip_w, y + 16)], fill=(203, 213, 225), width=2)
-
-    return frame
 
 
 def create_test_pattern_postcard(printer_name: str = "Canon SELPHY CP1500") -> Image.Image:

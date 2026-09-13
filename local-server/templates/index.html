@@ -3,14 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>AI 4-CUT STUDIO | 인생 4컷 포토부스</title>
+  <title>청년 4컷 - 서울청년센터 영등포 × 놀면뭐AI</title>
 
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Gaegu, Pretendard, Noto Sans KR, Noto Serif KR -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- CSS 스타일 가이드 연동 -->
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;600;700;800;900&family=Noto+Serif+KR:wght@600;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
+  <!-- 두들 & 네오브루탈리즘 스타일시트 -->
   <link rel="stylesheet" href="/templates/style.css">
 </head>
 <body>
@@ -19,569 +20,886 @@
     
     <!-- 필터 미선택 경고 토스트 알림 -->
     <div id="toast-alert" class="toast-alert">
-      <div class="toast-content">
-        <i>⚠️</i>
-        <span id="toast-message">필터를 선택해 주세요!</span>
-      </div>
+      <span>⚠️</span>
+      <span id="toast-message">알림 메시지</span>
     </div>
 
-    <!-- AI 변환 & 인화 실시간 간결 로딩 오버레이 (미니멀 프리미엄 UI) -->
+    <!-- AI 변환 & 인화 실시간 두들 로딩 오버레이 -->
     <div id="loading-overlay" class="loading-overlay">
-      <div class="dynamic-loading-card simple-loading-card">
-        <!-- 상단 헤더 & 회전 스피너 -->
-        <div class="loading-header-area">
-          <div class="quantum-spinner-wrap">
-            <div class="quantum-spinner"></div>
-            <div class="camera-center-icon">✨</div>
-          </div>
-          <h2 id="loading-main-title" class="loading-dynamic-title">AI 인생 4컷 변환 중...</h2>
+      <div class="loading-doodle-card">
+        <div class="loading-doodle-spinner">✨</div>
+        <h2 id="loading-main-title" class="loading-title-hand">AI 청년 4컷 변환 중...</h2>
+        
+        <div class="loading-progress-track">
+          <div id="progress-bar-fill" class="loading-progress-fill" style="width: 10%;"></div>
+        </div>
+        
+        <div style="display:flex; justify-content:space-between; width:100%; font-size:11px; font-weight:700;">
+          <span id="loading-status-text" class="loading-status-text">안면 및 포즈 분석 중...</span>
+          <span id="progress-percent-text" style="font-family:var(--font-mono); color:var(--point-teal);">10%</span>
         </div>
 
-        <!-- 실시간 프로그레스 게이지 & 남은 시간 -->
-        <div class="progress-section">
-          <div class="progress-meta-row">
-            <span id="loading-status-text" class="progress-status-highlight">인화 준비 및 4컷 변환 중...</span>
-            <span id="progress-percent-text" class="progress-percent-text font-mono">10%</span>
-          </div>
-          <div class="progress-bar-track">
-            <div id="progress-bar-fill" class="progress-bar-fill" style="width: 10%;"></div>
-          </div>
-          <div class="time-meta-row simple-time-row">
-            <span id="loading-timer-remaining" class="timer-badge highlight">⏳ 예상 남은 시간: 약 45초</span>
-          </div>
+        <div id="loading-timer-remaining" class="loading-eta-badge">
+          ⏳ 예상 남은 시간: 약 45초
         </div>
 
-        <!-- 변환 완료 이벤트성 배너 (100% 도달 시 노출) -->
-        <div id="loading-complete-banner" class="loading-complete-banner" style="display: none;">
-          <div class="complete-badge">🎉 AI 4컷 변환 완료!</div>
+        <div id="loading-complete-banner" style="display:none; font-size:12px; font-weight:800; color:var(--point-teal);">
+          🎉 AI 4컷 변환 완료! 잠시 후 결과 화면으로 이동합니다.
         </div>
       </div>
     </div>
 
     <!-- ==========================================
-         [화면 1] 홈 화면
+         [화면 1] 홈 화면 (STEP 0 - 인트로)
          ========================================== -->
     <section id="screen-home" class="screen active">
-      <div class="hero-section">
-        <div class="logo-area">
-          <div class="header-top-status-bar">
-            <button id="btn-open-diagnostics" class="diagnostics-status-pill" title="현장 네트워크 & IoT 연동 상태 진단">
-              <span class="status-indicator-dot online"></span>
-              <span id="quick-status-text">네트워크 정상 (0ms)</span>
-              <span class="gear-icon">⚙️</span>
-            </button>
-          </div>
-          <div class="logo-icon-wrap">
-            <svg class="sparkle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor"/>
-            </svg>
-          </div>
-          <h1 class="brand-title">AI 4-CUT STUDIO</h1>
-          <p class="brand-subtitle">나만의 프롬프트로 완성하는 감성 인생 4컷 포토부스</p>
-        </div>
-
-        <div class="hero-visual">
-          <div class="placeholder-card">
-            <div class="preview-layout">
-              <div class="preview-box"></div>
-              <div class="preview-box"></div>
-              <div class="preview-box"></div>
-              <div class="preview-box"></div>
+      <!-- 상단 헤더 브랜딩 -->
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
-            <div class="sparkle-group">
-              <div class="sparkle-dot"></div>
-              <div class="sparkle-dot"></div>
-              <div class="sparkle-dot"></div>
+          </div>
+          <div class="header-right-badges">
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot"></span>
+              <span>ONLINE</span>
             </div>
+            <button id="btn-open-diagnostics" class="btn-mini-diag" title="현장 네트워크 & IoT 연동 상태 진단">⚙️</button>
           </div>
         </div>
 
-        <div>
-          <button id="btn-start" class="btn btn-primary btn-large w-full">📸 촬영 시작하기</button>
+        <!-- ₩0 서울청년영등포센터 전용 혜택 배지 -->
+        <div class="service-free-badge" style="margin-top:8px;">
+          <div class="free-circle">₩0</div>
+          <div style="display:flex; flex-direction:column;">
+            <span style="font-size:12px; font-weight:800; color:var(--ink-black);">서울청년영등포센터 전용 무료 포토부스</span>
+            <span style="font-size:10px; color:#666;">청년 맞춤 AI 인생 4컷 즉시 인화 및 스마트폰 다운로드</span>
+          </div>
         </div>
-      </div>
+      </header>
+
+      <!-- 홈 본문 콘텐츠 -->
+      <main class="home-content">
+        <!-- 중앙 카메라 두들 일러스트 -->
+        <div class="home-illustration-wrap">
+          <img class="camera-doodle-img" src="https://lh3.googleusercontent.com/aida/AEtjO1WdvMoQzuXlq5ilxWcdbU9P3yqJjq0VFhI4FXCPJI_Q878XUYJNWlx4KUJ1zHpTPLHmaZ27QKgEjPtoKp_9TBRB9xh0qch2a0ng_yQ6N0NaR6wI0bfisJbJuGRpMowP2x-RLceiijYnXvRnlWoZ0AF489yp4fUSGNRLbjm4NqolhtP2tQEQpZWyndyLnS8-sTJjP9nZorN8caJqbqmcRYB_eLcblzyken9h4yZU_xgvS8ZpN_gHWfdpz8b_" alt="Camera Doodle">
+        </div>
+
+        <!-- 3단계 이용 가이드 카드 -->
+        <div class="home-guide-card">
+          <div class="guide-card-header">
+            <div class="guide-title-group">
+              <span class="q-mark-circle">?</span>
+              <h2 class="guide-header-title">청년 4컷 이용 방법</h2>
+            </div>
+            <span class="guide-time-tag">TOTAL: 90 SEC</span>
+          </div>
+
+          <div class="guide-steps-list">
+            <div class="guide-step-item">
+              <span class="step-num-circle">1</span>
+              <div class="step-text-wrap">
+                <span class="step-item-title">컨셉 선택하기</span>
+                <span class="step-item-desc">인생 사계절, 마법 판타지, 조선 신분 등 원하는 AI 테마 선택</span>
+              </div>
+            </div>
+            <div class="guide-step-item">
+              <span class="step-num-circle">2</span>
+              <div class="step-text-wrap">
+                <span class="step-item-title">카운트다운 후 4컷 연사 촬영</span>
+                <span class="step-item-desc">3초 간격 셔터 찰칵! 자동 포즈 힌트 & 비하인드 영상 동시 녹화</span>
+              </div>
+            </div>
+            <div class="guide-step-item">
+              <span class="step-num-circle active">3</span>
+              <div class="step-text-wrap">
+                <span class="step-item-title">이미지 변환 및 다운받기</span>
+                <span class="step-item-desc">나만의 4컷 완성 및 즉시 엽서 인쇄 / 모바일 QR 다운로드</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 메인 CTA 촬영 시작하기 버튼 -->
+        <button id="btn-start" class="doodle-btn btn-start-hero" type="button">
+          <span>📷</span>
+          <span>촬영 시작하기</span>
+          <span class="touch-badge">TOUCH</span>
+        </button>
+      </main>
+
+      <!-- 푸터 -->
+      <footer class="app-footer">
+        <p class="footer-hand-text">서울청년센터 영등포 × 놀면뭐AI</p>
+        <p class="footer-sub-mono">FREE PHOTO SERVICE FOR SEOUL YOUTH</p>
+      </footer>
     </section>
 
     <!-- ==========================================
-         [화면 2] 스타일 필터 선택
+         [화면 2] 스타일/컨셉 선택 (STEP 1)
          ========================================== -->
     <section id="screen-filter" class="screen">
-      <header class="fixed-header">
-        <div class="header-title">AI 스타일 선택</div>
-        <div class="header-desc">원하는 콘셉트 필터를 1개 선택해 주세요.</div>
-      </header>
-
-      <div class="screen-content">
-        <!-- 상단 고퀄리티 모드 토글 바 -->
-        <div class="quality-toggle-bar">
-          <div class="quality-info">
-            <span class="quality-icon">💎</span>
-            <div>
-              <div class="quality-title">고퀄리티 AI 생성 모드</div>
-              <div class="quality-subtitle" id="quality-desc-text">초고속 gpt-image-1.5 모델 가동 중</div>
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="toggle-high-quality">
-            <span class="slider round"></span>
-          </label>
+          <div class="doodle-pill status-badge-online">
+            <span class="pulse-dot"></span>
+            <span>READY</span>
+          </div>
         </div>
 
-        <div class="filter-carousel-wrapper scrollable-content">
-          <div class="filter-carousel">
-            
-            <!-- [신규 대표 테마] ⏳ 인생 사계절 (연령 변환) -->
-            <div class="filter-card selected" data-style="time_travel">
-              <div class="filter-badge-popular">👑 BEST 인기</div>
-              <div class="filter-img-holder">
-                <div class="time-travel-preview">
-                  <div class="time-slice slice-child">👶<br>유년기</div>
-                  <div class="time-slice slice-teen">🧑‍🎓<br>학창시절</div>
-                  <div class="time-slice slice-adult">✨<br>현재모습</div>
-                  <div class="time-slice slice-elder">👵<br>노년기</div>
-                </div>
-              </div>
-              <div class="filter-name">⏳ 인생 사계절 (연령 변환)</div>
-              <div class="filter-subdesc">어린이부터 노년까지 한눈에</div>
-            </div>
-
-            <div class="filter-card" data-style="original">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #E2E8F0, #CBD5E1);display:flex;align-items:center;justify-content:center;font-size:2rem;">📷</div>
-              </div>
-              <div class="filter-name">오리지널 클래식</div>
-            </div>
-
-            <div class="filter-card" data-style="soft_cartoon">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #FED7AA, #FDBA74);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎨</div>
-              </div>
-              <div class="filter-name">소프트 카툰 (3D)</div>
-            </div>
-
-            <div class="filter-card" data-style="ghibli">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #BBF7D0, #86EFAC);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌿</div>
-              </div>
-              <div class="filter-name">지브리 수채화</div>
-            </div>
-
-            <div class="filter-card" data-style="neon_fantasy">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #F472B6, #C084FC);display:flex;align-items:center;justify-content:center;font-size:2rem;">🌆</div>
-              </div>
-              <div class="filter-name">네온 판타지</div>
-            </div>
-
-            <div class="filter-card" data-style="bw_cinema">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #475569, #1E293B);display:flex;align-items:center;justify-content:center;font-size:2rem;">🎬</div>
-              </div>
-              <div class="filter-name">흑백 시네마</div>
-            </div>
-
-            <div class="filter-card" data-style="wizard">
-              <div class="filter-img-holder">
-                <div style="width:100%;height:100%;background:linear-gradient(135deg, #4F46E5, #9333EA);display:flex;align-items:center;justify-content:center;font-size:2rem;">🧙‍♂️</div>
-              </div>
-              <div class="filter-name">마법 학교 (호그와트)</div>
-            </div>
-
+        <!-- STEP 1 배지 -->
+        <div class="step-banner-bar">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="step-tag-pill">STEP 1</span>
+            <span class="step-banner-title">컨셉 선택하기</span>
           </div>
+          <span class="step-banner-sub">다양한 AI 테마</span>
+        </div>
+      </header>
+
+      <!-- 타이틀 & 카테고리 탭 -->
+      <div class="filter-title-section">
+        <div style="position:relative; display:inline-block;">
+          <h1 class="filter-main-h1">원하는 4컷 컨셉을 선택해주세요</h1>
+          <svg class="marker-doodle" preserveAspectRatio="none" viewBox="0 0 100 12">
+            <path d="M0,8 Q50,0 100,6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="9"></path>
+          </svg>
+        </div>
+        <p class="filter-sub-hint">👈 좌우로 넘겨(스와이프) 원하는 AI 테마를 골라보세요 👉</p>
+
+        <!-- 퀵 카테고리 탭 -->
+        <nav class="concept-category-tabs">
+          <button class="doodle-pill tab-btn active" id="tab-cat-0" onclick="goToCarouselSlide(0)">인생 4컷</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-1" onclick="goToCarouselSlide(1)">판타지 4컷</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-2" onclick="goToCarouselSlide(2)">조선 4컷</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-3" onclick="goToCarouselSlide(3)">감성 아트</button>
+        </nav>
+      </div>
+
+      <!-- 고화질 모드 토글 바 -->
+      <div class="quality-mode-bar">
+        <div class="quality-mode-left">
+          <span class="quality-icon-wrap">💎</span>
+          <div class="quality-text-col">
+            <span class="quality-name">고퀄리티 AI 모드 (gpt-image-2)</span>
+            <span class="quality-sub" id="quality-desc-text">초고화질 gpt-image-2 모델 기본 가동 중 (극사실적 텍스처)</span>
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="toggle-high-quality" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <!-- 인터랙티브 스와이프 캐러셀 영역 -->
+      <div class="concept-carousel-wrap">
+        <button class="carousel-nav-arrow left" onclick="prevCarouselSlide()" aria-label="이전 테마">‹</button>
+        <button class="carousel-nav-arrow right" onclick="nextCarouselSlide()" aria-label="다음 테마">›</button>
+
+        <div class="concept-viewport" id="concept-carousel-viewport">
+          
+          <!-- 슬라이드 0: 인생 4컷 (연령 변환) -->
+          <div class="concept-slide active" data-style="time_travel" data-slide-index="0" onclick="selectConceptByIndex(0)">
+            <div class="slide-top-badge-row">
+              <span class="slide-tag-pill" style="background-color:#FFF275; color:#3E3415;">⏳ AI 연령 변환</span>
+              <span style="font-size:10px; font-weight:700; color:#6A6358;">인생 사계절</span>
+            </div>
+            <div class="slide-photo-grid">
+              <div class="photo-cell" style="background-color:#FFEB84;">
+                <span class="cell-emoji">👶</span>
+                <span class="cell-label" style="color:#3E3415;">유년기</span>
+                <span class="cell-sub" style="color:#6C5D2B;">순수했던 어린 시절</span>
+              </div>
+              <div class="photo-cell" style="background-color:#A2D8F9;">
+                <span class="cell-emoji">🎓</span>
+                <span class="cell-label" style="color:#18394E;">학창시절</span>
+                <span class="cell-sub" style="color:#2C5874;">꿈 많던 교복 감성</span>
+              </div>
+              <div class="photo-cell" style="background-color:#D3C8FA;">
+                <span class="cell-emoji">✨</span>
+                <span class="cell-label" style="color:#2F2256;">현재모습</span>
+                <span class="cell-sub" style="color:#55428C;">가장 빛나는 청춘</span>
+              </div>
+              <div class="photo-cell" style="background-color:#E1E4EA;">
+                <span class="cell-emoji">👵</span>
+                <span class="cell-label" style="color:#3B414A;">노년기</span>
+                <span class="cell-sub" style="color:#5F6570;">우아하고 따뜻한 미래</span>
+              </div>
+            </div>
+            <div class="slide-footer-info">
+              <div class="slide-title-row">
+                <h3 class="slide-title-text">인생 4컷 (연령 변환)</h3>
+                <span class="slide-category-tag" style="background-color:#FEE2E2; color:#B93828;">TIME TRIP</span>
+              </div>
+              <p class="slide-desc-text">유년기부터 노년기까지 내 인생의 사계절을 한 번에 담아내는 시그니처 AI 테마</p>
+            </div>
+          </div>
+
+          <!-- 슬라이드 1: 판타지 4컷 (마법과 환상) -->
+          <div class="concept-slide" data-style="wizard" data-slide-index="1" onclick="selectConceptByIndex(1)">
+            <div class="slide-top-badge-row">
+              <span class="slide-tag-pill" style="background-color:#EDE9FE; color:#6D28D9;">✨ 마법과 환상</span>
+              <span style="font-size:10px; font-weight:700; color:#5C2AB5;">판타지 동화</span>
+            </div>
+            <div class="slide-photo-grid">
+              <div class="photo-cell" style="background-color:#E9D5FF;">
+                <span class="cell-emoji">🧙‍♂️</span>
+                <span class="cell-label" style="color:#4C1D95;">호그와트 마법학교</span>
+                <span class="cell-sub" style="color:#6B21A8;">신비로운 로브와 지팡이</span>
+              </div>
+              <div class="photo-cell" style="background-color:#BBF7D0;">
+                <span class="cell-emoji">🧝</span>
+                <span class="cell-label" style="color:#14532D;">숲의 엘프</span>
+                <span class="cell-sub" style="color:#166534;">요정의 숲과 마법 활</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FEF08A;">
+                <span class="cell-emoji">🔮</span>
+                <span class="cell-label" style="color:#713F12;">대마법사</span>
+                <span class="cell-sub" style="color:#854D0E;">빛나는 오브와 주문</span>
+              </div>
+              <div class="photo-cell" style="background-color:#BAE6FD;">
+                <span class="cell-emoji">🐉</span>
+                <span class="cell-label" style="color:#0C4A6E;">드래곤 라이더</span>
+                <span class="cell-sub" style="color:#0369A1;">하늘을 가르는 비행</span>
+              </div>
+            </div>
+            <div class="slide-footer-info">
+              <div class="slide-title-row">
+                <h3 class="slide-title-text">판타지 4컷 (마법과 환상)</h3>
+                <span class="slide-category-tag" style="background-color:#EDE9FE; color:#7C3AED;">MAGICAL</span>
+              </div>
+              <p class="slide-desc-text">마법 지팡이와 고대 서고의 신비로운 주문 속으로 들어가는 판타지 동화 테마</p>
+            </div>
+          </div>
+
+          <!-- 슬라이드 2: 조선 4컷 (신분 변신) -->
+          <div class="concept-slide" data-style="time_travel" data-sub-theme="joseon" data-slide-index="2" onclick="selectConceptByIndex(2)">
+            <div class="slide-top-badge-row">
+              <span class="slide-tag-pill" style="background-color:#DCFCE7; color:#166534;">⚔️ K-히스토리</span>
+              <span style="font-size:10px; font-weight:700; color:#1F5E4F;">조선 4색 신분</span>
+            </div>
+            <div class="slide-photo-grid">
+              <div class="photo-cell" style="background-color:#FEE2E2;">
+                <span class="cell-emoji">👑</span>
+                <span class="cell-label" style="color:#881337;">01 왕</span>
+                <span class="cell-sub" style="color:#B91C1C;">위엄 가득 곤룡포</span>
+              </div>
+              <div class="photo-cell" style="background-color:#E0F2FE;">
+                <span class="cell-emoji">📜</span>
+                <span class="cell-label" style="color:#0C4A6E;">02 양반</span>
+                <span class="cell-sub" style="color:#0369A1;">풍류 흑립과 도포</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FEF3C7;">
+                <span class="cell-emoji">🎒</span>
+                <span class="cell-label" style="color:#78350F;">03 보부상</span>
+                <span class="cell-sub" style="color:#B45309;">팔도 패랭이 봇짐</span>
+              </div>
+              <div class="photo-cell" style="background-color:#F5F5F4;">
+                <span class="cell-emoji">🌾</span>
+                <span class="cell-label" style="color:#292524;">04 노비</span>
+                <span class="cell-sub" style="color:#57534E;">정겨운 삼베옷과 짚신</span>
+              </div>
+            </div>
+            <div class="slide-footer-info">
+              <div class="slide-title-row">
+                <h3 class="slide-title-text">조선 4컷 (신분 변신)</h3>
+                <span class="slide-category-tag" style="background-color:#E6F4EA; color:#088366;">HISTORIC</span>
+              </div>
+              <p class="slide-desc-text">왕부터 노비까지! 타임머신을 타고 조선시대로 떠나는 신분 역전 AI 테마</p>
+            </div>
+          </div>
+
+          <!-- 슬라이드 3: 감성 아트 4컷 (오리지널 / 지브리 / 카툰 / 네온) -->
+          <div class="concept-slide" data-style="original" data-slide-index="3" onclick="selectConceptByIndex(3)">
+            <div class="slide-top-badge-row">
+              <span class="slide-tag-pill" style="background-color:#FEE2E2; color:#991B1B;">🎨 감성 & 클래식</span>
+              <span style="font-size:10px; font-weight:700; color:#78350F;">아트 스튜디오</span>
+            </div>
+            <div class="slide-photo-grid">
+              <div class="photo-cell" style="background-color:#F1F5F9;">
+                <span class="cell-emoji">📷</span>
+                <span class="cell-label" style="color:#1E293B;">오리지널</span>
+                <span class="cell-sub" style="color:#475569;">자연스러운 원본</span>
+              </div>
+              <div class="photo-cell" style="background-color:#DCFCE7;">
+                <span class="cell-emoji">🌿</span>
+                <span class="cell-label" style="color:#166534;">지브리 감성</span>
+                <span class="cell-sub" style="color:#15803D;">따뜻한 수채화</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FFEDD5;">
+                <span class="cell-emoji">🎨</span>
+                <span class="cell-label" style="color:#9A3412;">3D 카툰</span>
+                <span class="cell-sub" style="color:#C2410C;">부드러운 애니메이션</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FCE7F3;">
+                <span class="cell-emoji">🌆</span>
+                <span class="cell-label" style="color:#831843;">네온 시티</span>
+                <span class="cell-sub" style="color:#9D174D;">사이버펑크 네온</span>
+              </div>
+            </div>
+            <div class="slide-footer-info">
+              <div class="slide-title-row">
+                <h3 class="slide-title-text">클래식 & 아트 4컷</h3>
+                <span class="slide-category-tag" style="background-color:#F3E8FF; color:#7E22CE;">ARTISTIC</span>
+              </div>
+              <p class="slide-desc-text">원본 고유의 느낌을 살리거나 아기자기한 수채화/카툰 감성을 더하는 테마</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 캐러셀 인디케이터 닷 -->
+        <div class="carousel-dots-row">
+          <button class="carousel-dot active" id="dot-0" onclick="goToCarouselSlide(0)" aria-label="1번 테마"></button>
+          <button class="carousel-dot" id="dot-1" onclick="goToCarouselSlide(1)" aria-label="2번 테마"></button>
+          <button class="carousel-dot" id="dot-2" onclick="goToCarouselSlide(2)" aria-label="3번 테마"></button>
+          <button class="carousel-dot" id="dot-3" onclick="goToCarouselSlide(3)" aria-label="4번 테마"></button>
         </div>
       </div>
 
-      <footer class="fixed-footer">
-        <button id="btn-to-shoot" class="btn btn-primary btn-large w-full">다음 (촬영 준비) ➔</button>
+      <!-- 하단 액션 영역 -->
+      <footer class="filter-bottom-action">
+        <div class="selected-concept-notice">
+          <span style="width:8px; height:8px; border-radius:50%; background-color:var(--point-red); display:inline-block;"></span>
+          <span>선택된 테마: </span>
+          <span id="selected-theme-title-display" class="selected-title-underline">인생 사계절 (인생 4컷)</span>
+        </div>
+        <button id="btn-to-shoot" class="doodle-btn btn-confirm-concept" type="button">
+          <span>컨셉 선택 완료 (촬영 부스로 입장하기) ➔</span>
+        </button>
       </footer>
     </section>
 
     <!-- ==========================================
-         [화면 3] 사진 4컷 촬영 & 비하인드 녹화
+         [화면 3] 사진 4컷 촬영 부스 (STEP 2)
          ========================================== -->
     <section id="screen-shoot" class="screen">
-      <header class="fixed-header">
-        <div class="header-title">사진 촬영</div>
-        <div class="header-desc">카메라를 보고 매 컷마다 멋진 포즈를 취해 보세요!</div>
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
+            </div>
+          </div>
+          <div class="doodle-pill status-badge-online">
+            <span class="pulse-dot-red"></span>
+            <span>REC LIVE</span>
+          </div>
+        </div>
+
+        <!-- STEP 2 배지 -->
+        <div class="step-banner-bar">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="step-tag-pill">STEP 2</span>
+            <span class="step-banner-title">4컷 연사 촬영 중</span>
+          </div>
+          <span class="step-banner-sub">| 3초 간격 셔터 찰칵!</span>
+        </div>
       </header>
 
-      <div class="screen-content scrollable-content shoot-scrollable-content">
-        <!-- 현재 적용 테마 뱃지 -->
-        <div style="text-align: center; width: 100%;">
-          <div id="shoot-current-theme" class="current-theme-badge">⏳ 콘셉트: 인생 사계절 (연령 변환)</div>
-        </div>
-
-        <div class="timer-container">
-          <div class="shoot-timer-wrap">
-            <svg class="timer-svg" viewBox="0 0 100 100">
-              <circle class="timer-bg" cx="50" cy="50" r="42"></circle>
-              <circle id="timer-progress" class="timer-progress" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="0"></circle>
-            </svg>
-            <div id="timer-number" class="timer-number">5</div>
+      <!-- 촬영 부스 메인 뷰 -->
+      <main class="shoot-content">
+        <div class="viewfinder-outer-box">
+          <!-- 뷰파인더 상단 메타 헤더 -->
+          <div class="viewfinder-top-meta">
+            <div class="cam-name-tag">
+              <span class="cam-red-dot"></span>
+              <span>CAM 01 // EYE LEVEL</span>
+            </div>
+            <div id="shoot-current-theme-tag" class="current-theme-pill">
+              👑 조선 4컷 (신분 변신)
+            </div>
+            <span class="cam-fps-badge">60 FPS</span>
           </div>
-          <div id="shoot-counter-badge" class="shoot-counter-badge">1 / 4 컷</div>
-        </div>
 
-        <!-- 컷별 실시간 변환 가이드 뱃지 -->
-        <div id="shoot-cut-guide" class="cut-guide-badge">👶 1컷 준비: 어린이(유년기) 변환 예정</div>
-
-        <div class="camera-viewport-container">
-          <div class="camera-viewport">
+          <!-- 웹캠 라이브 스크린 -->
+          <div class="video-screen-container">
             <video id="webcam-preview" autoplay playsinline muted></video>
-            <div id="flash-effect" class="flash-effect"></div>
+            
+            <!-- 카메라 격자 & 초점 오버레이 -->
+            <div class="camera-overlay-layer">
+              <div class="thirds-grid">
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+                <div class="grid-cell"></div><div class="grid-cell"></div><div class="grid-cell"></div>
+              </div>
+              <div class="focus-brackets">
+                <span class="corner-yellow corner-tl"></span>
+                <span class="corner-yellow corner-tr"></span>
+                <span class="corner-yellow corner-bl"></span>
+                <span class="corner-yellow corner-br"></span>
+              </div>
+            </div>
+
+            <!-- 대형 3초 카운트다운 펄스 뱃지 -->
+            <div class="countdown-badge-wrap">
+              <div class="countdown-circle">
+                <span id="countdown-display-num" class="countdown-num-text">3</span>
+              </div>
+              <span id="countdown-hint-text" class="countdown-sub-hint">초 뒤 찰칵!</span>
+            </div>
+
+            <!-- 플래시 자동 인디케이터 -->
+            <div class="flash-auto-badge">
+              <span>⚡</span>
+              <span>FLASH AUTO</span>
+            </div>
+
+            <!-- 셔터 플래시 효과 레이어 -->
+            <div id="flash-effect" class="flash-screen"></div>
+          </div>
+
+          <!-- 4컷 진행도 비주얼 스트립 -->
+          <div class="shot-progress-strip">
+            <div class="strip-meta-header">
+              <div style="display:flex; align-items:center; gap:4px;">
+                <span class="strip-count-title">촬영 진행도</span>
+                <span id="shoot-counter-badge" class="strip-count-highlight">(1 / 4 CUT)</span>
+              </div>
+              <span id="shoot-cut-guide" class="strip-sub-text">각 컷마다 3초씩 여유롭게 촬영돼요!</span>
+            </div>
+
+            <div class="strip-boxes-grid">
+              <div id="cut-box-1" class="strip-cut-box active">
+                <span class="cut-idx-tag">1컷</span>
+                <span class="cut-box-emoji" id="cut-box-emoji-1">👑</span>
+                <span class="cut-box-status" id="cut-box-status-1">촬영중</span>
+              </div>
+              <div id="cut-box-2" class="strip-cut-box">
+                <span class="cut-idx-tag">2컷</span>
+                <span class="cut-box-emoji" id="cut-box-emoji-2">📜</span>
+                <span class="cut-box-status" id="cut-box-status-2">대기</span>
+              </div>
+              <div id="cut-box-3" class="strip-cut-box">
+                <span class="cut-idx-tag">3컷</span>
+                <span class="cut-box-emoji" id="cut-box-emoji-3">🎒</span>
+                <span class="cut-box-status" id="cut-box-status-3">대기</span>
+              </div>
+              <div id="cut-box-4" class="strip-cut-box">
+                <span class="cut-idx-tag">4컷</span>
+                <span class="cut-box-emoji" id="cut-box-emoji-4">🌾</span>
+                <span class="cut-box-status" id="cut-box-status-4">대기</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- 다인원 또렷한 촬영 및 Windows 배경 흐림 해제 안내 배너 -->
-        <div class="camera-help-box">
-          <div class="camera-help-item">
-            <span class="help-icon">⚠️</span>
-            <span><strong>배경이 뿌옇게 흐린가요?</strong> Windows 우측 하단 빠른설정(<code>Win + A</code>)에서 <strong>'스튜디오 효과(배경 흐림)'</strong>를 끄시면 전원 선명하게 촬영됩니다!</span>
-          </div>
-          <div class="camera-help-item sub">
-            <span class="help-icon">👥</span>
-            <span><strong>다인원 꿀팁:</strong> 프레임 안쪽으로 가깝게 모여 서주시면 모든 분이 또렷하게 변환됩니다.</span>
+        <!-- 포즈 & 카메라 꿀팁 스티커 노트 -->
+        <div class="tip-sticker-note">
+          <div class="tip-sticker-icon">👀</div>
+          <div class="tip-sticker-content">
+            <div class="tip-title-row">
+              <span>촬영 꿀팁</span>
+              <span class="tip-pill-tag">시선은 상단 렌즈로!</span>
+            </div>
+            <p class="tip-desc-text">화면 가운데 카메라 렌즈를 바라보시면 자연스러운 시선 처리가 완성됩니다.</p>
           </div>
         </div>
 
-        <!-- 촬영 화면 고퀄리티 모드 토글 스위치 바 -->
-        <div class="shoot-quality-toggle-box">
-          <span class="shoot-quality-label">💎 고퀄리티 모드 (gpt-image-2)</span>
-          <label class="switch">
-            <input type="checkbox" id="toggle-shoot-high-quality">
-            <span class="slider round"></span>
-          </label>
-        </div>
-
-        <button id="btn-manual-trigger" class="btn btn-primary btn-large w-full btn-shoot-trigger">🚀 4컷 연사 시작</button>
-      </div>
+        <!-- 하단 연사 시작 버튼 -->
+        <button id="btn-manual-trigger" class="doodle-btn doodle-btn-primary" style="width:100%; padding:14px; font-size:17px; font-weight:900;" type="button">
+          <span>🚀 4컷 연사 시작 (카운트다운 ON)</span>
+        </button>
+      </main>
     </section>
 
     <!-- ==========================================
-         [화면 4] 촬영본 4컷 확인 및 AI 변환 요청
+         [화면 4] 촬영본 확인 (STEP 2.5)
          ========================================== -->
     <section id="screen-select" class="screen">
-      <header class="fixed-header">
-        <div class="header-title">촬영본 확인</div>
-        <div class="header-desc">캡처된 4컷 사진을 확인하세요.</div>
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
+            </div>
+          </div>
+          <div class="doodle-pill status-badge-online">
+            <span class="pulse-dot"></span>
+            <span>CHECK</span>
+          </div>
+        </div>
+
+        <div class="step-banner-bar">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="step-tag-pill">CHECK</span>
+            <span class="step-banner-title">촬영본 4컷 확인</span>
+          </div>
+          <span class="step-banner-sub">마음에 드시나요?</span>
+        </div>
       </header>
 
-      <div class="screen-content scrollable-content select-content">
-        <div class="photos-grid">
-          <div class="photo-card selected">
-            <img id="captured-img-0" src="" alt="Shot 1">
-            <div class="photo-badge">1</div>
+      <main class="select-content">
+        <!-- 4컷 캡처 그리드 -->
+        <div class="captured-photos-grid">
+          <div class="captured-card">
+            <img id="captured-img-0" src="" alt="1컷">
+            <span class="captured-card-badge">1</span>
           </div>
-          <div class="photo-card selected">
-            <img id="captured-img-1" src="" alt="Shot 2">
-            <div class="photo-badge">2</div>
+          <div class="captured-card">
+            <img id="captured-img-1" src="" alt="2컷">
+            <span class="captured-card-badge">2</span>
           </div>
-          <div class="photo-card selected">
-            <img id="captured-img-2" src="" alt="Shot 3">
-            <div class="photo-badge">3</div>
+          <div class="captured-card">
+            <img id="captured-img-2" src="" alt="3컷">
+            <span class="captured-card-badge">3</span>
           </div>
-          <div class="photo-card selected">
-            <img id="captured-img-3" src="" alt="Shot 4">
-            <div class="photo-badge">4</div>
+          <div class="captured-card">
+            <img id="captured-img-3" src="" alt="4컷">
+            <span class="captured-card-badge">4</span>
           </div>
         </div>
-      </div>
 
-      <footer class="fixed-footer">
-        <div class="split-buttons">
-          <button id="btn-retake" class="btn btn-secondary">🔄 재촬영</button>
-          <button id="btn-transform" class="btn btn-primary">✨ AI 변환 생성</button>
+        <div class="dual-action-row">
+          <button id="btn-retake" class="doodle-btn doodle-btn-secondary btn-dual" type="button">
+            <span>🔄 재촬영하기</span>
+          </button>
+          <button id="btn-transform" class="doodle-btn doodle-btn-primary btn-dual" type="button">
+            <span>✨ AI 변환 생성하기</span>
+          </button>
         </div>
-      </footer>
+      </main>
     </section>
 
     <!-- ==========================================
-         [화면 5/6] 생성 결과 비교 (AI vs 원본)
-         ========================================== -->
-    <!-- ==========================================
-         [화면 5/6] 변환 완료 상세 뷰 (AI vs 원본 대형 개별 탭 뷰)
+         [화면 5] 변환 완료 상세 뷰 (STEP 3 Preview)
          ========================================== -->
     <section id="screen-result" class="screen">
-      <header class="fixed-header">
-        <div class="header-title">변환 완료</div>
-        <div class="header-desc">AI 스타일 및 원본 4컷을 큰 화면으로 확인하고 선택하세요.</div>
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
+            </div>
+          </div>
+          <div class="doodle-pill status-badge-online">
+            <span class="pulse-dot"></span>
+            <span>COMPLETE</span>
+          </div>
+        </div>
+
+        <div class="step-banner-bar">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="step-tag-pill">STEP 3</span>
+            <span class="step-banner-title">변환 완료 & 프레임 선택</span>
+          </div>
+          <span class="step-banner-sub">AI vs 원본 비교</span>
+        </div>
       </header>
 
-      <div class="screen-content scrollable-content result-large-content">
-        <!-- 상단 탭 스위처 (개별 페이지 전환) -->
-        <div class="result-tab-bar">
-          <button id="tab-ai-frame" class="result-tab-btn active">
+      <main class="result-content">
+        <!-- 탭 스위처 -->
+        <div class="result-tabs-row">
+          <button id="tab-ai-frame" class="result-tab-btn active" type="button">
             <span>✨ AI 스타일 4컷</span>
           </button>
-          <button id="tab-orig-frame" class="result-tab-btn">
+          <button id="tab-orig-frame" class="result-tab-btn" type="button">
             <span>📷 원본 촬영 4컷</span>
           </button>
         </div>
 
-        <!-- 대형 프레임 뷰어 컨테이너 -->
-        <div class="large-frame-viewport">
-          <!-- 1. AI 스타일 대형 프레임 -->
-          <div id="view-ai-frame" class="large-frame-card active">
-            <div class="frame-tag-badge">✨ AI 스타일 프레임 (선택됨)</div>
-            <div class="four-cut-frame-large">
-              <img id="ai-frame-preview" src="" alt="AI 4컷 대형 프레임">
-            </div>
-            <div class="frame-choice-status">✓ 최종 다운로드 및 인화 대상</div>
+        <!-- 4-Cut Realistic Paper Strip 카드 프리뷰 -->
+        <article class="photo-strip-preview-card" id="photo-strip-card">
+          <div class="stamp-tag-top">최종 인화본 ✨</div>
+          <div class="stamp-seal-right">通</div>
+
+          <!-- 실제 프레임 이미지 렌더링 영역 -->
+          <div class="strip-single-img-wrap">
+            <img id="ai-frame-preview" src="" alt="AI 4컷 프레임">
+            <img id="orig-frame-preview" src="" alt="원본 4컷 프레임" style="display:none;">
           </div>
 
-          <!-- 2. 원본 사진 대형 프레임 -->
-          <div id="view-orig-frame" class="large-frame-card">
-            <div class="frame-tag-badge" style="color: #64748B; background: #F1F5F9; border-color: #CBD5E1;">📷 원본 사진 프레임 (선택됨)</div>
-            <div class="four-cut-frame-large">
-              <img id="orig-frame-preview" src="" alt="Original 4컷 대형 프레임">
+          <!-- 스트립 하단 서명 푸터 -->
+          <footer class="strip-signature-footer">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+              <span class="strip-sign-title" id="strip-brand-label">청년4컷 스튜디오</span>
+              <span style="font-family:var(--font-mono); font-size:9.5px; color:#555;" id="strip-date-label">2026.09.12</span>
             </div>
-            <div class="frame-choice-status" style="color: #64748B; background: #F8FAFC; border-color: #E2E8F0;">✓ 원본 사진으로 저장하기</div>
-          </div>
+            <div class="barcode-simulation-row">
+              <span class="bar-line" style="width:2px;"></span>
+              <span class="bar-line" style="width:1px;"></span>
+              <span class="bar-line" style="width:3px;"></span>
+              <span class="bar-line" style="width:1.5px;"></span>
+              <span class="bar-line" style="width:4px;"></span>
+              <span class="bar-line" style="width:2px;"></span>
+              <span class="bar-line" style="width:1px;"></span>
+              <span class="bar-line" style="width:3px;"></span>
+              <span class="bar-line" style="width:1px;"></span>
+              <span class="bar-line" style="width:3px;"></span>
+              <span class="bar-line" style="width:2px;"></span>
+              <span class="bar-line" style="width:4px;"></span>
+            </div>
+            <p class="strip-footer-sub">서울청년센터 영등포 × 놀면뭐AI</p>
+          </footer>
+        </article>
+
+        <!-- 프레임 컬러 변경 팔레트 -->
+        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:4px;">
+          <span style="font-size:12px; font-weight:800; color:#1E232A;">프레임 테두리:</span>
+          <button class="doodle-pill frame-color-btn active" style="width:24px; height:24px; background-color:#FFFDF9; border:2.5px solid #1E232A; box-shadow:0 0 0 2.5px #1E232A; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#FFFDF9', '#1E232A', this)" title="클래식 크림"></button>
+          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#222222; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#222222', '#FFFFFF', this)" title="먹물 블랙"></button>
+          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#8F291D; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#8F291D', '#FFFFFF', this)" title="단청 레드"></button>
+          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#152E55; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#152E55', '#FFFFFF', this)" title="클래식 네이비"></button>
         </div>
-      </div>
 
-      <footer class="fixed-footer">
-        <button id="btn-to-finish" class="btn btn-primary btn-large w-full">선택 완료 (QR & 인화) ➔</button>
-      </footer>
+        <button id="btn-to-finish" class="doodle-btn doodle-btn-primary" style="width:100%; padding:13px; font-size:15px; font-weight:900;" type="button">
+          <span>선택 완료 (QR 모바일 저장 & 인화) ➔</span>
+        </button>
+      </main>
     </section>
 
     <!-- ==========================================
-         [화면 7] 다운로드 QR & 인화 시뮬레이션
+         [화면 6] 스마트폰 저장 & 출력 (STEP 3 Finish)
          ========================================== -->
     <section id="screen-finish" class="screen">
-      <header class="fixed-header">
-        <div class="header-title">스마트폰 저장 & 출력</div>
-        <div class="header-desc">QR 코드를 스캔하여 완성본과 비하인드 영상을 받으세요!</div>
+      <header class="app-header">
+        <div class="header-top-row">
+          <div class="brand-group">
+            <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+            <div class="brand-divider"></div>
+            <div class="brand-text-col">
+              <span class="brand-title-hand">놀면뭐AI</span>
+              <span class="brand-sub-mono">AI SYSTEM</span>
+            </div>
+          </div>
+          <div class="doodle-pill status-badge-online">
+            <span class="pulse-dot"></span>
+            <span>COMPLETE</span>
+          </div>
+        </div>
+
+        <div class="step-banner-bar">
+          <div style="display:flex; align-items:center; gap:6px;">
+            <span class="step-tag-pill">STEP 3</span>
+            <span class="step-banner-title">스마트폰 저장 & 출력</span>
+          </div>
+          <span class="step-banner-sub">QR 1초 다운로드</span>
+        </div>
       </header>
 
-      <div class="screen-content center-content finish-scrollable">
-        <div class="finish-panel">
-          <!-- 미디어 프리뷰 2열 그리드 (4컷 사진 + 2배속 영상) -->
-          <div class="finish-media-preview-grid">
-            <div id="btn-thumb-preview-card" class="preview-mini-card clickable-thumb" title="클릭하면 4컷을 큰 화면으로 다시 봅니다">
-              <div class="mini-card-badge">📸 4컷 완성본 <span class="badge-zoom-hint">(크게 보기 🔍)</span></div>
-              <div class="mini-thumb-box">
-                <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
-              </div>
+      <main class="finish-content">
+        <!-- 2열 미디어 (사진 + 2배속 비하인드 동영상) -->
+        <div class="finish-media-grid">
+          <div class="finish-media-box" id="btn-thumb-preview-card" title="클릭하면 큰 화면으로 다시 봅니다">
+            <div class="finish-box-header">
+              <span>📸 4컷 완성본</span>
+              <span style="font-size:9.5px; color:#008B74;">(크게보기 🔍)</span>
             </div>
-            <div class="preview-mini-card">
-              <div class="mini-card-badge">⚡ 2배속 비하인드 캠</div>
-              <div class="mini-video-box">
-                <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
-                  <source id="kiosk-video-source" src="" type="video/mp4">
-                </video>
-              </div>
+            <div class="thumb-crop-box">
+              <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
             </div>
           </div>
 
-          <div class="qr-container-box">
-            <div class="qrcode-wrapper">
-              <img id="qr-code-img" width="160" height="160" src="" alt="QR Code">
+          <div class="finish-media-box">
+            <div class="finish-box-header">
+              <span>⚡ 2배속 비하인드</span>
+              <span style="font-size:9.5px; color:#B93826;">REC</span>
             </div>
-            <p class="qr-info-text">
-              스마트폰 카메라로 <strong>QR 코드를 스캔</strong>하면<br>
-              <strong>4컷 완성본 사진</strong>과 <strong>2배속 비하인드 영상</strong>을<br>
-              로그인 없이 1초 만에 스마트폰에 즉시 다운로드할 수 있습니다.<br>
-              <span style="font-size:0.75rem;color:#94A3B8;">(개인정보 보호법 준수 24시간 후 자동 영구 파기)</span>
+            <div class="thumb-crop-box">
+              <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
+                <source id="kiosk-video-source" src="" type="video/mp4">
+              </video>
+            </div>
+          </div>
+        </div>
+
+        <!-- 모바일 즉시 다운로드 QR 카드 -->
+        <div class="qr-mobile-download-card">
+          <span class="qr-top-del-tag">다운로드 즉시 파기 (미다운로드 시 24h)</span>
+          <div class="qr-frame-box">
+            <img id="qr-code-img" src="" alt="모바일 다운로드 QR 코드">
+          </div>
+          <div class="qr-desc-col">
+            <h3 class="qr-headline">📱 모바일 즉시 다운로드</h3>
+            <p class="qr-body-text">
+              스마트폰 기본 카메라로 <strong>QR 코드를 비추면</strong><br>
+              <strong>고화질 4컷 사진</strong>과 <strong>2배속 영상</strong>을 즉시 무료로 소장하실 수 있습니다.<br>
+              <span style="font-size:0.75rem; color:#64748B;">🔒 다운로드 즉시 클라우드 및 서버에서 안전하게 영구 파기됩니다.</span>
             </p>
           </div>
         </div>
-      </div>
 
-      <footer class="fixed-footer finish-fixed-footer">
-        <div class="finish-action-grid">
-          <!-- 1행: 4컷 다시보기 & 엽서 인화 출력 (50:50 분할) -->
-          <div class="finish-dual-btn-row">
-            <button id="btn-back-to-result" class="btn btn-action-dual btn-back-dual">
-              ◀ 4컷 다시보기
+        <!-- 하단 액션 버튼들 -->
+        <div class="finish-action-panel">
+          <div class="finish-dual-row">
+            <button id="btn-back-to-result" class="doodle-btn doodle-btn-secondary btn-finish-dual" type="button">
+              <span>◀ 4컷 다시보기</span>
             </button>
-            <button id="btn-print-modal" class="btn btn-action-dual btn-print-dual">
-              🖨️ 엽서 인화 출력
+            <button id="btn-print-modal" class="doodle-btn doodle-btn-primary btn-finish-dual" type="button">
+              <span>🖨️ 엽서 인화 출력</span>
             </button>
           </div>
-          <!-- 2행: 처음으로 (새로운 촬영) 전폭 버튼 -->
-          <button id="btn-reset-home" class="btn btn-home-full">
-            🏠 처음으로 (새로운 촬영)
+          <button id="btn-reset-home" class="doodle-btn btn-finish-home" type="button">
+            <span>🏠 처음으로 (새로운 촬영 시작)</span>
           </button>
         </div>
-      </footer>
+      </main>
     </section>
 
-    <!-- Canon SELPHY CP1500 무선 인화 모달 -->
+    <!-- ==========================================
+         [모달 1] Canon SELPHY CP1500 무선 인화 모달
+         ========================================== -->
     <div id="modal-print" class="modal-overlay">
-      <div class="modal-card print-kiosk-modal">
-        <button id="modal-close" class="modal-close-btn" disabled>✕</button>
-        
-        <div class="modal-header">
-          <div class="print-animation">
-            <div class="printer-pulse">🖨️</div>
+      <div class="modal-card">
+        <div class="modal-header-row">
+          <div class="modal-title-wrap">
+            <span>🖨️</span>
+            <span>Canon SELPHY CP1500 인화 중</span>
           </div>
-          <h3 class="print-modal-title">Canon SELPHY CP1500 무선 인화 중</h3>
-          <p class="print-modal-sub">4x6 엽서 (1200x1800 300DPI) 듀얼 스트립 출력</p>
+          <button id="modal-close" class="modal-close-btn" disabled>✕</button>
         </div>
 
-        <div class="modal-body">
-          <!-- 45초 카운트다운 프로그레스 바 -->
-          <div class="print-timer-card">
-            <div class="print-timer-meta">
-              <span id="print-pass-status" class="print-pass-badge">🟡 1차 왕복: Yellow(노랑) 현색 중</span>
-              <span id="print-countdown-text" class="print-countdown-text">45초</span>
-            </div>
-            <div class="print-progress-track">
-              <div id="print-progress-bar" class="print-progress-bar" style="width: 0%;"></div>
-            </div>
-          </div>
+        <div style="font-size:11.5px; color:#555; text-align:center;">
+          4x6 엽서 (1200x1800 300DPI) 듀얼 스트립 인화가 진행 중입니다.
+        </div>
 
-          <!-- 4-Pass 실시간 왕복 상태 인디케이터 -->
-          <div class="four-pass-stepper">
-            <div class="pass-chip active" id="pass-chip-1">
-              <div class="pass-chip-circle" style="background:#FACC15;"></div>
-              <span>1. 노랑</span>
-            </div>
-            <div class="pass-chip" id="pass-chip-2">
-              <div class="pass-chip-circle" style="background:#F43F5E;"></div>
-              <span>2. 빨강</span>
-            </div>
-            <div class="pass-chip" id="pass-chip-3">
-              <div class="pass-chip-circle" style="background:#0EA5E9;"></div>
-              <span>3. 파랑</span>
-            </div>
-            <div class="pass-chip" id="pass-chip-4">
-              <div class="pass-chip-circle" style="background:#A855F7;"></div>
-              <span>4. 코팅</span>
-            </div>
+        <!-- 프로그레스 바 & 카운트다운 -->
+        <div style="background:#ffffff; border:2px solid var(--ink-black); border-radius:14px; padding:10px; box-shadow:var(--shadow-sm);">
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-weight:800; margin-bottom:4px;">
+            <span id="print-pass-status" style="color:var(--point-red);">🟡 1차 왕복: Yellow(노랑) 현색 중...</span>
+            <span id="print-countdown-text" style="font-family:var(--font-mono);">45초</span>
           </div>
-
-          <!-- 하드웨어 고장 방지 필수 안전 경고 배너 -->
-          <div class="hardware-safety-alert">
-            <div class="safety-icon-pulse">⚠️</div>
-            <div class="safety-text-group">
-              <strong>사진이 앞뒤로 4번 왕복합니다!</strong>
-              <p>인화가 완전히 끝나 트레이에 멈출 때까지 <u>절대 손으로 잡아당기거나 만지지 마세요.</u> (기기 기어 파손 방지)</p>
-            </div>
-          </div>
-
-          <!-- 카세트 18매 용지 잔여량 정보 -->
-          <div class="cartridge-status-row">
-            <span class="cartridge-label">📄 용지 카세트 상태:</span>
-            <span id="cartridge-sheet-badge" class="cartridge-badge">잔여 18 / 18매 (정상)</span>
+          <div class="loading-progress-track" style="height:10px;">
+            <div id="print-progress-bar" class="loading-progress-fill" style="width: 0%;"></div>
           </div>
         </div>
 
-        <div class="modal-footer">
-          <button id="btn-print-confirm" class="btn btn-primary w-full" disabled>
-            ⏳ 인화가 진행 중입니다... (약 45초)
-          </button>
+        <!-- 4-Pass 왕복 인디케이터 -->
+        <div class="print-stepper-grid">
+          <div class="pass-chip active" id="pass-chip-1">
+            <div class="pass-chip-circle" style="background:#FACC15;"></div>
+            <span>1. 노랑</span>
+          </div>
+          <div class="pass-chip" id="pass-chip-2">
+            <div class="pass-chip-circle" style="background:#F43F5E;"></div>
+            <span>2. 빨강</span>
+          </div>
+          <div class="pass-chip" id="pass-chip-3">
+            <div class="pass-chip-circle" style="background:#0EA5E9;"></div>
+            <span>3. 파랑</span>
+          </div>
+          <div class="pass-chip" id="pass-chip-4">
+            <div class="pass-chip-circle" style="background:#A855F7;"></div>
+            <span>4. 코팅</span>
+          </div>
         </div>
+
+        <!-- 카세트 잔여량 뱃지 -->
+        <div style="text-align:center;">
+          <span id="cartridge-sheet-badge" class="doodle-pill" style="background:#F1F5F9; font-size:10.5px; font-weight:700; padding:2px 8px;">
+            용지 잔여량: 확인 중...
+          </span>
+        </div>
+
+        <button id="btn-print-confirm" class="doodle-btn doodle-btn-primary" style="width:100%; padding:11px; font-size:13px;" disabled>
+          인화 중에는 창을 닫을 수 없습니다...
+        </button>
       </div>
     </div>
 
-    <!-- 현장 네트워크 & IoT 연동 진단 모달 (모니터링 대시보드) -->
+    <!-- ==========================================
+         [모달 2] 현장 네트워크 & 하드웨어 진단 모달
+         ========================================== -->
     <div id="modal-diagnostics" class="modal-overlay">
-      <div class="modal-card diagnostics-modal">
-        <button id="diagnostics-close" class="modal-close-btn">✕</button>
-
-        <div class="modal-header">
-          <div class="diagnostics-icon-wrap">🛠️</div>
-          <h3 class="diagnostics-title">현장 네트워크 & IoT 연동 진단기</h3>
-          <p class="diagnostics-sub">태블릿 ⇄ Host PC ⇄ Canon CP1500 통신 상태 모니터링</p>
+      <div class="modal-card">
+        <div class="modal-header-row">
+          <div class="modal-title-wrap">
+            <span>⚙️</span>
+            <span>현장 시스템 및 네트워크 진단</span>
+          </div>
+          <button id="diagnostics-close" class="modal-close-btn">✕</button>
         </div>
 
-        <div class="modal-body diagnostics-body">
-          <!-- 1. 태블릿 ⇄ Host PC 통신 카드 -->
-          <div class="diag-card">
-            <div class="diag-card-header">
-              <div class="diag-card-title">
-                <span class="diag-bullet">📱</span>
-                <strong>태블릿 ⇄ Host PC 통신</strong>
-              </div>
-              <span id="diag-ping-badge" class="diag-badge badge-green">측정 중...</span>
+        <div class="diag-items-list">
+          <!-- 1. Wi-Fi & 네트워크 -->
+          <div class="diag-item-box">
+            <div class="diag-item-header">
+              <span>📶 로컬 네트워크 상태</span>
+              <span id="diag-ping-badge" class="doodle-pill" style="background:#DCFCE7; font-size:9.5px; padding:1px 6px;">측정 중</span>
             </div>
-            <div class="diag-card-content">
-              <div class="diag-row">
-                <span class="diag-label">Host PC 서버 IP:</span>
-                <span id="diag-host-ip" class="diag-val font-mono">-</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">태블릿 클라이언트 IP:</span>
-                <span id="diag-client-ip" class="diag-val font-mono">-</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">동일 서브넷 (동일 Wi-Fi):</span>
-                <span id="diag-subnet-status" class="diag-val font-bold text-green">확인 중...</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">API 왕복 응답 지연 (Latency):</span>
-                <span id="diag-latency-val" class="diag-val font-mono font-bold">-</span>
-              </div>
+            <div class="diag-row">
+              <span class="diag-label">Host PC IP:</span>
+              <span id="diag-host-ip" class="diag-val">-</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label">Client IP:</span>
+              <span id="diag-client-ip" class="diag-val">-</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label">동일 서브넷 Wi-Fi:</span>
+              <span id="diag-subnet-status" class="diag-val">확인 중...</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label">API 왕복 응답 지연:</span>
+              <span id="diag-latency-val" class="diag-val">-</span>
             </div>
           </div>
 
-          <!-- 2. Canon SELPHY CP1500 인화기 카드 -->
-          <div class="diag-card">
-            <div class="diag-card-header">
-              <div class="diag-card-title">
-                <span class="diag-bullet">🖨️</span>
-                <strong>Canon SELPHY CP1500 인화기</strong>
-              </div>
-              <span id="diag-printer-badge" class="diag-badge badge-green">감지 중...</span>
+          <!-- 2. CP1500 인화기 -->
+          <div class="diag-item-box">
+            <div class="diag-item-header">
+              <span>🖨️ Canon SELPHY CP1500</span>
+              <span id="diag-printer-badge" class="doodle-pill" style="background:#DCFCE7; font-size:9.5px; padding:1px 6px;">감지 중</span>
             </div>
-            <div class="diag-card-content">
-              <div class="diag-row">
-                <span class="diag-label">드라이버 감지:</span>
-                <span id="diag-printer-name" class="diag-val font-bold">-</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">용지 카세트 잔여량:</span>
-                <span id="diag-cartridge-sheets" class="diag-val font-bold text-green">-</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">출력 용지 규격:</span>
-                <span class="diag-val">4x6 엽서 (1200x1800 300DPI 2분할)</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">누적 인쇄 성공:</span>
-                <span id="diag-print-total" class="diag-val font-mono">0회</span>
-              </div>
+            <div class="diag-row">
+              <span class="diag-label">프린터 드라이버:</span>
+              <span id="diag-printer-name" class="diag-val">-</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label">카세트 잔여량:</span>
+              <span id="diag-cartridge-sheets" class="diag-val">-</span>
+            </div>
+            <div class="diag-row">
+              <span class="diag-label">누적 인쇄 횟수:</span>
+              <span id="diag-print-total" class="diag-val">0회</span>
             </div>
           </div>
 
-          <!-- 3. 클라우드 및 인터넷 통신 카드 -->
-          <div class="diag-card">
-            <div class="diag-card-header">
-              <div class="diag-card-title">
-                <span class="diag-bullet">☁️</span>
-                <strong>클라우드 & AI API 연동</strong>
-              </div>
-              <span id="diag-cloud-badge" class="diag-badge badge-green">정상</span>
+          <!-- 3. 클라우드 & AI API -->
+          <div class="diag-item-box">
+            <div class="diag-item-header">
+              <span>☁️ 클라우드 & AI API</span>
+              <span id="diag-cloud-badge" class="doodle-pill" style="background:#DCFCE7; font-size:9.5px; padding:1px 6px;">정상</span>
             </div>
-            <div class="diag-card-content">
-              <div class="diag-row">
-                <span class="diag-label">Google Drive 백업:</span>
-                <span id="diag-gdrive-status" class="diag-val text-green font-bold">연결됨</span>
-              </div>
-              <div class="diag-row">
-                <span class="diag-label">OpenAI 연령 변환 모델:</span>
-                <span id="diag-openai-status" class="diag-val text-green font-bold">정상 구성</span>
-              </div>
+            <div class="diag-row">
+              <span class="diag-label">Google Drive:</span>
+              <span id="diag-gdrive-status" class="diag-val">연결됨</span>
             </div>
-          </div>
-
-          <!-- 현장 1장 시험 인쇄 액션 영역 -->
-          <div class="diag-test-print-box">
-            <div class="test-print-desc">
-              <strong>🧪 현장 테스트 인쇄 (1장)</strong>
-              <p>행사 시작 전 CP1500의 4색 컬러 밴드 발색과 300 DPI 엽서 정렬 상태를 즉시 시험 출력합니다.</p>
+            <div class="diag-row">
+              <span class="diag-label">OpenAI 연령 변환:</span>
+              <span id="diag-openai-status" class="diag-val">정상 구성</span>
             </div>
-            <button id="btn-diag-test-print" class="btn btn-primary btn-sm">
-              🖨️ 테스트 엽서 1장 출력
-            </button>
           </div>
         </div>
 
-        <div class="modal-footer diagnostics-footer">
-          <button id="btn-refresh-diagnostics" class="btn btn-outline-purple w-full">
-            🔄 실시간 통신 상태 다시 확인 (Ping)
+        <div style="display:flex; gap:6px;">
+          <button id="btn-diag-test-print" class="doodle-btn doodle-btn-secondary" style="flex:1; padding:9px; font-size:11.5px;">
+            🖨️ 테스트 엽서 1장 출력
+          </button>
+          <button id="btn-refresh-diagnostics" class="doodle-btn doodle-btn-primary" style="flex:1; padding:9px; font-size:11.5px;">
+            🔄 상태 다시 확인 (Ping)
           </button>
         </div>
       </div>
@@ -589,45 +907,44 @@
 
   </div>
 
-  <!-- JavaScript 연동 -->
+  <!-- ==========================================
+       자바스크립트 비즈니스 로직 & 인터랙션
+       ========================================== -->
   <script>
     // 전역 상태 변수
     let currentScreen = 'screen-home';
-    let selectedStyle = 'time_travel'; // 기본값: 연령 변환 테마
+    let selectedStyle = 'time_travel'; // 기본값: 인생 사계절 (연령 변환)
+    let selectedSubTheme = '';
     let mediaStream = null;
     let mediaRecorder = null;
     let recordedChunks = [];
     let capturedBlobs = [];
     let transformResult = null;
-    let isHighQuality = false;
+    let isHighQuality = true; // 기본 모델: gpt-image-2 탑재
+    let sessionId = "";
+    let selectedFrameChoice = 'ai';
 
-    // 스타일 표시명 매핑
-    const styleNames = {
-      'time_travel': '⏳ 인생 사계절 (연령 변환)',
-      'original': '📷 오리지널 클래식',
-      'soft_cartoon': '🎨 소프트 카툰 (3D)',
-      'ghibli': '🌿 지브리 수채화',
-      'neon_fantasy': '🌆 네온 판타지',
-      'bw_cinema': '🎬 흑백 시네마',
-      'wizard': '🧙‍♂️ 마법 학교 (호그와트)'
-    };
+    const conceptList = [
+      { style: 'time_travel', sub: '', name: '인생 사계절 (인생 4컷)', badge: '👑 인생 4컷' },
+      { style: 'wizard', sub: '', name: '판타지 마법과 환상 (판타지 4컷)', badge: '✨ 마법' },
+      { style: 'joseon', sub: 'joseon', name: '조선 4색 신분 (조선 4컷)', badge: '⚔️ 조선' },
+      { style: 'original', sub: '', name: '클래식 & 아트 4컷', badge: '🎨 아트' }
+    ];
 
-    // DOM 요소
-    const screens = {
-      home: document.getElementById('screen-home'),
-      filter: document.getElementById('screen-filter'),
-      shoot: document.getElementById('screen-shoot'),
-      select: document.getElementById('screen-select'),
-      result: document.getElementById('screen-result'),
-      finish: document.getElementById('screen-finish')
-    };
+    let currentConceptIndex = 0;
 
     // 화면 전환 함수
+    const screenIds = ['screen-home', 'screen-filter', 'screen-shoot', 'screen-select', 'screen-result', 'screen-finish'];
+
     function navigateTo(screenId) {
-      Object.values(screens).forEach(s => s.classList.remove('active'));
+      screenIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.remove('active');
+      });
       const target = document.getElementById(screenId);
       if (target) {
         target.classList.add('active');
+        target.scrollTop = 0;
         currentScreen = screenId;
       }
     }
@@ -635,89 +952,168 @@
     // 토스트 알림 표시
     function showToast(msg) {
       const toast = document.getElementById('toast-alert');
-      document.getElementById('toast-message').innerText = msg;
-      toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3000);
-    }
-
-    // 고퀄리티 모드 토글 양방향 동기화 함수
-    function updateQualityState(checked) {
-      isHighQuality = checked;
-      const t1 = document.getElementById('toggle-high-quality');
-      const t2 = document.getElementById('toggle-shoot-high-quality');
-      const bar = document.querySelector('.quality-toggle-bar');
-      const desc = document.getElementById('quality-desc-text');
-      if (t1) t1.checked = checked;
-      if (t2) t2.checked = checked;
-      if (bar) {
-        if (checked) {
-          bar.classList.add('active');
-          if (desc) desc.innerText = "초고화질 gpt-image-2 모델 가동 중 (극사실적 텍스처)";
-        } else {
-          bar.classList.remove('active');
-          if (desc) desc.innerText = "초고속 gpt-image-1.5 모델 가동 중 (빠른 반응 속도)";
-        }
+      const msgElem = document.getElementById('toast-message');
+      if (msgElem) msgElem.innerText = msg;
+      if (toast) {
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2800);
       }
     }
 
-    // 토글 이벤트 리스너 바인딩
-    const tHighQuality = document.getElementById('toggle-high-quality');
-    if (tHighQuality) {
-      tHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
-    }
-    const tShootHighQuality = document.getElementById('toggle-shoot-high-quality');
-    if (tShootHighQuality) {
-      tShootHighQuality.addEventListener('change', (e) => updateQualityState(e.target.checked));
-    }
-
-    // 필터 카루셀 선택 처리
-    document.querySelectorAll('.filter-card').forEach(card => {
-      card.addEventListener('click', () => {
-        document.querySelectorAll('.filter-card').forEach(c => c.classList.remove('selected'));
-        card.classList.add('selected');
-        selectedStyle = card.getAttribute('data-style');
-        const themeElem = document.getElementById('shoot-current-theme');
-        if (themeElem) {
-          themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
+    // 고화질 모드 토글
+    const toggleHq = document.getElementById('toggle-high-quality');
+    const descText = document.getElementById('quality-desc-text');
+    if (toggleHq) {
+      toggleHq.addEventListener('change', (e) => {
+        isHighQuality = e.target.checked;
+        if (descText) {
+          descText.innerText = isHighQuality 
+            ? "초고화질 gpt-image-2 모델 가동 중 (극사실적 텍스처)" 
+            : "초고속 gpt-image-1.5 모델 가동 중 (빠른 반응 속도)";
         }
       });
-    });
+    }
+
+    // ==========================================
+    // 캐러셀 컨트롤러 (스와이프 & 탭 동기화)
+    // ==========================================
+    const carouselViewport = document.getElementById('concept-carousel-viewport');
+    const conceptSlides = carouselViewport ? carouselViewport.querySelectorAll('.concept-slide') : [];
+
+    function updateCarouselUI(index) {
+      currentConceptIndex = index;
+      const concept = conceptList[index];
+      if (!concept) return;
+
+      selectedStyle = concept.style;
+      selectedSubTheme = concept.sub;
+
+      // 1. 슬라이드 active 클래스
+      conceptSlides.forEach((slide, idx) => {
+        if (idx === index) slide.classList.add('active');
+        else slide.classList.remove('active');
+      });
+
+      // 2. 상단 카테고리 탭 active
+      for (let i = 0; i < 4; i++) {
+        const tab = document.getElementById(`tab-cat-${i}`);
+        const dot = document.getElementById(`dot-${i}`);
+        if (tab) {
+          if (i === index) tab.classList.add('active');
+          else tab.classList.remove('active');
+        }
+        if (dot) {
+          if (i === index) dot.classList.add('active');
+          else dot.classList.remove('active');
+        }
+      }
+
+      // 3. 하단 선택 텍스트 갱신
+      const titleDisplay = document.getElementById('selected-theme-title-display');
+      if (titleDisplay) {
+        titleDisplay.innerText = concept.name;
+      }
+
+      // 4. 촬영 화면 뱃지 갱신
+      const shootTag = document.getElementById('shoot-current-theme-tag');
+      if (shootTag) {
+        shootTag.innerText = concept.name;
+      }
+    }
+
+    function goToCarouselSlide(index) {
+      if (conceptSlides[index]) {
+        conceptSlides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        updateCarouselUI(index);
+      }
+    }
+
+    function nextCarouselSlide() {
+      const next = (currentConceptIndex + 1) % conceptList.length;
+      goToCarouselSlide(next);
+    }
+
+    function prevCarouselSlide() {
+      const prev = (currentConceptIndex - 1 + conceptList.length) % conceptList.length;
+      goToCarouselSlide(prev);
+    }
+
+    function selectConceptByIndex(index) {
+      goToCarouselSlide(index);
+    }
+
+    // 캐러셀 스크롤 이벤트 감지
+    let scrollTimeout;
+    if (carouselViewport) {
+      carouselViewport.addEventListener('scroll', () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(() => {
+          const viewportCenter = carouselViewport.scrollLeft + carouselViewport.offsetWidth / 2;
+          let closestIdx = 0;
+          let minDistance = Infinity;
+
+          conceptSlides.forEach((slide, idx) => {
+            const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+            const dist = Math.abs(slideCenter - viewportCenter);
+            if (dist < minDistance) {
+              minDistance = dist;
+              closestIdx = idx;
+            }
+          });
+
+          if (closestIdx !== currentConceptIndex) {
+            updateCarouselUI(closestIdx);
+          }
+        }, 50);
+      }, { passive: true });
+    }
+
+    // ==========================================
+    // 화면 라우팅 이벤트 리스너
+    // ==========================================
 
     // 1. 홈 -> 필터 선택
     document.getElementById('btn-start').addEventListener('click', () => {
       navigateTo('screen-filter');
     });
 
-    // 2. 필터 -> 촬영 준비 (웹캠 활성화)
+    // 2. 필터 -> 촬영 부스
     document.getElementById('btn-to-shoot').addEventListener('click', async () => {
-      if (!selectedStyle) {
-        showToast('AI 스타일을 먼저 선택해 주세요!');
-        return;
-      }
-      const themeElem = document.getElementById('shoot-current-theme');
-      if (themeElem) {
-        themeElem.innerText = `콘셉트: ${styleNames[selectedStyle] || selectedStyle}`;
-      }
-      const triggerBtn = document.getElementById('btn-manual-trigger');
-      if (triggerBtn) triggerBtn.style.display = 'block';
-      
-      const guideElem = document.getElementById('shoot-cut-guide');
-      if (guideElem) {
-        guideElem.innerText = selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 촬영 준비 중...';
-      }
-
+      // 컷별 이모지 및 안내 설정
+      updateShootCutEmojis();
       navigateTo('screen-shoot');
       await initWebcam();
     });
 
-    // 웹캠 및 MediaRecorder 초기화 (다인원 전체 선명도 보장 & OS/하드웨어 단 인위적 블러 차단)
+    function updateShootCutEmojis() {
+      const isJoseon = selectedSubTheme === 'joseon';
+      const emojis = isJoseon ? ['👑', '📜', '🎒', '🌾'] : (selectedStyle === 'wizard' ? ['🧙‍♂️', '🧝', '🔮', '🐉'] : ['👶', '🎓', '✨', '👵']);
+      
+      for (let i = 1; i <= 4; i++) {
+        const emEl = document.getElementById(`cut-box-emoji-${i}`);
+        if (emEl) emEl.innerText = emojis[i-1];
+        const statusEl = document.getElementById(`cut-box-status-${i}`);
+        if (statusEl) statusEl.innerText = (i === 1) ? '대기중' : '대기';
+        const boxEl = document.getElementById(`cut-box-${i}`);
+        if (boxEl) {
+          boxEl.className = 'strip-cut-box' + (i === 1 ? ' active' : '');
+        }
+      }
+
+      const triggerBtn = document.getElementById('btn-manual-trigger');
+      if (triggerBtn) {
+        triggerBtn.style.display = 'inline-flex';
+        triggerBtn.disabled = false;
+      }
+    }
+
+    // 웹캠 및 MediaRecorder 초기화
     async function initWebcam() {
       try {
         const constraints = {
           video: {
             width: { ideal: 1280 },
             height: { ideal: 960 },
-            // OS(Windows Studio Effects)/하드웨어의 단일인물 배경 블러 억제 및 연속 초점 제약
             advanced: [
               { backgroundBlur: false },
               { focusMode: "continuous" },
@@ -729,16 +1125,13 @@
 
         try {
           mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-        } catch (constraintErr) {
-          // advanced 제약 미지원 브라우저/환경 호환 fallback
-          console.warn('Advanced constraints not supported, fallback to standard mode:', constraintErr);
+        } catch (e) {
           mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 960 }, audio: false });
         }
 
         const videoElem = document.getElementById('webcam-preview');
-        videoElem.srcObject = mediaStream;
+        if (videoElem) videoElem.srcObject = mediaStream;
 
-        // MediaRecorder 준비
         recordedChunks = [];
         try {
           mediaRecorder = new MediaRecorder(mediaStream, { mimeType: 'video/webm' });
@@ -752,272 +1145,254 @@
         };
       } catch (err) {
         console.error('웹캠 연결 실패:', err);
-        showToast('웹캠을 연결할 수 없습니다.');
+        showToast('웹캠을 연결할 수 없습니다. 카메라 권한을 확인해주세요.');
       }
     }
 
-    // 3. 4컷 연속 촬영 타이머 루틴
+    // ==========================================
+    // 3. 4컷 연사 촬영 시퀀스 (3초 찰칵!)
+    // ==========================================
     document.getElementById('btn-manual-trigger').addEventListener('click', () => {
-      document.getElementById('btn-manual-trigger').style.display = 'none';
+      const triggerBtn = document.getElementById('btn-manual-trigger');
+      if (triggerBtn) {
+        triggerBtn.disabled = true;
+        triggerBtn.style.display = 'none';
+      }
       startShootingSequence();
     });
-
-    let sessionId = "";
 
     async function startShootingSequence() {
       capturedBlobs = [];
       sessionId = Math.random().toString(36).substring(2, 10);
-      
+
       if (mediaRecorder && mediaRecorder.state === 'inactive') {
         mediaRecorder.start();
       }
 
-      const cutGuides = {
-        1: selectedStyle === 'time_travel' ? '👶 1컷 준비: 어린이(유년기) AI 변환 예정' : '📸 1컷 준비 중...',
-        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 준비: 청소년·교복 AI 변환 예정' : '📸 2컷 준비 중...',
-        3: selectedStyle === 'time_travel' ? '✨ 3컷 준비: 현재 모습 100% 원본 유지' : '📸 3컷 준비 중...',
-        4: selectedStyle === 'time_travel' ? '👵 4컷 준비: 온화한 노년 AI 변환 예정' : '📸 4컷 준비 중...'
-      };
-
-      const cutGuidesShooting = {
-        1: selectedStyle === 'time_travel' ? '👶 1컷 촬영 완료! 어린이 AI 변환 시작 ➔' : '📸 1컷 촬영 완료!',
-        2: selectedStyle === 'time_travel' ? '🧑‍🎓 2컷 촬영 완료! 청소년 AI 변환 시작 ➔' : '📸 2컷 촬영 완료!',
-        3: selectedStyle === 'time_travel' ? '✨ 3컷 촬영 완료! 현재 모습 보존 ➔' : '📸 3컷 촬영 완료!',
-        4: selectedStyle === 'time_travel' ? '👵 4컷 촬영 완료! 노년 AI 변환 시작 ➔' : '📸 4컷 촬영 완료!'
-      };
+      const isJoseon = selectedSubTheme === 'joseon';
+      const cutNames = isJoseon 
+        ? ['1컷: 왕 (위엄 가득 곤룡포)', '2컷: 양반 (풍류 흑립과 도포)', '3컷: 보부상 (팔도 패랭이 봇짐)', '4컷: 노비 (정겨운 삼베옷과 짚신)']
+        : (selectedStyle === 'wizard'
+          ? ['1컷: 호그와트 마법학교', '2컷: 숲의 엘프', '3컷: 대마법사', '4컷: 드래곤 라이더']
+          : ['1컷: 유년기 (어린 시절)', '2컷: 학창시절 (교복 감성)', '3컷: 현재모습 (빛나는 청춘)', '4컷: 노년기 (온화한 미래)']);
 
       for (let cut = 1; cut <= 4; cut++) {
-        document.getElementById('shoot-counter-badge').innerText = `${cut} / 4 컷`;
-        const guideElem = document.getElementById('shoot-cut-guide');
-        if (guideElem) guideElem.innerText = cutGuides[cut];
+        // 현재 컷 박스 active
+        for (let i = 1; i <= 4; i++) {
+          const box = document.getElementById(`cut-box-${i}`);
+          const st = document.getElementById(`cut-box-status-${i}`);
+          if (box && st) {
+            if (i < cut) {
+              box.className = 'strip-cut-box completed';
+              st.innerText = '완료';
+            } else if (i === cut) {
+              box.className = 'strip-cut-box active';
+              st.innerText = '촬영중';
+            } else {
+              box.className = 'strip-cut-box';
+              st.innerText = '대기';
+            }
+          }
+        }
 
-        await runCountdown(5);
-        let blob = await captureCanvasShot();
-        
-        if (guideElem) guideElem.innerText = cutGuidesShooting[cut];
+        const counterBadge = document.getElementById('shoot-counter-badge');
+        if (counterBadge) counterBadge.innerText = `(${cut} / 4 CUT)`;
 
-        // 즉시 비동기 업로드 (AI 백그라운드 변환 시작)
-        let formData = new FormData();
+        const cutGuide = document.getElementById('shoot-cut-guide');
+        if (cutGuide) cutGuide.innerText = `📸 ${cutNames[cut-1]} 준비 중!`;
+
+        // 3초 카운트다운
+        await runDoodleCountdown(3);
+
+        // 셔터 캡처
+        const blob = await captureWebcamFrame();
+
+        // 셔터 플래시
+        const flash = document.getElementById('flash-effect');
+        if (flash) {
+          flash.classList.add('flash');
+          setTimeout(() => flash.classList.remove('flash'), 350);
+        }
+
+        // 백그라운드 전송
+        const formData = new FormData();
         formData.append('photo', blob, `photo_${cut-1}.jpg`);
         formData.append('session_id', sessionId);
         formData.append('cut_index', cut-1);
         formData.append('style', selectedStyle);
+        formData.append('sub_theme', selectedSubTheme);
         formData.append('is_high_quality', isHighQuality ? "true" : "false");
-        
+
         fetch('/api/transform_single', {
           method: 'POST',
           body: formData
-        }).catch(err => console.error('비동기 전송 에러:', err));
-        
-        // 셔터 플래시 효과
-        const flash = document.getElementById('flash-effect');
-        flash.classList.add('flash');
-        setTimeout(() => flash.classList.remove('flash'), 300);
+        }).catch(err => console.error('Single cut upload error:', err));
       }
 
-      // 녹화 종료
+      // 모든 컷 완료 처리
+      for (let i = 1; i <= 4; i++) {
+        const box = document.getElementById(`cut-box-${i}`);
+        const st = document.getElementById(`cut-box-status-${i}`);
+        if (box) box.className = 'strip-cut-box completed';
+        if (st) st.innerText = '완료';
+      }
+
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         mediaRecorder.stop();
       }
 
-      // 웹캠 정지
       if (mediaStream) {
-        mediaStream.getTracks().forEach(track => track.stop());
+        mediaStream.getTracks().forEach(t => t.stop());
       }
 
-      // 촬영본 확인 화면으로 이동
-      renderCapturedPreview();
+      // 4컷 확인 화면으로 이동
+      renderCapturedThumbs();
       navigateTo('screen-select');
     }
 
-    function runCountdown(seconds) {
+    function runDoodleCountdown(seconds) {
       return new Promise(resolve => {
         let count = seconds;
-        const timerNum = document.getElementById('timer-number');
-        const progressCircle = document.getElementById('timer-progress');
-        const totalLength = 264;
+        const numEl = document.getElementById('countdown-display-num');
+        const hintEl = document.getElementById('countdown-hint-text');
 
-        timerNum.innerText = count;
-        progressCircle.style.strokeDashoffset = 0;
+        if (numEl) numEl.innerText = count;
+        if (hintEl) hintEl.innerText = '초 뒤 찰칵!';
 
-        const interval = setInterval(() => {
+        const timer = setInterval(() => {
           count--;
           if (count > 0) {
-            timerNum.innerText = count;
-            const offset = totalLength * (1 - count / seconds);
-            progressCircle.style.strokeDashoffset = offset;
+            if (numEl) numEl.innerText = count;
           } else {
-            clearInterval(interval);
-            timerNum.innerText = '📸';
-            resolve();
+            clearInterval(timer);
+            if (numEl) numEl.innerText = '📸';
+            if (hintEl) hintEl.innerText = '찰칵!';
+            setTimeout(resolve, 300);
           }
         }, 1000);
       });
     }
 
-    function captureCanvasShot() {
-      return new Promise((resolve) => {
+    function captureWebcamFrame() {
+      return new Promise(resolve => {
         const video = document.getElementById('webcam-preview');
         const canvas = document.createElement('canvas');
         canvas.width = 640;
-        canvas.height = 800; // 4:5 비율
+        canvas.height = 800; // 4:5
         const ctx = canvas.getContext('2d');
-        
-        // 거울 반전 캡처
         ctx.translate(canvas.width, 0);
         ctx.scale(-1, 1);
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-        canvas.toBlob((blob) => {
+        canvas.toBlob(blob => {
           capturedBlobs.push(blob);
           resolve(blob);
-        }, 'image/jpeg', 0.92);
+        }, 'image/jpeg', 0.94);
       });
     }
 
-    function renderCapturedPreview() {
+    function renderCapturedThumbs() {
       capturedBlobs.forEach((blob, idx) => {
         const url = URL.createObjectURL(blob);
-        document.getElementById(`captured-img-${idx}`).src = url;
+        const img = document.getElementById(`captured-img-${idx}`);
+        if (img) img.src = url;
       });
     }
 
-    // 재촬영 버튼
+    // 재촬영
     document.getElementById('btn-retake').addEventListener('click', async () => {
-      document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
+      updateShootCutEmojis();
       navigateTo('screen-shoot');
       await initWebcam();
     });
 
-    // 실시간 AI 변환 & 인화 상태 폴링 관리
-    let statusPollInterval = null;
+    // ==========================================
+    // 4. AI 변환 요청 & 실시간 프로그레스
+    // ==========================================
+    let pollInterval = null;
     let pollStartTime = 0;
-    const tipsList = [
-      "DSLR 85mm 렌즈의 섬세한 피부 질감과 본인 고유의 얼굴 골격을 살려 생애 사계절을 완성하고 있습니다.",
-      "과도한 플라스틱 스무딩을 배제하고 자연스러운 모공과 미세 주름을 디테일하게 묘사하고 있습니다.",
-      "곧 2배속 비하인드 동영상과 고해상도 4컷 포토 프레임이 완성됩니다. 잠시만 기다려주세요!",
-      "촬영 중 담긴 따뜻한 미소와 손동작이 연령대별로 생생하게 연결되고 있습니다."
-    ];
-    let tipIndex = 0;
 
-    function formatTime(seconds) {
-      const m = Math.floor(seconds / 60);
-      const s = seconds % 60;
-      return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-    }
-
-    function startStatusPolling(sId) {
+    function startLoadingPolling(sId) {
       pollStartTime = Date.now();
-      
-      // 초기 상태 리셋
-      const mainTitle = document.getElementById('loading-main-title');
+      const fill = document.getElementById('progress-bar-fill');
+      const text = document.getElementById('progress-percent-text');
       const statusText = document.getElementById('loading-status-text');
-      const timerRemaining = document.getElementById('loading-timer-remaining');
-      const completeBanner = document.getElementById('loading-complete-banner');
-      const progFill = document.getElementById('progress-bar-fill');
-      const progText = document.getElementById('progress-percent-text');
+      const timerText = document.getElementById('loading-timer-remaining');
+      const banner = document.getElementById('loading-complete-banner');
 
-      if (mainTitle) mainTitle.innerText = 'AI 인생 4컷 변환 중...';
-      if (statusText) statusText.innerText = '다인원 안면 및 포즈 분석을 준비하고 있습니다...';
-      if (timerRemaining) timerRemaining.innerText = isHighQuality ? '⏳ 예상 소요 시간: 약 75~85초' : '⏳ 예상 소요 시간: 약 60~70초';
-      if (completeBanner) completeBanner.style.display = 'none';
-      if (progFill) progFill.style.width = '10%';
-      if (progText) progText.innerText = '10%';
+      if (fill) fill.style.width = '10%';
+      if (text) text.innerText = '10%';
+      if (statusText) statusText.innerText = 'AI 안면 및 포즈 분석 중...';
+      if (timerText) timerText.innerText = isHighQuality ? '⏳ 예상 소요 시간: 약 75초' : '⏳ 예상 소요 시간: 약 45초';
+      if (banner) banner.style.display = 'none';
 
-      if (statusPollInterval) clearInterval(statusPollInterval);
+      if (pollInterval) clearInterval(pollInterval);
 
-      let currentDisplayProgress = 10;
-      // 다인원 및 고화질 모드 고려 기준 기본 기대 시간 (초)
-      const expectedTotalSec = isHighQuality ? 85 : 70;
+      let curProg = 10;
+      const expectedTotal = isHighQuality ? 75 : 45;
 
-      statusPollInterval = setInterval(async () => {
-        const elapsedSec = Math.floor((Date.now() - pollStartTime) / 1000);
-        
+      pollInterval = setInterval(async () => {
+        const elapsed = Math.floor((Date.now() - pollStartTime) / 1000);
         let serverProg = 10;
-        let stepName = "";
-        let serverMsg = "";
+        let stepMsg = "";
 
         try {
-          const res = await fetch(`/api/transform_status/${sId}`);
-          if (res.ok) {
-            const st = await res.json();
-            serverProg = st.progress || 10;
-            stepName = st.step_name || "";
-            serverMsg = st.message || "";
+          const r = await fetch(`/api/transform_status/${sId}`);
+          if (r.ok) {
+            const data = await r.json();
+            serverProg = data.progress || 10;
+            stepMsg = data.message || data.step_name || "";
           }
-        } catch (e) {
-          console.log('Status polling error:', e);
+        } catch (e) {}
+
+        const timeRatio = Math.min(0.95, elapsed / expectedTotal);
+        const timeProg = Math.floor(10 + timeRatio * 85);
+        const targetProg = Math.max(serverProg, timeProg);
+
+        if (targetProg > curProg) {
+          curProg = Math.min(98, curProg + Math.max(1, Math.floor((targetProg - curProg) * 0.4)));
         }
 
-        // 지능형 프로그레스 계산:
-        // 서버의 실제 진행률과 시간 경과 기반 진행률을 부드럽게 결합
-        const timeRatio = Math.min(0.96, elapsedSec / expectedTotalSec);
-        const timeBasedProg = Math.floor(10 + timeRatio * 85); // 최대 95%
-        
-        // 서버 진행률과 시간 기반 진행률 중 더 높은 값으로 전진 (절대 뒤로 가지 않음)
-        const targetProgress = Math.max(serverProg, timeBasedProg);
-        if (targetProgress > currentDisplayProgress) {
-          currentDisplayProgress = Math.min(98, currentDisplayProgress + Math.max(1, Math.floor((targetProgress - currentDisplayProgress) * 0.4)));
-        } else if (elapsedSec > expectedTotalSec && currentDisplayProgress < 98) {
-          // 기대 시간 초과 시 96% -> 97% -> 98%로 미세 전진 (멈춤 느낌 방지)
-          if (Math.random() > 0.4) currentDisplayProgress = Math.min(98, currentDisplayProgress + 1);
+        if (fill) fill.style.width = `${curProg}%`;
+        if (text) text.innerText = `${curProg}%`;
+
+        if (timerText) {
+          const remain = Math.max(5, expectedTotal - elapsed);
+          timerText.innerText = curProg >= 95 ? '✨ 4컷 고화질 합성 렌더링 중...' : `⏳ 예상 남은 시간: 약 ${remain}초`;
         }
 
-        if (progFill) progFill.style.width = `${currentDisplayProgress}%`;
-        if (progText) progText.innerText = `${currentDisplayProgress}%`;
-
-        // 지능형 남은 시간 (Smart ETA) 표기: 5초에서 고정되지 않고 세밀하게 피드백
-        if (timerRemaining) {
-          if (currentDisplayProgress >= 95 || elapsedSec >= expectedTotalSec) {
-            timerRemaining.innerText = `✨ 다인원 고화질 렌더링 마무리 중... (잠시만 기다려주세요)`;
-          } else {
-            const estRemain = Math.max(6, expectedTotalSec - elapsedSec);
-            timerRemaining.innerText = `⏳ 예상 남은 시간: 약 ${estRemain}초`;
-          }
-        }
-
-        // 상태 메시지 갱신 (중복 퍼센트 표기 제거하고 명료한 단계 안내)
-        if (statusText) {
-          if (stepName && serverMsg) {
-            statusText.innerText = `${stepName} — ${serverMsg}`;
-          } else if (stepName) {
-            statusText.innerText = stepName;
-          } else if (serverMsg) {
-            statusText.innerText = serverMsg;
-          } else {
-            statusText.innerText = 'AI 생애 주기 변환을 진행 중입니다...';
-          }
+        if (statusText && stepMsg) {
+          statusText.innerText = stepMsg;
         }
       }, 1000);
     }
 
-    function stopStatusPolling() {
-      if (statusPollInterval) {
-        clearInterval(statusPollInterval);
-        statusPollInterval = null;
+    function stopLoadingPolling() {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+        pollInterval = null;
       }
     }
 
-    // 4. AI 변환 생성 API 호출
     document.getElementById('btn-transform').addEventListener('click', async () => {
       if (capturedBlobs.length < 4) {
-        showToast('4컷 사진 촬영이 완료되지 않았습니다.');
+        showToast('4컷 촬영이 완료되지 않았습니다.');
         return;
       }
 
       const overlay = document.getElementById('loading-overlay');
-      overlay.classList.add('active');
+      if (overlay) overlay.classList.add('active');
 
-      // 실시간 동적 프로그레스 폴링 시작
-      startStatusPolling(sessionId);
+      startLoadingPolling(sessionId);
 
       const formData = new FormData();
       formData.append('session_id', sessionId);
       formData.append('style', selectedStyle);
+      formData.append('sub_theme', selectedSubTheme);
 
       if (recordedChunks.length > 0) {
-        const videoBlob = new Blob(recordedChunks, { type: 'video/webm' });
-        formData.append('video', videoBlob, 'behind_video.webm');
+        const vBlob = new Blob(recordedChunks, { type: 'video/webm' });
+        formData.append('video', vBlob, 'behind_video.webm');
       }
 
       try {
@@ -1026,96 +1401,157 @@
           body: formData
         });
         const data = await res.json();
-        
+
         if (data.status === 'success') {
           transformResult = data;
-          document.getElementById('ai-frame-preview').src = data.ai_frame_base64 || data.ai_frame_url;
-          document.getElementById('orig-frame-preview').src = data.orig_frame_base64 || data.orig_frame_url;
-          document.getElementById('qr-code-img').src = data.qr_code_base64;
+          stopLoadingPolling();
 
-          stopStatusPolling();
+          const fill = document.getElementById('progress-bar-fill');
+          const text = document.getElementById('progress-percent-text');
+          const banner = document.getElementById('loading-complete-banner');
+          if (fill) fill.style.width = '100%';
+          if (text) text.innerText = '100%';
+          if (banner) banner.style.display = 'block';
 
-          // ✨ 100% 완료 및 이벤트성 완료 애니메이션 노출
-          const progFill = document.getElementById('progress-bar-fill');
-          const progText = document.getElementById('progress-percent-text');
-          const mainTitle = document.getElementById('loading-main-title');
-          const statusText = document.getElementById('loading-status-text');
-          const timerRemaining = document.getElementById('loading-timer-remaining');
-          const completeBanner = document.getElementById('loading-complete-banner');
+          // 프리뷰 이미지 바인딩
+          const aiPreview = document.getElementById('ai-frame-preview');
+          const origPreview = document.getElementById('orig-frame-preview');
+          const qrImg = document.getElementById('qr-code-img');
 
-          if (progFill) progFill.style.width = '100%';
-          if (progText) progText.innerText = '100%';
-          if (mainTitle) mainTitle.innerText = '✨ 변환 완료!';
-          if (statusText) statusText.innerText = '완성된 4컷 사진을 불러옵니다...';
-          if (timerRemaining) timerRemaining.innerText = '✅ 준비 완료!';
-          if (completeBanner) completeBanner.style.display = 'block';
+          if (aiPreview) aiPreview.src = data.ai_frame_base64 || data.ai_frame_url;
+          if (origPreview) origPreview.src = data.orig_frame_base64 || data.orig_frame_url;
+          if (qrImg) qrImg.src = data.qr_code_base64;
 
-          // 0.8초 후 화면 전환
+          // 날짜 바인딩
+          const dateEl = document.getElementById('strip-date-label');
+          if (dateEl) {
+            const d = new Date();
+            dateEl.innerText = `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+          }
+
           setTimeout(() => {
-            overlay.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
             navigateTo('screen-result');
           }, 800);
         } else {
           throw new Error('변환 실패');
         }
       } catch (err) {
-        console.error('AI 변환 오류:', err);
-        stopStatusPolling();
-        overlay.classList.remove('active');
-        showToast('AI 변환 중 오류가 발생했습니다.');
+        console.error('AI Transform Error:', err);
+        stopLoadingPolling();
+        if (overlay) overlay.classList.remove('active');
+        showToast('AI 변환 처리 중 오류가 발생했습니다.');
       }
     });
 
-    // 4.5 탭 전환 이벤트 리스너 (대형 개별 탭 뷰)
-    let selectedFrameChoice = 'ai';
+    // ==========================================
+    // 5. 결과 화면 (탭 & 컬러 커스텀)
+    // ==========================================
+    const tabAi = document.getElementById('tab-ai-frame');
+    const tabOrig = document.getElementById('tab-orig-frame');
+    const aiPreviewEl = document.getElementById('ai-frame-preview');
+    const origPreviewEl = document.getElementById('orig-frame-preview');
 
-    document.getElementById('tab-ai-frame').addEventListener('click', () => {
-      selectedFrameChoice = 'ai';
-      document.getElementById('tab-ai-frame').classList.add('active');
-      document.getElementById('tab-orig-frame').classList.remove('active');
-      document.getElementById('view-ai-frame').classList.add('active');
-      document.getElementById('view-orig-frame').classList.remove('active');
-    });
+    if (tabAi && tabOrig) {
+      tabAi.addEventListener('click', () => {
+        selectedFrameChoice = 'ai';
+        tabAi.classList.add('active');
+        tabOrig.classList.remove('active');
+        if (aiPreviewEl) aiPreviewEl.style.display = 'block';
+        if (origPreviewEl) origPreviewEl.style.display = 'none';
+      });
 
-    document.getElementById('tab-orig-frame').addEventListener('click', () => {
-      selectedFrameChoice = 'orig';
-      document.getElementById('tab-orig-frame').classList.add('active');
-      document.getElementById('tab-ai-frame').classList.remove('active');
-      document.getElementById('view-orig-frame').classList.add('active');
-      document.getElementById('view-ai-frame').classList.remove('active');
-    });
+      tabOrig.addEventListener('click', () => {
+        selectedFrameChoice = 'orig';
+        tabOrig.classList.add('active');
+        tabAi.classList.remove('active');
+        if (aiPreviewEl) aiPreviewEl.style.display = 'none';
+        if (origPreviewEl) origPreviewEl.style.display = 'block';
+      });
+    }
 
-    // 5. 결과 확인 -> Finish (QR)
+    let currentFrameBg = '#FFFDF9';
+    let currentFrameText = '#1E232A';
+
+    function changeStripColor(bgColor, textColor, btnEl) {
+      currentFrameBg = bgColor;
+      currentFrameText = textColor;
+
+      // 1. 화면 카드 스타일 즉시 반응
+      const card = document.getElementById('photo-strip-card');
+      if (card) {
+        card.style.backgroundColor = bgColor;
+        card.style.color = textColor;
+      }
+
+      // 2. 버튼 활성화 외곽선 표시
+      document.querySelectorAll('.frame-color-btn').forEach(btn => {
+        btn.classList.remove('active');
+        btn.style.boxShadow = 'none';
+        btn.style.borderColor = '#555';
+        btn.style.transform = 'scale(1)';
+      });
+      if (btnEl) {
+        btnEl.classList.add('active');
+        btnEl.style.boxShadow = '0 0 0 2.5px #1E232A';
+        btnEl.style.borderColor = '#1E232A';
+        btnEl.style.transform = 'scale(1.15)';
+      }
+
+      // 3. 백엔드에서 1번 프리뷰 스타일의 고해상도 프레임 실시간 재생성 요청
+      if (transformResult && transformResult.session_id) {
+        fetch('/api/update-frame-color', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: transformResult.session_id,
+            frame_type: selectedFrameChoice || 'ai',
+            frame_color: bgColor,
+            text_color: textColor
+          })
+        }).then(r => r.json()).then(data => {
+          if (data && data.success && data.frame_url) {
+            const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
+            if (activeImg) activeImg.src = data.frame_url + '?t=' + Date.now();
+            const finishThumb = document.getElementById('kiosk-finish-thumb');
+            if (finishThumb) finishThumb.src = data.frame_url + '?t=' + Date.now();
+            if (data.qr_code_base64) {
+              const qrImg = document.getElementById('qr-code-img');
+              if (qrImg) qrImg.src = data.qr_code_base64;
+              if (transformResult) {
+                transformResult.qr_code_base64 = data.qr_code_base64;
+                if (data.download_url) transformResult.download_url = data.download_url;
+              }
+            }
+          }
+        }).catch(e => console.log('Update frame color error:', e));
+      }
+    }
+
+    // 결과 -> Finish (QR 화면)
     document.getElementById('btn-to-finish').addEventListener('click', () => {
-      // 선택된 프레임(AI 또는 원본) 썸네일 설정
-      const thumbImg = document.getElementById('kiosk-finish-thumb');
-      const activeFrameImg = selectedFrameChoice === 'ai' 
-        ? document.getElementById('ai-frame-preview')
-        : document.getElementById('orig-frame-preview');
-      if (thumbImg && activeFrameImg) {
-        thumbImg.src = activeFrameImg.src;
-      }
+      const thumb = document.getElementById('kiosk-finish-thumb');
+      const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
+      if (thumb && activeImg) thumb.src = activeImg.src;
 
-      // 2배속 비하인드 동영상 플레이어 연동
       if (transformResult && transformResult.video_url) {
-        const kioskVideo = document.getElementById('kiosk-behind-video');
-        const kioskSource = document.getElementById('kiosk-video-source');
-        if (kioskVideo && kioskSource) {
-          kioskVideo.src = transformResult.video_url;
-          kioskSource.src = transformResult.video_url;
-          kioskVideo.load();
-          kioskVideo.play().catch(e => console.log('Kiosk video autoplay:', e));
+        const vid = document.getElementById('kiosk-behind-video');
+        const src = document.getElementById('kiosk-video-source');
+        if (vid && src) {
+          vid.src = transformResult.video_url;
+          src.src = transformResult.video_url;
+          vid.load();
+          vid.play().catch(e => console.log('Autoplay:', e));
         }
       }
 
       navigateTo('screen-finish');
     });
 
-    // 5.1 [UX 개선] 완성본 큰 화면 다시보기 (뒤로가기 버튼 & 썸네일 클릭)
+    // 4컷 다시보기
     document.getElementById('btn-back-to-result').addEventListener('click', () => {
       navigateTo('screen-result');
     });
-
     const thumbCard = document.getElementById('btn-thumb-preview-card');
     if (thumbCard) {
       thumbCard.addEventListener('click', () => {
@@ -1123,12 +1559,24 @@
       });
     }
 
-    // 5.2 [IoT 연동] Canon SELPHY CP1500 실제 무선 인화 및 45초 4-Pass 안전 카운트다운
-    let printCountdownInterval = null;
+    // 처음으로 리셋
+    document.getElementById('btn-reset-home').addEventListener('click', () => {
+      const triggerBtn = document.getElementById('btn-manual-trigger');
+      if (triggerBtn) {
+        triggerBtn.disabled = false;
+        triggerBtn.style.display = 'inline-flex';
+      }
+      navigateTo('screen-home');
+    });
 
-    document.getElementById('btn-print-modal').addEventListener('click', async () => {
+    // ==========================================
+    // 6. Canon SELPHY CP1500 인화 모달 & 시뮬레이션
+    // ==========================================
+    let printTimer = null;
+
+    document.getElementById('btn-print-modal').addEventListener('click', () => {
       if (!transformResult || !transformResult.session_id) {
-        showToast('인쇄할 4컷 사진 데이터가 없습니다.');
+        showToast('인쇄할 사진 데이터가 없습니다.');
         return;
       }
 
@@ -1136,228 +1584,161 @@
       const closeBtn = document.getElementById('modal-close');
       const confirmBtn = document.getElementById('btn-print-confirm');
       const passStatus = document.getElementById('print-pass-status');
-      const countdownText = document.getElementById('print-countdown-text');
-      const progressBar = document.getElementById('print-progress-bar');
-      const cartridgeBadge = document.getElementById('cartridge-sheet-badge');
+      const cdText = document.getElementById('print-countdown-text');
+      const pBar = document.getElementById('print-progress-bar');
+      const badge = document.getElementById('cartridge-sheet-badge');
 
-      // 1. 모달 활성화 및 안전 초기화 (인쇄 도중 닫기 차단)
-      modal.classList.add('active');
-      closeBtn.disabled = true;
-      confirmBtn.disabled = true;
-      confirmBtn.innerText = '⏳ 사진이 인화기에 전송되어 출력 중입니다...';
+      if (modal) modal.classList.add('active');
+      if (closeBtn) closeBtn.disabled = true;
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerText = '사진이 인화기로 전송되어 출력 중입니다...';
+      }
 
-      let remainSeconds = 45;
-      progressBar.style.width = '0%';
-      countdownText.innerText = '45초';
+      let remain = 45;
+      if (pBar) pBar.style.width = '0%';
+      if (cdText) cdText.innerText = '45초';
 
-      // 4-Pass 칩 리셋
       for (let i = 1; i <= 4; i++) {
-        document.getElementById(`pass-chip-${i}`).className = 'pass-chip' + (i === 1 ? ' active' : '');
+        const chip = document.getElementById(`pass-chip-${i}`);
+        if (chip) chip.className = 'pass-chip' + (i === 1 ? ' active' : '');
       }
 
-      // 2. 실제 백엔드 Wi-Fi 인쇄 API 호출
-      try {
-        fetch('/api/print', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            session_id: transformResult.session_id,
-            frame_type: selectedFrameChoice || 'ai',
-            printer_name: 'Canon SELPHY CP1500'
-          })
-        }).then(res => res.json()).then(data => {
-          if (data && data.remaining_sheets !== undefined) {
-            cartridgeBadge.innerText = `잔여 ${data.remaining_sheets} / 18매` + (data.low_paper ? ' ⚠️ (용지 부족 경고)' : ' (정상)');
-            if (data.low_paper) {
-              cartridgeBadge.classList.add('low-paper');
-            }
-          }
-        }).catch(err => {
-          console.log('[Print API Notice]', err);
-        });
-      } catch (e) {
-        console.error('Print request trigger error:', e);
-      }
+      // 백엔드 인쇄 호출 (사용자가 선택한 frame_color 및 text_color 전송)
+      fetch('/api/print', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session_id: transformResult.session_id,
+          frame_type: selectedFrameChoice || 'ai',
+          printer_name: 'Canon SELPHY CP1500',
+          frame_color: currentFrameBg,
+          text_color: currentFrameText
+        })
+      }).then(r => r.json()).then(data => {
+        if (badge && data && data.remaining_sheets !== undefined) {
+          badge.innerText = `용지 잔여량: ${data.remaining_sheets} / 18매`;
+        }
+      }).catch(e => console.log('Print error:', e));
 
-      // 3. 45초 4-Pass 인터랙티브 카운트다운 타이머 가동
-      if (printCountdownInterval) clearInterval(printCountdownInterval);
+      if (printTimer) clearInterval(printTimer);
 
-      const passMessages = [
-        { time: 34, chip: 1, text: '🟡 1차 왕복: Yellow (노랑) 염료 승화 중...' },
-        { time: 23, chip: 2, text: '🔴 2차 왕복: Magenta (빨강) 염료 승화 중...' },
-        { time: 12, chip: 3, text: '🔵 3차 왕복: Cyan (파랑) 염료 승화 중...' },
-        { time: 0,  chip: 4, text: '✨ 4차 왕복: Overcoat 투명 보호막 코팅 중...' }
+      const passMsgs = [
+        { time: 33, pass: 1, text: '🟡 1차 왕복: Yellow(노랑) 현색 중...' },
+        { time: 22, pass: 2, text: '🔴 2차 왕복: Magenta(빨강) 현색 중...' },
+        { time: 11, pass: 3, text: '🔵 3차 왕복: Cyan(파랑) 현색 중...' },
+        { time: 0,  pass: 4, text: '✨ 4차 왕복: Overcoat 투명 보호막 코팅 중...' }
       ];
 
-      printCountdownInterval = setInterval(() => {
-        remainSeconds--;
-        const elapsed = 45 - remainSeconds;
-        const percent = Math.min(100, Math.floor((elapsed / 45) * 100));
+      printTimer = setInterval(() => {
+        remain--;
+        const elapsed = 45 - remain;
+        const pct = Math.min(100, Math.floor((elapsed / 45) * 100));
 
-        progressBar.style.width = `${percent}%`;
-        countdownText.innerText = `${Math.max(0, remainSeconds)}초`;
+        if (pBar) pBar.style.width = `${pct}%`;
+        if (cdText) cdText.innerText = `${Math.max(0, remain)}초`;
 
-        // Pass 단계별 칩 및 메시지 전환
-        let currentPass = 4;
-        if (remainSeconds > 33) currentPass = 1;
-        else if (remainSeconds > 22) currentPass = 2;
-        else if (remainSeconds > 11) currentPass = 3;
+        let curP = 4;
+        if (remain > 33) curP = 1;
+        else if (remain > 22) curP = 2;
+        else if (remain > 11) curP = 3;
 
         for (let i = 1; i <= 4; i++) {
-          const chip = document.getElementById(`pass-chip-${i}`);
-          if (!chip) continue;
-          if (i < currentPass) {
-            chip.className = 'pass-chip completed';
-          } else if (i === currentPass) {
-            chip.className = 'pass-chip active';
-          } else {
-            chip.className = 'pass-chip';
-          }
+          const ch = document.getElementById(`pass-chip-${i}`);
+          if (!ch) continue;
+          if (i < curP) ch.className = 'pass-chip completed';
+          else if (i === curP) ch.className = 'pass-chip active';
+          else ch.className = 'pass-chip';
         }
 
-        const msgObj = passMessages.find(p => remainSeconds >= p.time) || passMessages[3];
-        passStatus.innerText = msgObj.text;
+        const msgObj = passMsgs.find(p => remain >= p.time) || passMsgs[3];
+        if (passStatus) passStatus.innerText = msgObj.text;
 
-        // 45초 인화 완료 처리
-        if (remainSeconds <= 0) {
-          clearInterval(printCountdownInterval);
-          progressBar.style.width = '100%';
-          countdownText.innerText = '완료!';
-          passStatus.innerText = '✅ 인화 완료! 4x6 엽서가 배출구에 안착했습니다.';
+        if (remain <= 0) {
+          clearInterval(printTimer);
+          if (pBar) pBar.style.width = '100%';
+          if (cdText) cdText.innerText = '완료!';
+          if (passStatus) passStatus.innerText = '✅ 4x6 엽서 인화 완료! 배출구를 확인해주세요.';
 
           for (let i = 1; i <= 4; i++) {
-            const chip = document.getElementById(`pass-chip-${i}`);
-            if (chip) chip.className = 'pass-chip completed';
+            const ch = document.getElementById(`pass-chip-${i}`);
+            if (ch) ch.className = 'pass-chip completed';
           }
 
-          // 닫기 버튼 활성화
-          closeBtn.disabled = false;
-          confirmBtn.disabled = false;
-          confirmBtn.innerText = '🎉 인화 완료! 사진을 수령하세요 (창 닫기)';
+          if (closeBtn) closeBtn.disabled = false;
+          if (confirmBtn) {
+            confirmBtn.disabled = false;
+            confirmBtn.innerText = '🎉 인화 완료! 엽서를 수령하세요 (창 닫기)';
+          }
           showToast('🎉 인화가 성공적으로 완료되었습니다!');
         }
       }, 1000);
     });
 
-    document.getElementById('modal-close').addEventListener('click', () => {
-      document.getElementById('modal-print').classList.remove('active');
-    });
+    const modalCloseBtn = document.getElementById('modal-close');
+    if (modalCloseBtn) {
+      modalCloseBtn.addEventListener('click', () => {
+        document.getElementById('modal-print').classList.remove('active');
+      });
+    }
 
-    document.getElementById('btn-print-confirm').addEventListener('click', () => {
-      document.getElementById('modal-print').classList.remove('active');
-    });
+    const printConfirmBtn = document.getElementById('btn-print-confirm');
+    if (printConfirmBtn) {
+      printConfirmBtn.addEventListener('click', () => {
+        document.getElementById('modal-print').classList.remove('active');
+      });
+    }
 
-    // 처음으로 버튼 (상태 리셋)
-    document.getElementById('btn-reset-home').addEventListener('click', () => {
-      document.getElementById('btn-manual-trigger').style.display = 'inline-flex';
-      navigateTo('screen-home');
-    });
-
-    // ==========================================================================
-    // 5.3 [현장 셋업 & 네트워크 진단 모니터링] Diagnostics 실시간 헬스체크 & 테스트 인쇄
-    // ==========================================================================
+    // ==========================================
+    // 7. 진단 모달 (Diagnostics)
+    // ==========================================
     const diagModal = document.getElementById('modal-diagnostics');
     const btnOpenDiag = document.getElementById('btn-open-diagnostics');
     const btnCloseDiag = document.getElementById('diagnostics-close');
     const btnRefreshDiag = document.getElementById('btn-refresh-diagnostics');
-    const btnDiagTestPrint = document.getElementById('btn-diag-test-print');
-    const quickStatusText = document.getElementById('quick-status-text');
+    const btnTestPrint = document.getElementById('btn-diag-test-print');
 
-    async function checkSystemHealth(isManual = false) {
-      const startTime = performance.now();
+    async function checkHealth(manual = false) {
+      const start = performance.now();
       try {
         const res = await fetch('/api/diagnostics/health');
-        const latency = Math.round(performance.now() - startTime);
-
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const lat = Math.round(performance.now() - start);
+        if (!res.ok) throw new Error();
         const data = await res.json();
 
-        // 1. 빠른 상단 헤더 뱃지 갱신
-        if (quickStatusText) {
-          quickStatusText.innerText = `네트워크 정상 (${latency}ms)`;
-        }
-
-        // 2. 모달 내 네트워크 상세 정보 갱신
-        const pingBadge = document.getElementById('diag-ping-badge');
-        const latencyVal = document.getElementById('diag-latency-val');
-        if (pingBadge && latencyVal) {
-          latencyVal.innerText = `${latency} ms`;
-          if (latency < 50) {
-            pingBadge.className = 'diag-badge badge-green';
-            pingBadge.innerText = '⚡ 매우 빠름';
-          } else if (latency < 150) {
-            pingBadge.className = 'diag-badge badge-green';
-            pingBadge.innerText = '🟢 정상 (양호)';
-          } else {
-            pingBadge.className = 'diag-badge badge-amber';
-            pingBadge.innerText = '⚠️ 지연 발생';
-          }
-        }
+        const ping = document.getElementById('diag-ping-badge');
+        const latVal = document.getElementById('diag-latency-val');
+        if (ping) ping.innerText = `${lat} ms`;
+        if (latVal) latVal.innerText = `${lat} ms`;
 
         document.getElementById('diag-host-ip').innerText = data.network.host_ip + ':' + data.network.port;
         document.getElementById('diag-client-ip').innerText = data.network.client_ip;
         
-        const subnetEl = document.getElementById('diag-subnet-status');
-        if (subnetEl) {
-          if (data.network.same_subnet) {
-            subnetEl.className = 'diag-val font-bold text-green';
-            subnetEl.innerText = '✅ 동일 Wi-Fi 서브넷 일치';
-          } else {
-            subnetEl.className = 'diag-val font-bold text-amber';
-            subnetEl.innerText = '⚠️ 서로 다른 IP 대역 (라우터 점검 필요)';
-          }
-        }
+        const sub = document.getElementById('diag-subnet-status');
+        if (sub) sub.innerText = data.network.same_subnet ? '✅ 동일 Wi-Fi 서브넷 일치' : '⚠️ 서로 다른 IP 대역';
 
-        // 3. 프린터 상태 갱신
-        const pBadge = document.getElementById('diag-printer-badge');
         const pName = document.getElementById('diag-printer-name');
         const pSheets = document.getElementById('diag-cartridge-sheets');
         const pTotal = document.getElementById('diag-print-total');
+        if (pName && data.printer) pName.innerText = data.printer.printer_name;
+        if (pSheets && data.printer) pSheets.innerText = `잔여 ${data.printer.remaining_sheets} / 18매`;
+        if (pTotal && data.printer) pTotal.innerText = `${data.printer.print_count}회`;
 
-        if (pBadge && data.printer) {
-          if (data.printer.detected) {
-            pBadge.className = 'diag-badge badge-green';
-            pBadge.innerText = '🟢 온라인 (연결됨)';
-          } else {
-            pBadge.className = 'diag-badge badge-purple';
-            pBadge.innerText = '🟣 시뮬레이션 모드';
-          }
-          pName.innerText = data.printer.printer_name;
-          pSheets.innerText = `잔여 ${data.printer.remaining_sheets} / 18매` + (data.printer.low_paper ? ' ⚠️ (용지 부족)' : ' (정상)');
-          pSheets.className = data.printer.low_paper ? 'diag-val font-bold text-amber' : 'diag-val font-bold text-green';
-          pTotal.innerText = `${data.printer.print_count}회`;
-        }
+        const gd = document.getElementById('diag-gdrive-status');
+        const oa = document.getElementById('diag-openai-status');
+        if (gd && data.cloud) gd.innerText = data.cloud.google_drive_connected ? '✅ 연결됨 (GAS/API)' : '⚠️ 로컬 저장 전용';
+        if (oa && data.cloud) oa.innerText = data.cloud.openai_api_configured ? '✅ 정상 구성' : '⚠️ 미등록';
 
-        // 4. 클라우드 연동 상태
-        const gdriveEl = document.getElementById('diag-gdrive-status');
-        const openaiEl = document.getElementById('diag-openai-status');
-        if (gdriveEl && data.cloud) {
-          gdriveEl.innerText = data.cloud.google_drive_connected ? '✅ 연결됨 (GAS/API)' : '⚠️ 로컬 저장 전용';
-        }
-        if (openaiEl && data.cloud) {
-          openaiEl.innerText = data.cloud.openai_api_configured ? '✅ API 키 정상' : '⚠️ 미등록';
-        }
-
-        if (isManual) {
-          showToast('진단 상태가 최신으로 갱신되었습니다.');
-        }
-      } catch (err) {
-        console.error('[Health Check Failed]', err);
-        if (quickStatusText) {
-          quickStatusText.innerText = '네트워크 점검 필요 ⚠️';
-        }
-        const pingBadge = document.getElementById('diag-ping-badge');
-        if (pingBadge) {
-          pingBadge.className = 'diag-badge badge-amber';
-          pingBadge.innerText = '❌ 응답 없음';
-        }
+        if (manual) showToast('진단 상태가 최신으로 갱신되었습니다.');
+      } catch (e) {
+        console.log('Health error:', e);
       }
     }
 
     if (btnOpenDiag) {
       btnOpenDiag.addEventListener('click', () => {
         diagModal.classList.add('active');
-        checkSystemHealth(false);
+        checkHealth(false);
       });
     }
 
@@ -1370,44 +1751,39 @@
     if (btnRefreshDiag) {
       btnRefreshDiag.addEventListener('click', () => {
         btnRefreshDiag.disabled = true;
-        btnRefreshDiag.innerText = '⏳ 측정 중...';
-        checkSystemHealth(true).finally(() => {
+        btnRefreshDiag.innerText = '측정 중...';
+        checkHealth(true).finally(() => {
           btnRefreshDiag.disabled = false;
-          btnRefreshDiag.innerText = '🔄 실시간 통신 상태 다시 확인 (Ping)';
+          btnRefreshDiag.innerText = '🔄 상태 다시 확인 (Ping)';
         });
       });
     }
 
-    if (btnDiagTestPrint) {
-      btnDiagTestPrint.addEventListener('click', async () => {
-        if (!confirm('Canon SELPHY CP1500으로 4x6 엽서 진단 테스트 패턴을 1장 출력하시겠습니까?')) {
-          return;
-        }
-
-        btnDiagTestPrint.disabled = true;
-        btnDiagTestPrint.innerText = '⏳ 테스트 인화 전송 중...';
-
+    if (btnTestPrint) {
+      btnTestPrint.addEventListener('click', async () => {
+        if (!confirm('Canon SELPHY CP1500으로 진단 테스트 엽서 1장을 출력하시겠습니까?')) return;
+        btnTestPrint.disabled = true;
+        btnTestPrint.innerText = '인화 전송 중...';
         try {
           const res = await fetch('/api/diagnostics/test-print', { method: 'POST' });
           const data = await res.json();
           if (res.ok && data.status === 'success') {
-            showToast('🖨️ 테스트 엽서 인쇄 요청이 성공적으로 전송되었습니다!');
-            checkSystemHealth(false);
+            showToast('🖨️ 테스트 엽서 인쇄 요청이 전송되었습니다.');
+            checkHealth(false);
           } else {
-            showToast('테스트 출력 전송 실패: ' + (data.detail || '오류'));
+            showToast('테스트 출력 전송 실패');
           }
         } catch (e) {
-          showToast('인화기 통신 오류 발생');
+          showToast('인화기 통신 오류');
         } finally {
-          btnDiagTestPrint.disabled = false;
-          btnDiagTestPrint.innerText = '🖨️ 테스트 엽서 1장 출력';
+          btnTestPrint.disabled = false;
+          btnTestPrint.innerText = '🖨️ 테스트 엽서 1장 출력';
         }
       });
     }
 
-    // 앱 기동 시 1회 및 15초 주기 백그라운드 헬스체크
-    setTimeout(() => checkSystemHealth(false), 1000);
-    setInterval(() => checkSystemHealth(false), 15000);
+    // 초기 상태 로드
+    setTimeout(() => checkHealth(false), 1000);
   </script>
 </body>
 </html>

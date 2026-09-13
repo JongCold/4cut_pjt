@@ -43,7 +43,33 @@ function doPost(e) {
 
     const data = JSON.parse(e.postData.contents);
     
-    // 1. 백엔드에서 자동 파기 트리거 호출 시
+    // 1. 고객 다운로드 즉시 파기 명령 수신 시 (구글 드라이브 파일 즉시 삭제)
+    if (data.action === "delete_files") {
+      const fileIds = data.fileIds || [];
+      const results = [];
+      let successCount = 0;
+      fileIds.forEach(function(fid) {
+        if (fid) {
+          try {
+            const file = DriveApp.getFileById(fid);
+            file.setTrashed(true); // 휴지통으로 이동하여 즉시 접근 차단
+            results.push({ fileId: fid, status: "trashed" });
+            successCount++;
+          } catch (err) {
+            results.push({ fileId: fid, status: "error", message: err.toString() });
+          }
+        }
+      });
+      Logger.log("[Immediate Destroy] Trashed " + successCount + " files: " + JSON.stringify(fileIds));
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        message: "Immediate destruction completed",
+        successCount: successCount,
+        results: results
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // 2. 24시간 만료 정기 자동 파기 트리거 호출 시
     if (data.action === "cleanup") {
       const cleanupResult = cleanupOldFiles();
       return ContentService.createTextOutput(JSON.stringify({
@@ -53,7 +79,7 @@ function doPost(e) {
       })).setMimeType(ContentService.MimeType.JSON);
     }
     
-    // 2. 사진/영상 파일 업로드 처리
+    // 3. 사진/영상 파일 업로드 처리
     const filename = data.filename || "upload_file";
     const mimeType = data.mimeType || "image/jpeg";
     const base64Data = data.base64Data;

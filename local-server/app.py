@@ -31,6 +31,14 @@ class PrintJobRequest(BaseModel):
     session_id: str
     frame_type: str = "ai"  # "ai" 또는 "orig"
     printer_name: Optional[str] = None
+    frame_color: Optional[str] = "#FFFDF9"
+    text_color: Optional[str] = None
+
+class FrameColorRequest(BaseModel):
+    session_id: str
+    frame_type: str = "ai"  # "ai" 또는 "orig"
+    frame_color: str = "#FFFDF9"
+    text_color: Optional[str] = None
 
 PRINT_SUCCESS_COUNT = 0
 
@@ -317,34 +325,112 @@ def upload_to_google_drive(file_path: str, filename: str, mime_type: str, folder
     return None
 
 
-def delete_session_files_after_delay(session_id: str, delay_seconds: int = 60):
-    """
-    모바일 다운로드 완료 알림 수신 시,
-    사용자가 사진과 동영상을 모두 다운로드할 수 있도록 짧은 유예 시간(기본 60초) 후
-    해당 세션과 관련된 로컬 uploads/ 내의 모든 파일(사진 4장, 원본 프레임, AI 프레임, 비디오)을 영구 삭제합니다.
-    """
-    def _worker():
-        if delay_seconds > 0:
-            time.sleep(delay_seconds)
+def destroy_google_drive_files(file_ids: List[str]) -> int:
+    """구글 드라이브 파일 즉시 파기 (GAS Webhook 및 Service Account 이중 호출)"""
+    if not file_ids:
+        return 0
         
-        deleted_count = 0
+    valid_ids = [fid.strip() for fid in file_ids if fid and isinstance(fid, str) and len(fid.strip()) > 5]
+    if not valid_ids:
+        return 0
+        
+    deleted_count = 0
+    # 1. Google Apps Script Webhook을 통한 즉시 휴지통/파기
+    if GAS_WEBHOOK_URL:
         try:
-            if not os.path.exists(UPLOAD_DIR):
-                return
+            import requests
+            payload = {
+                "action": "delete_files",
+                "fileIds": valid_ids
+            }
+            res = requests.post(GAS_WEBHOOK_URL, json=payload, timeout=20)
+            if res.status_code == 200:
+                res_json = res.json()
+                cnt = res_json.get("successCount", len(valid_ids))
+                deleted_count += cnt
+                print(f"[Instant Destruction] ✅ Google Apps Script 클라우드 파일 {cnt}개 즉시 파기 완료: {valid_ids}")
+            else:
+                print(f"[Instant Destruction Warning] GAS 응답 오류 (HTTP {res.status_code}): {res.text[:200]}")
+        except Exception as e:
+            print(f"[Instant Destruction Warning] GAS 파일 파기 예외: {e}")
+
+    # 2. Service Account API를 통한 직접 영구 파기 Fallback
+    if DRIVE_SERVICE is not None:
+        for fid in valid_ids:
+            try:
+                DRIVE_SERVICE.files().delete(fileId=fid).execute()
+                print(f"[Instant Destruction] ✅ 서비스 계정 구글 드라이브 파일 즉시 삭제: {fid}")
+                deleted_count += 1
+            except Exception as se:
+                if "insufficientFilePermissions" not in str(se):
+                    pass
+                    
+    return deleted_count
+
+
+def destroy_session_files_immediately(session_id: str, gdrive_ids: Optional[List[str]] = None, target_files: Optional[List[str]] = None, destroy_type: str = "all"):
+    """
+    고객 모바일 다운로드 확인 즉시 구글 드라이브 및 로컬 세션 파일 영구 파기
+    - destroy_type == 'photo': 사진 관련 파일만 파기 (동영상 보존)
+    - destroy_type == 'video': 동영상 관련 파일만 파기 (사진 보존)
+    - destroy_type == 'all': 해당 세션의 모든 미디어 파기
+    """
+    # 1. 구글 드라이브 파일 즉시 파기
+    if gdrive_ids:
+        destroy_google_drive_files(gdrive_ids)
+
+    # 2. 로컬 uploads/ 폴더 내 파일 정밀 파기
+    local_deleted = 0
+    try:
+        if os.path.exists(UPLOAD_DIR):
             for fname in os.listdir(UPLOAD_DIR):
-                if session_id in fname:
+                is_session_match = bool(session_id and session_id in fname)
+                is_target_match = bool(target_files and fname in target_files)
+                
+                if not (is_session_match or is_target_match):
+                    continue
+                    
+                # 미디어 유형별 삭제 필터링 (사진 다운로드 시 동영상이 지워져 404가 나는 문제 원천 차단)
+                is_video_file = ("behind_video" in fname) or fname.endswith(".mp4") or fname.endswith(".webm")
+                
+                should_delete = False
+                if destroy_type == "all":
+                    should_delete = True
+                elif destroy_type == "photo":
+                    # 사진만 다운로드된 경우: 비디오는 절대 삭제하지 않음!
+                    if not is_video_file:
+                        should_delete = True
+                elif destroy_type == "video":
+                    # 비디오만 다운로드된 경우: 비디오 파일만 삭제!
+                    if is_video_file:
+                        should_delete = True
+                else:
+                    should_delete = True
+                    
+                if should_delete:
                     fpath = os.path.join(UPLOAD_DIR, fname)
                     if os.path.isfile(fpath):
                         try:
                             os.remove(fpath)
-                            deleted_count += 1
-                            print(f"[Instant Cleanup] 다운로드 완료에 따른 세션 파일 영구 파기: {fname}")
+                            local_deleted += 1
+                            print(f"[Instant Destruction] 🗑️ 로컬 파일 영구 파기 ({destroy_type}): {fname}")
                         except Exception as e:
-                            print(f"[Instant Cleanup Error] 파일 삭제 실패 ({fname}): {e}")
-            if deleted_count > 0:
-                print(f"[Instant Cleanup] ✅ 세션 '{session_id}' 파일 총 {deleted_count}개 영구 파기 완료")
-        except Exception as ex:
-            print(f"[Instant Cleanup Error] 세션 정리 오류: {ex}")
+                            print(f"[Instant Destruction Error] 로컬 파일 삭제 실패 ({fname}): {e}")
+                            
+        print(f"[Instant Destruction] ✅ 세션 '{session_id}' [{destroy_type}] 로컬 파일 {local_deleted}개 영구 파기 완료")
+    except Exception as ex:
+        print(f"[Instant Destruction Error] 세션 정리 중 오류 발생: {ex}")
+
+
+def delete_session_files_after_delay(session_id: str, delay_seconds: int = 0, gdrive_ids: Optional[List[str]] = None, target_files: Optional[List[str]] = None, destroy_type: str = "all"):
+    """
+    모바일 다운로드 완료 알림 수신 시 백그라운드 워커에서 즉시(또는 지정 지연시간 후)
+    지정된 미디어 유형(photo, video, all)의 파일을 영구 삭제합니다.
+    """
+    def _worker():
+        if delay_seconds > 0:
+            time.sleep(delay_seconds)
+        destroy_session_files_immediately(session_id, gdrive_ids=gdrive_ids, target_files=target_files, destroy_type=destroy_type)
 
     t = threading.Thread(target=_worker, daemon=True)
     t.start()
@@ -353,8 +439,10 @@ def delete_session_files_after_delay(session_id: str, delay_seconds: int = 60):
 class CleanupSessionRequest(BaseModel):
     session_id: Optional[str] = None
     files: Optional[List[str]] = None
-    delay_seconds: Optional[int] = 60
-    immediate: Optional[bool] = False
+    gdrive_ids: Optional[List[str]] = None
+    destroy_type: Optional[str] = "all"  # "all", "photo", "video"
+    delay_seconds: Optional[int] = 0      # 기본 0초 (다운로드 즉시 파기)
+    immediate: Optional[bool] = True      # 다운로드 즉시 파기 플래그
 
 
 def cleanup_expired_files():
@@ -429,31 +517,41 @@ except Exception as e:
 
 
 @app.post("/api/cleanup-session")
+@app.post("/api/destroy-media")
 async def api_cleanup_session(req: CleanupSessionRequest):
     """
-    QR 모바일 다운로드 후 자동 파기 엔드포인트
-    - 모바일 브라우저에서 사진 또는 영상 다운로드 완료 시 호출됨
-    - 기본 60초(사진과 영상을 모두 받을 수 있는 시간) 후 해당 세션의 로컬 파일 영구 파기
+    QR 모바일 다운로드 즉시 파기 엔드포인트
+    - 모바일 브라우저에서 사진 또는 영상 다운로드 완료 시 즉각 호출됨
+    - 구글 드라이브에 업로드된 사진/영상 파일과 로컬 uploads/ 내의 세션 미디어 파일을 즉시 영구 파기
+    - 미다운로드 고객의 데이터는 별도 24시간 스케줄러를 통해 24시간 후 자동 파기됨
     """
     sid = req.session_id
     if not sid and req.files:
         for f in req.files:
-            match = re.search(r"([a-f0-9]{8})", f)
+            match = re.search(r"([a-f0-9]{8})", str(f))
             if match:
                 sid = match.group(1)
                 break
                 
-    if not sid:
-        raise HTTPException(status_code=400, detail="session_id or valid files parameter is required")
+    if not sid and not req.gdrive_ids:
+        raise HTTPException(status_code=400, detail="session_id, files, or gdrive_ids parameter is required")
         
-    delay = 0 if req.immediate else (req.delay_seconds if req.delay_seconds is not None else 60)
-    delete_session_files_after_delay(sid, delay_seconds=delay)
+    delay = 0 if req.immediate else (req.delay_seconds if req.delay_seconds is not None else 0)
+    delete_session_files_after_delay(
+        sid or "unknown",
+        delay_seconds=delay,
+        gdrive_ids=req.gdrive_ids,
+        target_files=req.files,
+        destroy_type=req.destroy_type or "all"
+    )
     
     return {
         "status": "success",
-        "message": f"세션 '{sid}'의 모든 미디어 파일이 {delay}초 후 영구 파기되도록 예약되었습니다.",
+        "message": f"다운로드 확인 즉시 파기 진행 (세션: '{sid}', 구글 드라이브 ID: {req.gdrive_ids or []}, 지연: {delay}초)",
         "session_id": sid,
-        "scheduled_delay": delay
+        "gdrive_ids": req.gdrive_ids or [],
+        "scheduled_delay": delay,
+        "immediate": delay == 0
     }
 
 
@@ -465,6 +563,15 @@ async def serve_kiosk_home():
         with open(index_path, "r", encoding="utf-8") as f:
             return f.read()
     return HTMLResponse("<h1>AI 4-Cut Studio</h1><p>index.html 준비 중</p>")
+
+
+@app.get("/style.css")
+async def serve_style_css():
+    """상대 경로 style.css 직접 서빙 지원"""
+    css_path = os.path.join(TEMPLATES_DIR, "style.css")
+    if os.path.exists(css_path):
+        return FileResponse(css_path, media_type="text/css")
+    raise HTTPException(status_code=404, detail="style.css not found")
 
 
 @app.get("/download.html", response_class=HTMLResponse)
@@ -551,11 +658,12 @@ async def api_transform_single(
     session_id: str = Form(...),
     cut_index: int = Form(...),
     style: str = Form("time_travel"),
-    is_high_quality: str = Form("false"),
+    sub_theme: str = Form(""),
+    is_high_quality: str = Form("true"),
     photo: UploadFile = File(...)
 ):
     """
-    개별 사진 수신 후 즉시 백그라운드 변환 시작
+    개별 사진 수신 후 즉시 백그라운드 변환 시작 (gpt-image-2 기본 탑재)
     """
     if session_id not in TRANSFORM_TASKS:
         TRANSFORM_TASKS[session_id] = {}
@@ -568,16 +676,25 @@ async def api_transform_single(
     single_path = os.path.join(UPLOAD_DIR, single_filename)
     pil_img.save(single_path, format="JPEG", quality=95)
     
-    # 모델 선택
-    model_name = "gpt-image-2" if is_high_quality.lower() == "true" else "gpt-image-1.5"
+    # 모델 선택: gpt-image-2 기본 탑재
+    model_name = "gpt-image-2" if is_high_quality.lower() != "false" else "gpt-image-1.5"
     
-    # 컷별 실시간 진행 상태 등록
-    step_descriptions = {
-        0: (1, 15, "1컷 유년기 변환", "어린이 AI 실사 변환 분석 중... (골격 100% 보존)"),
-        1: (2, 35, "2컷 청소년기 변환", "청소년 교복 AI 실사 변환 분석 중..."),
-        2: (3, 50, "3컷 현재 원본 보존", "현재 본연의 모습 원본 100% 보존 완료"),
-        3: (4, 65, "4컷 노년기 변환", "품격 있는 황혼 AI 실사 변환 분석 중...")
-    }
+    # 컷별 실시간 진행 상태 등록 (조선 4컷 vs 인생 사계절)
+    is_joseon = (style == "joseon" or sub_theme == "joseon")
+    if is_joseon:
+        step_descriptions = {
+            0: (1, 15, "1컷 국왕 변환", "조선 국왕 AI 실사 변환 분석 중... (곤룡포 & 익선관)"),
+            1: (2, 35, "2컷 선비 변환", "기품 있는 선비 AI 실사 변환 분석 중... (도포 & 흑립)"),
+            2: (3, 50, "3컷 보부상 변환", "팔도 보부상 AI 실사 변환 분석 중... (패랭이 & 봇짐)"),
+            3: (4, 65, "4컷 노비 변환", "정겨운 민초/노비 AI 실사 변환 분석 중... (삼베옷 & 머리띠)")
+        }
+    else:
+        step_descriptions = {
+            0: (1, 15, "1컷 유년기 변환", "어린이 AI 실사 변환 분석 중... (골격 100% 보존)"),
+            1: (2, 35, "2컷 청소년기 변환", "청소년 교복 AI 실사 변환 분석 중..."),
+            2: (3, 50, "3컷 현재 원본 보존", "현재 본연의 모습 원본 100% 보존 완료"),
+            3: (4, 65, "4컷 노년기 변환", "품격 있는 황혼 AI 실사 변환 분석 중...")
+        }
     step_num, prog_val, s_name, s_msg = step_descriptions.get(cut_index, (1, 10, "변환 진행 중", "AI 이미지 분석 중..."))
     set_progress(session_id, step_num, prog_val, s_name, s_msg)
 
@@ -586,8 +703,7 @@ async def api_transform_single(
     if style == "original":
         task = loop.run_in_executor(executor, lambda img: img.convert("RGB"), pil_img)
     else:
-        # time_travel (연령 변환) 및 기타 테마
-        task = loop.run_in_executor(executor, transform_single_image_openai, pil_img, cut_index, model_name)
+        task = loop.run_in_executor(executor, transform_single_image_openai, pil_img, cut_index, style, sub_theme, model_name)
         
     TRANSFORM_TASKS[session_id][cut_index] = {
         "original_img": pil_img,
@@ -595,7 +711,7 @@ async def api_transform_single(
         "single_filename": single_filename,
         "task": task
     }
-    return {"status": "success", "style": style, "cut_index": cut_index}
+    return {"status": "success", "style": style, "sub_theme": sub_theme, "cut_index": cut_index}
 
 def get_host_lan_ip() -> str:
     import socket
@@ -614,7 +730,8 @@ async def api_transform_four_cut(
     request: Request,
     session_id: str = Form(...),
     video: Optional[UploadFile] = File(None),
-    style: str = Form("original")
+    style: str = Form("time_travel"),
+    sub_theme: str = Form("")
 ):
     """
     4컷 촬영 완료 후 최종 병합 및 구글 드라이브 업로드
@@ -623,20 +740,13 @@ async def api_transform_four_cut(
         raise HTTPException(status_code=400, detail="모든 4컷 사진이 전송되지 않았습니다.")
 
     timestamp_str = datetime.now().strftime("%Y%m%d_%H%M%S")
-    set_progress(session_id, 4, 70, "변환 마무리 대기", "생애 주기별 고화질 AI 이미지 변환 결과를 수집하고 있습니다...")
+    set_progress(session_id, 4, 70, "변환 마무리 대기", "고화질 AI 4컷 이미지 변환 결과를 수집하고 있습니다...")
 
     # 1. 캡처된 원본 4장 수집 (async 태스크 대기)
     original_pil_images = []
     single_orig_filenames = []
     single_orig_paths = []
     transformed_pil_images = []
-    
-    cut_finish_msgs = {
-        0: (1, 30, "1컷 유년기 완료", "어린이 AI 변환 완료 (DSLR 실사 텍스처 반영)"),
-        1: (2, 55, "2컷 청소년기 완료", "청소년 교복 AI 변환 완료"),
-        2: (3, 65, "3컷 현재 모습 완료", "현재 원본 보존 완료"),
-        3: (4, 80, "4컷 노년기 완료", "노년 황혼 AI 변환 완료")
-    }
 
     for idx in range(4):
         item = TRANSFORM_TASKS[session_id][idx]
@@ -647,10 +757,18 @@ async def api_transform_four_cut(
     # AI 4컷 변환 결과 병렬 동시 취합 (지연 최소화)
     tasks = [TRANSFORM_TASKS[session_id][idx]["task"] for idx in range(4)]
     transformed_pil_images = await asyncio.gather(*tasks)
-    set_progress(session_id, 4, 82, "AI 4컷 실사 변환 완료", "다인원 생애 사계절 고화질 변환 수집 완료")
+    set_progress(session_id, 4, 82, "AI 4컷 실사 변환 완료", "고화질 변환 수집 완료")
         
     # 메모리 정리
     del TRANSFORM_TASKS[session_id]
+
+    # AI 개별 컷 이미지 디스크 캐싱 (프레임 색상 실시간 변경 및 출력용)
+    for idx, t_img in enumerate(transformed_pil_images):
+        t_path = os.path.join(UPLOAD_DIR, f"ai_single_{idx+1}_{session_id}.jpg")
+        try:
+            t_img.convert("RGB").save(t_path, format="JPEG", quality=95)
+        except Exception as ex:
+            print(f"[Warning] ai_single_{idx+1} 캐싱 실패: {ex}")
         
     # 2. 원본 4컷 프레임 합성 및 저장 (웹 뷰용 3:4 & 인화 전용 1200x1800 엽서)
     orig_frame = create_4cut_frame(original_pil_images, brand_title="AI 4-CUT STUDIO (ORIGINAL)")
@@ -665,7 +783,14 @@ async def api_transform_four_cut(
     
     # 3. AI 변환 적용 & 4컷 프레임 생성 (웹 뷰용 3:4 & 인화 전용 1200x1800 엽서)
     set_progress(session_id, 5, 85, "4컷 인화 프레임 렌더링", "고해상도 4컷 포토 프레임을 합성 중입니다...")
-    frame_title = "AI 4-CUT (TIME TRAVEL)" if style == "time_travel" else f"AI 4-CUT STUDIO ({style.upper()})"
+    is_joseon = (style == "joseon" or sub_theme == "joseon")
+    if is_joseon:
+        frame_title = "조선 4컷 (신분 변신)"
+    elif style == "time_travel":
+        frame_title = "AI 4-CUT (TIME TRAVEL)"
+    else:
+        frame_title = f"AI 4-CUT STUDIO ({style.upper()})"
+        
     ai_frame = create_4cut_frame(transformed_pil_images, brand_title=frame_title)
     ai_frame_filename = f"ai_frame_{session_id}_{style}.jpg"
     ai_frame_path = os.path.join(UPLOAD_DIR, ai_frame_filename)
@@ -783,7 +908,120 @@ async def api_transform_four_cut(
         "local_download_url": local_download_url,
         "qr_code_base64": qr_base64,
         "drive_upload_success": img_drive_id is not None and vid_drive_id is not None,
-        "drive_status_msg": "구글 드라이브 업로드 완료 (AI 프레임 및 비디오)" if (img_drive_id and vid_drive_id) else "로컬 스토리지 저장 완료 (24시간 자동 파기 대상)"
+        "drive_status_msg": "구글 드라이브 업로드 완료 (다운로드 즉시 파기 / 미다운로드 시 24시간 자동 파기)" if (img_drive_id and vid_drive_id) else "로컬 스토리지 저장 완료 (다운로드 즉시 파기 / 24시간 자동 파기)"
+    }
+
+
+@app.post("/api/update-frame-color")
+async def api_update_frame_color(req: FrameColorRequest, request: Request):
+    """
+    태블릿에서 사용자가 프레임 색상(크림, 블랙, 레드, 네이비 등)을 변경했을 때:
+    1. 화면 프리뷰 및 인쇄용 엽서 프레임 실시간 재생성
+    2. 모바일 다운로드용 기본 프레임(ai_frame_{sid}.jpg)에도 최신 선택 색상 즉시 동기화
+    3. 구글 드라이브 업로드 및 새 테두리 색상이 적용된 QR 코드 실시간 재생성 반환!
+    """
+    prefix = req.frame_type  # "ai" 또는 "orig"
+    session_id = req.session_id
+    
+    # 4개 컷 이미지 로드
+    single_images = []
+    for idx in range(1, 5):
+        fn = f"{prefix}_single_{idx}_{session_id}.jpg"
+        fp = os.path.join(UPLOAD_DIR, fn)
+        if not os.path.exists(fp):
+            fp = os.path.join(UPLOAD_DIR, f"orig_single_{idx}_{session_id}.jpg")
+        if os.path.exists(fp):
+            try:
+                single_images.append(Image.open(fp).convert("RGB"))
+            except Exception:
+                pass
+
+    if len(single_images) < 4:
+        raise HTTPException(status_code=404, detail="프레임 재생성을 위한 개별 사진을 찾을 수 없습니다.")
+
+    # 타이틀 결정
+    brand_title = "AI 4-CUT STUDIO"
+    if prefix == "orig":
+        brand_title = "AI 4-CUT STUDIO (ORIGINAL)"
+    else:
+        for f in os.listdir(UPLOAD_DIR):
+            if f.startswith(f"ai_frame_{session_id}"):
+                if "joseon" in f:
+                    brand_title = "조선 4컷 (신분 변신)"
+                elif "time_travel" in f:
+                    brand_title = "AI 4-CUT (TIME TRAVEL)"
+                break
+
+    color_safe = (req.frame_color or "#FFFDF9").replace("#", "")
+
+    # 1. 화면 프리뷰 및 다운로드용 네오브루탈리즘 프레임 재생성
+    new_frame = create_4cut_frame(
+        images=single_images,
+        brand_title=brand_title,
+        frame_color=req.frame_color,
+        text_color=req.text_color
+    )
+    new_frame_name = f"{prefix}_frame_{session_id}_{color_safe}.jpg"
+    new_frame_path = os.path.join(UPLOAD_DIR, new_frame_name)
+    new_frame.save(new_frame_path, format="JPEG", quality=95)
+
+    # 1-1. 기본 파일명(ai_frame_{sid}.jpg)에도 최신 색상 즉시 덮어쓰기 (기존 URL 접속 시에도 새 색상 보장)
+    base_frame_name = f"{prefix}_frame_{session_id}.jpg"
+    base_frame_path = os.path.join(UPLOAD_DIR, base_frame_name)
+    try:
+        new_frame.save(base_frame_path, format="JPEG", quality=95)
+    except Exception as save_err:
+        print(f"[Update Color] 기본 프레임 덮어쓰기 알림: {save_err}")
+
+    # 2. 인쇄용 1200x1800 엽서 프레임 재생성
+    new_postcard = create_4cut_frame_postcard(
+        images=single_images,
+        brand_title=brand_title,
+        frame_color=req.frame_color,
+        text_color=req.text_color
+    )
+    new_postcard_name = f"{prefix}_postcard_{session_id}_{color_safe}.jpg"
+    new_postcard_path = os.path.join(UPLOAD_DIR, new_postcard_name)
+    new_postcard.save(new_postcard_path, format="JPEG", quality=96)
+
+    # 3. 구글 드라이브 새 색상 프레임 업로드
+    new_img_drive_id = upload_to_google_drive(new_frame_path, new_frame_name, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+
+    # 4. 새 색상이 적용된 QR 코드 및 모바일 다운로드 URL 실시간 갱신
+    lan_ip = get_host_lan_ip()
+    port = request.base_url.port or 8000
+    server_origin = f"http://{lan_ip}:{port}"
+    vercel_domain = os.environ.get("VERCEL_PUBLIC_URL", "https://4cut-pjt.vercel.app").rstrip("/")
+    video_filename = f"behind_video_{session_id}.mp4"
+
+    # 동영상 구글 드라이브 ID 검색 (기존 것 유지)
+    vid_drive_id = None
+    
+    gid_param = new_img_drive_id or ""
+    if new_img_drive_id:
+        download_url = f"{vercel_domain}/download.html?gid={gid_param}&img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+    else:
+        download_url = f"{server_origin}/download.html?img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+
+    qr = qrcode.QRCode(version=1, box_size=8, border=2)
+    qr.add_data(download_url)
+    qr.make(fit=True)
+    qr_img = qr.make_image(fill_color="black", back_color="white")
+    
+    buffered = io.BytesIO()
+    qr_img.save(buffered, format="PNG")
+    new_qr_base64 = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+    print(f"[Update Color] ✅ 색상({req.frame_color}) 변경 완료: 프레임 생성, 구글 드라이브(ID: {new_img_drive_id}) 및 QR 코드 실시간 갱신")
+
+    return {
+        "success": True,
+        "frame_url": f"/uploads/{new_frame_name}",
+        "postcard_url": f"/uploads/{new_postcard_name}",
+        "frame_color": req.frame_color,
+        "text_color": req.text_color,
+        "qr_code_base64": new_qr_base64,
+        "download_url": download_url
     }
 
 
@@ -791,18 +1029,60 @@ async def api_transform_four_cut(
 async def api_print_photo(req: PrintJobRequest):
     """
     태블릿에서 인쇄 요청 시 Wi-Fi 연결된 Canon SELPHY CP1500으로 4x6 엽서 고해상도 즉시 출력
+    - 사용자가 화면에서 선택한 frame_color 및 text_color가 인쇄물에 실시간 반영됨!
     """
     target_path = None
-    postcard_prefix = f"{req.frame_type}_postcard_{req.session_id}"
-    frame_prefix = f"{req.frame_type}_frame_{req.session_id}"
+    color_safe = (req.frame_color or "#FFFDF9").replace("#", "")
+    colored_postcard = f"{req.frame_type}_postcard_{req.session_id}_{color_safe}.jpg"
+    colored_postcard_path = os.path.join(UPLOAD_DIR, colored_postcard)
 
-    if os.path.exists(UPLOAD_DIR):
-        # 1. 1200x1800 300DPI 엽서 프레임 우선 검색
+    # 1. 이미 선택된 색상으로 렌더링된 엽서 파일이 있으면 우선 채택
+    if os.path.exists(colored_postcard_path):
+        target_path = colored_postcard_path
+    else:
+        # 단일 컷 이미지를 읽어 요청된 색상으로 1번 스타일의 1200x1800 엽서 즉시 실시간 렌더링
+        single_images = []
+        for idx in range(1, 5):
+            fn = f"{req.frame_type}_single_{idx}_{req.session_id}.jpg"
+            fp = os.path.join(UPLOAD_DIR, fn)
+            if not os.path.exists(fp):
+                fp = os.path.join(UPLOAD_DIR, f"orig_single_{idx}_{req.session_id}.jpg")
+            if os.path.exists(fp):
+                try:
+                    single_images.append(Image.open(fp).convert("RGB"))
+                except Exception:
+                    pass
+
+        if len(single_images) == 4:
+            brand_title = "AI 4-CUT STUDIO"
+            if req.frame_type == "orig":
+                brand_title = "AI 4-CUT STUDIO (ORIGINAL)"
+            else:
+                for f in os.listdir(UPLOAD_DIR):
+                    if f.startswith(f"ai_frame_{req.session_id}_"):
+                        if "joseon" in f:
+                            brand_title = "조선 4컷 (신분 변신)"
+                        elif "time_travel" in f:
+                            brand_title = "AI 4-CUT (TIME TRAVEL)"
+                        break
+
+            postcard_img = create_4cut_frame_postcard(
+                images=single_images,
+                brand_title=brand_title,
+                frame_color=req.frame_color or "#FFFDF9",
+                text_color=req.text_color
+            )
+            postcard_img.save(colored_postcard_path, format="JPEG", quality=96)
+            target_path = colored_postcard_path
+
+    # 2. 실시간 생성이 불가능한 경우 기존 파일 fallback 검색
+    if not target_path or not os.path.exists(target_path):
+        postcard_prefix = f"{req.frame_type}_postcard_{req.session_id}"
+        frame_prefix = f"{req.frame_type}_frame_{req.session_id}"
         for fname in os.listdir(UPLOAD_DIR):
             if fname.startswith(postcard_prefix) and fname.endswith(".jpg"):
                 target_path = os.path.join(UPLOAD_DIR, fname)
                 break
-        # 2. 없을 경우 일반 프레임 fallback
         if not target_path:
             for fname in os.listdir(UPLOAD_DIR):
                 if fname.startswith(frame_prefix) and fname.endswith(".jpg"):

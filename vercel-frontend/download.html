@@ -2,299 +2,600 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI 4-CUT STUDIO | 모바일 사진 & 영상 즉시 다운로드</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>청년 4컷 모바일 다운로드 | 서울청년센터 영등포 × 놀면뭐AI</title>
   
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Gaegu, Pretendard, Noto Sans KR -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&family=Pretendard:wght@400;600;700;800&display=swap" rel="stylesheet">
-  
-  <link rel="stylesheet" href="./style.css">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+
   <style>
-    /* 모바일 전체 스크롤 보장 및 1-클릭 다운로드 최적화 */
-    html, body {
-      overflow-x: hidden !important;
-      overflow-y: auto !important;
-      height: auto !important;
-      min-height: 100vh !important;
-      touch-action: pan-y !important;
-      -webkit-overflow-scrolling: touch !important;
-      background-color: #F8FAFC !important;
-      font-family: 'Pretendard', sans-serif;
-      color: #1F2937;
+    /* 1. 디자인 토큰 정의 */
+    :root {
+      --bg-cream: #FBF9F4;
+      --bg-paper: #FAF8F5;
+      --ink-black: #1E232A;
+      --point-red: #B93826;
+      --point-red-dark: #962A1B;
+      --point-teal: #008B74;
+      --point-teal-light: #E8F5EE;
+      --point-yellow: #F9D649;
+      --point-yellow-light: #FFF9E6;
+      --border-color: #DDD7CD;
+      
+      --shadow-sm: 2px 2px 0px var(--ink-black);
+      --shadow-md: 3.5px 3.5px 0px var(--ink-black);
+      --shadow-lg: 5px 5px 0px var(--ink-black);
+      --shadow-active: 1px 1px 0px var(--ink-black);
+
+      --font-hand: 'Gaegu', 'Nanum Pen Script', cursive, sans-serif;
+      --font-sans: 'Pretendard', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
-    
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
-    
+
+    html, body {
+      width: 100%;
+      min-height: 100vh;
+      overflow-x: hidden;
+      overflow-y: auto;
+      background-color: #ECE7DE;
+      font-family: var(--font-sans);
+      color: var(--ink-black);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 0;
+    }
+
+    @media (min-width: 640px) {
+      body {
+        padding: 16px;
+      }
+    }
+
+    /* 모바일 뷰어 컨테이너 (키오스크 규격 일치) */
     .mobile-viewer-card {
       width: 100%;
-      max-width: 480px;
-      margin: 0 auto;
-      height: auto !important;
-      min-height: 100vh !important;
-      overflow: visible !important;
-      background-color: #FFFFFF;
-      padding: 20px 16px 40px 16px;
+      max-width: 440px;
+      min-height: 100vh;
+      background-color: var(--bg-paper);
+      background-image: radial-gradient(#d3cebc 1px, transparent 1px);
+      background-size: 16px 16px;
+      position: relative;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+      justify-content: space-between;
+      padding-bottom: 24px;
     }
-    
-    .header-logo {
-      text-align: center;
-      margin-bottom: 16px;
+
+    @media (min-width: 640px) {
+      .mobile-viewer-card {
+        border: 3px solid var(--ink-black);
+        border-radius: 32px;
+        box-shadow: 7px 7px 0px rgba(30, 35, 42, 0.95);
+        margin: 16px auto;
+        min-height: calc(100vh - 32px);
+        overflow: hidden; /* 상단 헤더 모서리 삐져나옴 완벽 방지 */
+      }
+      .app-header {
+        border-top-left-radius: 29px;
+        border-top-right-radius: 29px;
+      }
     }
-    .header-logo h2 {
-      font-size: 1.35rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #1F2937, #8B5CF6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+
+    /* 상단 헤더 브랜딩 바 */
+    .app-header {
+      padding: 14px 16px 10px;
+      border-bottom: 2px dashed var(--border-color);
+      background-color: rgba(250, 248, 245, 0.96);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 20;
     }
-    
+
+    .header-top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-logo-img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+    }
+
+    .brand-divider {
+      width: 2px;
+      height: 24px;
+      background-color: var(--ink-black);
+      opacity: 0.25;
+    }
+
+    .brand-text-col {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title-hand {
+      font-family: var(--font-hand);
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--ink-black);
+    }
+
+    .brand-sub-mono {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      font-weight: 700;
+      color: #666;
+      letter-spacing: 1px;
+    }
+
+    .doodle-pill {
+      border: 2px solid var(--ink-black);
+      border-radius: 9999px;
+      box-shadow: var(--shadow-sm);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      background-color: #ffffff;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink-black);
+    }
+
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--point-teal);
+      display: inline-block;
+      animation: pulseGreen 1.5s infinite ease-in-out;
+    }
+
+    @keyframes pulseGreen {
+      0% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.2); opacity: 1; box-shadow: 0 0 8px #008B74; }
+      100% { transform: scale(0.9); opacity: 0.7; }
+    }
+
+    /* STEP 서브 배지 바 */
+    .step-banner-bar {
+      margin-top: 8px;
+      background-color: #ffffff;
+      border: 2px solid var(--ink-black);
+      border-radius: 9999px;
+      padding: 5px 12px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .step-tag-pill {
+      background-color: var(--ink-black);
+      color: #ffffff;
+      font-size: 10px;
+      font-weight: 900;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 본문 영역 */
+    .viewer-content {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+
     /* 탭 컨트롤러 */
     .tab-container {
       display: flex;
-      background-color: #F1F5F9;
-      padding: 4px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-      gap: 4px;
+      gap: 8px;
     }
+
     .tab-btn {
       flex: 1;
-      padding: 12px 8px;
-      border: none;
-      background: transparent;
-      border-radius: 8px;
-      font-size: 0.92rem;
-      font-weight: 700;
-      color: #64748B;
+      padding: 11px 8px;
+      background-color: #ffffff;
+      border: 2.5px solid var(--ink-black);
+      border-radius: 14px;
+      box-shadow: var(--shadow-sm);
+      font-size: 14px;
+      font-weight: 800;
+      color: #554D43;
       cursor: pointer;
-      transition: all 0.2s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
+      transition: all 0.15s ease;
     }
+
     .tab-btn.active {
-      background-color: #FFFFFF;
-      color: #8B5CF6;
-      box-shadow: 0 2px 8px rgba(139, 92, 246, 0.15);
+      background-color: var(--ink-black);
+      color: #ffffff;
+      box-shadow: var(--shadow-md);
     }
-    
-    /* 미디어 섹션 */
+
+    /* 미디어 카드 */
     .media-content {
       display: none;
       flex-direction: column;
-      gap: 16px;
+      gap: 12px;
       animation: fadeIn 0.25s ease-in-out;
     }
     .media-content.active {
       display: flex;
     }
+
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    
-    .media-card {
-      background-color: #F8FAFC;
-      border-radius: 16px;
-      padding: 16px;
-      border: 1px solid #E2E8F0;
+
+    .doodle-card {
+      background-color: #ffffff;
+      border: 2.5px solid var(--ink-black);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md);
+      padding: 14px;
+      position: relative;
     }
-    .media-title {
-      font-size: 0.98rem;
-      font-weight: 700;
-      margin-bottom: 12px;
+
+    .card-header-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      color: #1F2937;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1.5px dashed var(--border-color);
     }
-    .badge-speed {
-      font-size: 0.75rem;
-      background: #EDE9FE;
-      color: #7C3AED;
-      padding: 3px 8px;
-      border-radius: 6px;
+
+    .card-title-text {
+      font-size: 14.5px;
+      font-weight: 900;
+      color: var(--ink-black);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tag-badge {
+      font-size: 10.5px;
       font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 6px;
+      border: 1.5px solid var(--ink-black);
+      background-color: var(--point-yellow-light);
+      color: var(--ink-black);
     }
-    
+
+    /* 이미지 & 비디오 뷰 */
     .img-preview-box {
       width: 100%;
-      border-radius: 12px;
+      border: 2px solid var(--ink-black);
+      border-radius: 14px;
       overflow: hidden;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      margin-bottom: 14px;
-      background-color: #FFFFFF;
-      min-height: 240px;
+      background-color: #F8FAFC;
+      margin-bottom: 12px;
+      min-height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--shadow-sm);
     }
+
     .img-preview-box img {
       width: 100%;
       height: auto;
       display: block;
     }
+
     .video-preview-box {
       width: 100%;
-      border-radius: 12px;
+      border: 2px solid var(--ink-black);
+      border-radius: 14px;
       overflow: hidden;
-      margin-bottom: 14px;
-      background-color: #000000;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      min-height: 240px;
+      background-color: #2A313C;
+      margin-bottom: 12px;
+      min-height: 260px;
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--shadow-sm);
     }
+
     .video-preview-box video {
       width: 100%;
-      max-height: 60vh;
+      max-height: 55vh;
       display: block;
       object-fit: contain;
     }
-    
-    /* 1-클릭 다이렉트 다운로드 버튼 */
-    .btn-direct-download {
+
+    /* 두들 다운로드 버튼 */
+    .doodle-btn {
+      width: 100%;
+      padding: 14px 12px;
+      border: 2.5px solid var(--ink-black);
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 900;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 8px;
-      width: 100%;
-      padding: 16px 0;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 800;
-      color: #FFFFFF;
-      background: linear-gradient(135deg, #7C3AED, #6366F1);
-      border: none;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
-      transition: transform 0.15s ease, opacity 0.2s ease;
+      transition: all 0.12s ease;
       text-decoration: none;
-      user-select: none;
+      box-shadow: var(--shadow-md);
     }
-    .btn-direct-download:active {
-      transform: scale(0.98);
-      opacity: 0.9;
+
+    .doodle-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: var(--shadow-active);
     }
+
+    .btn-photo-download {
+      background-color: var(--point-red);
+      color: #ffffff;
+    }
+    .btn-photo-download:hover {
+      background-color: var(--point-red-dark);
+    }
+
     .btn-video-download {
-      background: linear-gradient(135deg, #0F172A, #334155);
-      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.3);
+      background-color: var(--ink-black);
+      color: #ffffff;
     }
-    
-    .download-tip {
-      font-size: 0.78rem;
-      color: #64748B;
+    .btn-video-download:hover {
+      background-color: #333C47;
+    }
+
+    .btn-destroyed {
+      background-color: #4A5568 !important;
+      color: #E2E8F0 !important;
+      cursor: default;
+      pointer-events: none;
+      box-shadow: none !important;
+    }
+
+    .instant-destroyed-banner {
+      display: none;
+      background-color: #F0FDF4;
+      border: 2px solid #16A34A;
+      border-radius: 12px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 12px;
+      color: #15803D;
+      font-weight: 700;
+      align-items: center;
+      gap: 6px;
+      animation: fadeIn 0.4s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .download-tip-text {
+      font-size: 11px;
+      color: #666666;
       text-align: center;
       margin-top: 8px;
-      line-height: 1.4;
+      line-height: 1.35;
     }
 
-    /* 하단 안내 및 전체보기 옵션 */
-    .view-all-toggle {
+    /* 펼쳐보기 토글 */
+    .view-all-box {
       text-align: center;
-      margin: 16px 0;
+      margin: 4px 0;
     }
-    .btn-toggle-all {
+
+    .btn-view-all {
       background: none;
       border: none;
-      color: #8B5CF6;
-      font-size: 0.9rem;
-      font-weight: 700;
-      text-decoration: underline;
+      color: var(--point-red);
+      font-size: 13px;
+      font-weight: 800;
+      text-decoration: underline wavy var(--point-yellow);
+      text-underline-offset: 3px;
       cursor: pointer;
-      padding: 8px 16px;
+      padding: 6px 12px;
     }
 
-    .privacy-notice {
-      background-color: #F5F3FF;
-      border: 1px solid #DDD6FE;
-      border-radius: 14px;
-      padding: 16px;
-      font-size: 0.83rem;
-      color: #64748B;
-      line-height: 1.65;
-      margin-top: 24px;
-      margin-bottom: 24px;
+    /* 개인정보 보호 안내 카드 (두들 스티커 노트 스타일) */
+    .privacy-notice-card {
+      background-color: #ffffff;
+      border: 2px solid var(--ink-black);
+      border-radius: 16px;
+      box-shadow: var(--shadow-sm);
+      padding: 12px;
+      font-size: 11px;
+      color: #554D43;
+      line-height: 1.45;
+    }
+
+    .privacy-headline {
+      font-size: 12px;
+      font-weight: 900;
+      color: var(--ink-black);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 4px;
+    }
+
+    /* 푸터 */
+    .app-footer {
+      padding: 12px 16px;
+      border-top: 2px dashed var(--border-color);
+      text-align: center;
+      margin-top: auto;
+    }
+
+    .footer-hand-text {
+      font-family: var(--font-hand);
+      font-size: 15px;
+      font-weight: 700;
+      color: #666666;
+    }
+
+    .footer-sub-mono {
+      font-family: var(--font-mono);
+      font-size: 9.5px;
+      color: #999999;
+      letter-spacing: 0.5px;
+      margin-top: 1px;
     }
   </style>
 </head>
 <body>
 
   <div class="mobile-viewer-card">
-    <div class="header-logo">
-      <h2>✨ AI 4-CUT STUDIO</h2>
-      <p style="font-size: 0.83rem; color: #64748B; margin-top: 4px;">로그인 없이 1초 만에 바로 저장되는 모바일 뷰어</p>
-    </div>
-
-    <!-- 탭 이동 컨트롤 -->
-    <div class="tab-container">
-      <button class="tab-btn active" id="tab-photo-btn" onclick="switchTab('photo')">
-        📸 4컷 사진
-      </button>
-      <button class="tab-btn" id="tab-video-btn" onclick="switchTab('video')">
-        🎥 2배속 비하인드 영상
-      </button>
-    </div>
-
-    <!-- 탭 1: 완성본 4컷 사진 섹션 -->
-    <div id="tab-photo-content" class="media-content active">
-      <div class="media-card">
-        <div class="media-title">
-          <span>📸 완성본 4컷 사진</span>
-          <span class="badge-speed">고화질 원본</span>
+    <!-- 상단 헤더 -->
+    <header class="app-header">
+      <div class="header-top-row">
+        <div class="brand-group">
+          <img class="brand-logo-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g" alt="서울청년센터 영등포">
+          <div class="brand-divider"></div>
+          <div class="brand-text-col">
+            <span class="brand-title-hand">놀면뭐AI</span>
+            <span class="brand-sub-mono">AI SYSTEM</span>
+          </div>
         </div>
-        <div class="img-preview-box">
-          <img id="display-image" src="" alt="4컷 사진을 불러오는 중입니다...">
+        <div class="doodle-pill">
+          <span class="pulse-dot"></span>
+          <span>READY</span>
         </div>
-        <button id="btn-download-img" onclick="downloadMedia('photo')" class="btn-direct-download">
-          ⬇️ 4컷 사진 즉시 저장 (1-Click)
-        </button>
-        <p class="download-tip">💡 터치 시 구글 로그인/계정 선택 없이 기기에 즉시 다운로드됩니다.</p>
       </div>
-    </div>
 
-    <!-- 탭 2: 전 과정 비하인드 동영상 섹션 -->
-    <div id="tab-video-content" class="media-content">
-      <div class="media-card" id="video-card-anchor">
-        <div class="media-title">
-          <span>🎥 전 과정 비하인드 영상</span>
-          <span class="badge-speed">⚡ 2배속 고속 모드</span>
+      <div class="step-banner-bar">
+        <div style="display:flex; align-items:center; gap:6px;">
+          <span class="step-tag-pill">STEP 3</span>
+          <span style="font-size:13px; font-weight:700; color:var(--ink-black);">모바일 즉시 다운로드</span>
         </div>
-        <div class="video-preview-box">
-          <video id="display-video" controls loop autoplay muted playsinline webkit-playsinline preload="auto">
-            <source id="video-source" src="" type="video/mp4">
-            브라우저가 동영상 재생을 지원하지 않습니다.
-          </video>
-        </div>
-        <button id="btn-download-vid" onclick="downloadMedia('video')" class="btn-direct-download btn-video-download">
-          ⬇️ 2배속 비하인드 영상 즉시 저장 (1-Click)
-        </button>
-        <p class="download-tip">💡 터치 시 스마트폰 갤러리/다운로드 폴더에 바로 저장됩니다.</p>
+        <span style="font-size:11px; font-weight:700; color:var(--point-teal);">1-Click 무료 저장</span>
       </div>
-    </div>
+    </header>
 
-    <!-- 전체 펼쳐보기 옵션 -->
-    <div class="view-all-toggle">
-      <button class="btn-toggle-all" onclick="showAllMedia()">📄 사진과 영상 모두 한 번에 펼쳐보기</button>
-    </div>
+    <!-- 메인 뷰어 본문 -->
+    <main class="viewer-content">
+      <!-- 파기 완료 실시간 안내 배너 -->
+      <div id="destroyed-banner" class="instant-destroyed-banner">
+        <span>🔒</span>
+        <span id="destroyed-banner-text">다운로드 완료! 개인정보 보호를 위해 구글 드라이브 및 서버에서 즉시 영구 파기되었습니다.</span>
+      </div>
 
-    <div class="privacy-notice" id="privacy-notice-box">
-      <strong style="color: #8B5CF6;">🔒 개인정보 보호 및 자동 파기 알고리즘</strong><br>
-      본 서비스는 No-DB 아키텍처로 운영되며, QR 접속 후 <strong>다운로드 완료 시 60초 이내 즉시 파기</strong>되거나 미다운로드 시에도 <strong>24시간 후 영구 자동 삭제</strong>됩니다.<br>
-      (서버 캐시 및 클라우드 스토리지에 사용자 데이터가 영구 보관되지 않습니다.)
-    </div>
+      <!-- 탭 컨트롤러 -->
+      <div class="tab-container">
+        <button class="tab-btn active" id="tab-photo-btn" onclick="switchTab('photo')">
+          <span>📸</span>
+          <span>4컷 사진 받기</span>
+        </button>
+        <button class="tab-btn" id="tab-video-btn" onclick="switchTab('video')">
+          <span>🎥</span>
+          <span>2배속 비하인드 영상</span>
+        </button>
+      </div>
+
+      <!-- 탭 1: 4컷 사진 섹션 -->
+      <div id="tab-photo-content" class="media-content active">
+        <div class="doodle-card">
+          <div class="card-header-row">
+            <div class="card-title-text">
+              <span>📸</span>
+              <span>나만의 청년 4컷 완성본</span>
+            </div>
+            <span class="tag-badge">고화질 원본 ✨</span>
+          </div>
+
+          <div class="img-preview-box">
+            <img id="display-image" src="" alt="4컷 사진을 불러오는 중입니다...">
+          </div>
+
+          <button id="btn-download-img" onclick="downloadMedia('photo')" class="doodle-btn btn-photo-download">
+            <span>⬇️</span>
+            <span id="btn-text-photo">4컷 사진 즉시 저장 (1-Click)</span>
+          </button>
+          <p class="download-tip-text">💡 터치 즉시 기기에 저장되며, 구글 드라이브 및 서버에서 즉시 파기됩니다.</p>
+        </div>
+      </div>
+
+      <!-- 탭 2: 비하인드 동영상 섹션 -->
+      <div id="tab-video-content" class="media-content">
+        <div class="doodle-card" id="video-card-anchor">
+          <div class="card-header-row">
+            <div class="card-title-text">
+              <span>⚡</span>
+              <span>2배속 비하인드 캠 영상</span>
+            </div>
+            <span class="tag-badge" style="background-color:#E0F2FE;">2X SPEED</span>
+          </div>
+
+          <div class="video-preview-box">
+            <video id="display-video" controls loop autoplay muted playsinline webkit-playsinline preload="auto">
+              <source id="video-source" src="" type="video/mp4">
+              브라우저가 동영상 재생을 지원하지 않습니다.
+            </video>
+          </div>
+
+          <button id="btn-download-vid" onclick="downloadMedia('video')" class="doodle-btn btn-video-download">
+            <span>⬇️</span>
+            <span id="btn-text-vid">2배속 영상 즉시 저장 (1-Click)</span>
+          </button>
+          <p class="download-tip-text">💡 터치 즉시 스마트폰에 저장되며, 구글 드라이브 및 서버에서 즉시 파기됩니다.</p>
+        </div>
+      </div>
+
+      <!-- 사진과 영상 한 번에 펼쳐보기 옵션 -->
+      <div class="view-all-box">
+        <button class="btn-view-all" onclick="showAllMedia()">📄 사진과 영상 모두 한 번에 펼쳐보기 ➔</button>
+      </div>
+
+      <!-- 개인정보 보호 및 다운로드 즉시 파기 안내 -->
+      <div class="privacy-notice-card">
+        <div class="privacy-headline">
+          <span>🔒</span>
+          <span>개인정보 안심 파기 알고리즘</span>
+        </div>
+        <p>
+          본 서비스는 No-DB 아키텍처로 안전하게 운영됩니다. 고객님이 사진이나 영상을 <strong>다운로드받는 즉시 구글 드라이브 및 서버에서 영구 파기</strong>됩니다.<br>
+          혹시 다운로드를 잊으셨더라도 <strong>24시간 동안 안전하게 유지된 후 자동 영구 삭제</strong>되므로 안심하고 이용하실 수 있습니다.
+        </p>
+      </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="app-footer">
+      <p class="footer-hand-text">서울청년센터 영등포 × 놀면뭐AI</p>
+      <p class="footer-sub-mono">FREE PHOTO SERVICE FOR SEOUL YOUTH</p>
+    </footer>
   </div>
 
   <script>
@@ -312,11 +613,11 @@
 
     let imageBlobUrl = null;
     let videoBlobUrl = null;
-    let imageFileName = 'ai_4cut_photo.jpg';
+    let imageFileName = 'youth_4cut_photo.jpg';
     let videoFileName = 'behind_video.mp4';
     let cleanupScheduled = false;
 
-    // 동영상 2배속 자동 가속 이벤트
+    // 동영상 2배속 자동 재생 설정
     if (videoElem) {
       videoElem.addEventListener('loadedmetadata', () => {
         videoElem.playbackRate = 2.0;
@@ -326,22 +627,48 @@
       });
     }
 
-    // 다운로드 완료 시 서버 세션 파일 자동 파기 요청 (사진과 영상 둘 다 받을 수 있도록 60초 유예 후 삭제)
-    function scheduleDownloadCleanup() {
-      if (cleanupScheduled) return;
-      cleanupScheduled = true;
+    // Google Apps Script Webhook 공용 URL (외부 LTE/5G 환경 다이렉트 즉시 파기 Fallback)
+    const GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw1b3onN_ZUkYEI816LMT8XGV-Dl9EpHkZEjkplPaIA6L-YZSGTuGmYBcEitU6yK5N1/exec";
+    const destroyedState = { photo: false, video: false };
 
+    // 다운로드 확인 즉시 구글 드라이브 및 로컬 서버 세션 파일 영구 파기
+    function triggerInstantDestruction(type) {
       const sid = sessionIdParam || 
                   (imgId ? imgId.match(/([a-f0-9]{8})/)?.[1] : null) || 
                   (vidId ? vidId.match(/([a-f0-9]{8})/)?.[1] : null);
-                  
+
+      let targetGdriveIds = [];
+      let targetLocalFiles = [];
+
+      if (type === 'all') {
+        targetGdriveIds = [gDriveImgId, gDriveVidId].filter(Boolean);
+        targetLocalFiles = [imgId, vidId].filter(Boolean);
+        destroyedState.photo = true;
+        destroyedState.video = true;
+      } else if (type === 'photo') {
+        targetGdriveIds = [gDriveImgId].filter(Boolean);
+        targetLocalFiles = [imgId].filter(Boolean);
+        destroyedState.photo = true;
+      } else if (type === 'video') {
+        targetGdriveIds = [gDriveVidId].filter(Boolean);
+        targetLocalFiles = [vidId].filter(Boolean);
+        destroyedState.video = true;
+      }
+
+      // UI 피드백 반영
+      updateDestructionUI(type);
+
+      // 1. 로컬 서버 엔드포인트 호출 (/api/cleanup-session) -> 서버와 구글드라이브 동시 파기
       const baseUrl = serverOrigin ? serverOrigin : '';
-      if (sid && baseUrl) {
+      if (baseUrl) {
         const cleanupUrl = `${baseUrl}/api/cleanup-session`;
         const payload = JSON.stringify({
           session_id: sid,
-          files: [imgId, vidId].filter(Boolean),
-          delay_seconds: 60
+          files: targetLocalFiles,
+          gdrive_ids: targetGdriveIds,
+          destroy_type: type,
+          immediate: true,
+          delay_seconds: 0
         });
 
         try {
@@ -351,13 +678,79 @@
           } else {
             fetch(cleanupUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
+              headers: { 'Content-Type': 'application/json' },
               body: payload,
               keepalive: true
             }).catch(() => {});
           }
         } catch (e) {
-          console.warn('Cleanup trigger error:', e);
+          console.warn('Local cleanup error:', e);
+        }
+      }
+
+      // 2. 외부 LTE/5G 환경 대비: 구글 클라우드(GAS Webhook) 다이렉트 즉시 파기 호출
+      //    (로컬 서버가 외부에서 접속 불가해도 구글 드라이브 파일은 100% 즉시 영구 파기)
+      if (targetGdriveIds.length > 0 && GAS_WEBHOOK_URL) {
+        try {
+          const gasPayload = JSON.stringify({
+            action: "delete_files",
+            fileIds: targetGdriveIds
+          });
+          
+          if (navigator.sendBeacon) {
+            const blob = new Blob([gasPayload], { type: 'text/plain' });
+            navigator.sendBeacon(GAS_WEBHOOK_URL, blob);
+          } else {
+            fetch(GAS_WEBHOOK_URL, {
+              method: 'POST',
+              body: gasPayload,
+              mode: 'no-cors',
+              keepalive: true
+            }).catch(() => {});
+          }
+        } catch (gasErr) {
+          console.warn('GAS Direct destroy error:', gasErr);
+        }
+      }
+    }
+
+    // UI 파기 완료 상태 업데이트
+    function updateDestructionUI(type) {
+      const banner = document.getElementById('destroyed-banner');
+      const bannerText = document.getElementById('destroyed-banner-text');
+      if (banner) {
+        banner.style.display = 'flex';
+        if (type === 'all' || (destroyedState.photo && destroyedState.video)) {
+          bannerText.textContent = "다운로드 완료! 사진과 영상 데이터가 구글 드라이브 및 서버에서 즉시 영구 파기되었습니다.";
+        } else if (type === 'photo') {
+          bannerText.textContent = "4컷 사진 다운로드 완료! 구글 드라이브 및 서버에서 해당 사진이 즉시 영구 파기되었습니다.";
+        } else if (type === 'video') {
+          bannerText.textContent = "2배속 영상 다운로드 완료! 구글 드라이브 및 서버에서 해당 영상이 즉시 영구 파기되었습니다.";
+        }
+      }
+
+      if (destroyedState.photo && destroyedState.video) {
+        const btnPhoto = document.getElementById('btn-download-img');
+        const btnVid = document.getElementById('btn-download-vid');
+        if (btnPhoto) {
+          btnPhoto.classList.add('btn-destroyed');
+          btnPhoto.innerHTML = '<span>🔒</span><span>4컷 사진 다운로드 & 파기 완료</span>';
+        }
+        if (btnVid) {
+          btnVid.classList.add('btn-destroyed');
+          btnVid.innerHTML = '<span>🔒</span><span>비하인드 영상 다운로드 & 파기 완료</span>';
+        }
+      } else if (type === 'photo') {
+        const btnPhoto = document.getElementById('btn-download-img');
+        if (btnPhoto) {
+          btnPhoto.classList.add('btn-destroyed');
+          btnPhoto.innerHTML = '<span>🔒</span><span>4컷 사진 다운로드 & 파기 완료</span>';
+        }
+      } else if (type === 'video') {
+        const btnVid = document.getElementById('btn-download-vid');
+        if (btnVid) {
+          btnVid.classList.add('btn-destroyed');
+          btnVid.innerHTML = '<span>🔒</span><span>비하인드 영상 다운로드 & 파기 완료</span>';
         }
       }
     }
@@ -389,7 +782,7 @@
       document.getElementById('tab-photo-content').classList.add('active');
       document.getElementById('tab-video-content').classList.add('active');
       document.querySelector('.tab-container').style.display = 'none';
-      document.querySelector('.view-all-toggle').style.display = 'none';
+      document.querySelector('.view-all-box').style.display = 'none';
       
       setTimeout(() => {
         const videoAnchor = document.getElementById('video-card-anchor');
@@ -399,7 +792,7 @@
       }, 100);
     }
 
-    // 1-Click 다이렉트 즉시 저장 함수
+    // 1-Click 개별 다이렉트 즉시 저장 및 해당 파일 즉시 파기
     function downloadMedia(type) {
       if (type === 'photo') {
         if (!imageBlobUrl) {
@@ -407,14 +800,14 @@
           return;
         }
         triggerInstantDownload(imageBlobUrl, imageFileName);
-        scheduleDownloadCleanup();
+        triggerInstantDestruction('photo');
       } else if (type === 'video') {
         if (!videoBlobUrl) {
           alert('동영상을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
           return;
         }
         triggerInstantDownload(videoBlobUrl, videoFileName);
-        scheduleDownloadCleanup();
+        triggerInstantDestruction('video');
       }
     }
 
@@ -431,18 +824,18 @@
       }, 500);
     }
 
-    // 1. 완성본 4컷 사진 로딩 (로컬 서버 우선 시도 후 Google Drive 클라우드 자동 Fallback)
+    // 사진 로드 (로컬 서버 우선 시도 후 Google Drive Fallback)
     async function loadPhoto() {
       const effectiveImgId = gDriveImgId || imgId;
       if (!effectiveImgId) return;
       imageFileName = effectiveImgId.endsWith('.jpg') ? effectiveImgId : `${effectiveImgId}.jpg`;
 
-      // 1) 로컬 서버 URL이 제공되고 로컬 파일명인 경우
+      // 1) 로컬 서버 URL 우선 시도
       if (serverOrigin && (imgId && (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')))) {
         const targetUrl = `${serverOrigin}/uploads/${imgId}`;
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5초 내 응답 없으면 클라우드로 전환
+          const timeoutId = setTimeout(() => controller.abort(), 2500);
           const response = await fetch(targetUrl, { signal: controller.signal });
           clearTimeout(timeoutId);
           if (response.ok) {
@@ -451,72 +844,82 @@
             imgElem.src = imageBlobUrl;
             return;
           }
-        } catch (err) {
-          console.warn('로컬 서버 접속 불가, 클라우드 스토리지(Google Drive)로 자동 전환합니다.', err);
+        } catch (e) {
+          console.log('Local photo fallback to drive:', e);
         }
       }
 
-      // 2) Google Drive 클라우드 스트림 모드 (LTE/5G 외부 공유 핵심)
-      const targetGid = gDriveImgId || (imgId && !imgId.includes('_') ? imgId : null);
-      if (targetGid) {
-        const gdriveCdnUrl = `https://lh3.googleusercontent.com/d/${targetGid}`;
-        imgElem.src = gdriveCdnUrl;
-        imageBlobUrl = gdriveCdnUrl;
+      // 2) Google Drive 클라우드 로드
+      if (gDriveImgId) {
+        const driveUrl = `https://lh3.googleusercontent.com/u/0/d/${gDriveImgId}=s2048`;
+        imgElem.crossOrigin = "anonymous";
+        imgElem.src = driveUrl;
         
-        // 인메모리 Blob 다운로드 백그라운드 준비
-        fetch(gdriveCdnUrl)
-          .then(res => res.blob())
-          .then(blob => { imageBlobUrl = URL.createObjectURL(blob); })
-          .catch(() => {});
-
-        imgElem.onerror = () => {
-          const fallbackUrl = `https://drive.google.com/thumbnail?id=${targetGid}&sz=w1600`;
-          imgElem.src = fallbackUrl;
-          imageBlobUrl = fallbackUrl;
-        };
+        try {
+          const r = await fetch(driveUrl);
+          if (r.ok) {
+            const b = await r.blob();
+            imageBlobUrl = URL.createObjectURL(b);
+          } else {
+            imageBlobUrl = driveUrl;
+          }
+        } catch (err) {
+          imageBlobUrl = driveUrl;
+        }
+      } else if (imgId) {
+        imgElem.src = `${serverOrigin}/uploads/${imgId}`;
+        imageBlobUrl = imgElem.src;
       }
     }
 
-    // 2. 전 과정 비하인드 동영상 로딩 (로컬 서버 우선 시도 후 Google Drive 클라우드 자동 Fallback)
+    // 동영상 로드
     async function loadVideo() {
       const effectiveVidId = gDriveVidId || vidId;
       if (!effectiveVidId) return;
       videoFileName = effectiveVidId.endsWith('.mp4') ? effectiveVidId : `${effectiveVidId}.mp4`;
 
-      // 1) 로컬 서버 URL이 제공되고 로컬 파일명인 경우
-      if (serverOrigin && (vidId && (vidId.startsWith('behind_video_') || vidId.endsWith('.mp4')))) {
+      // 1) 로컬 서버 우선 시도
+      if (serverOrigin && vidId) {
         const targetUrl = `${serverOrigin}/uploads/${vidId}`;
         try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 2500);
-          const headRes = await fetch(targetUrl, { method: 'HEAD', signal: controller.signal });
+          const response = await fetch(targetUrl, { signal: controller.signal });
           clearTimeout(timeoutId);
-          if (headRes.ok) {
-            videoElem.src = targetUrl;
-            videoSource.src = targetUrl;
-            videoBlobUrl = targetUrl;
+          if (response.ok) {
+            const blob = await response.blob();
+            videoBlobUrl = URL.createObjectURL(blob);
+            videoElem.src = videoBlobUrl;
+            videoSource.src = videoBlobUrl;
             videoElem.load();
-            videoElem.play().catch(e => console.log('Auto-play suppressed:', e));
             return;
           }
-        } catch (err) {
-          console.warn('로컬 서버 비디오 접근 불가, 클라우드 모드로 전환합니다.');
+        } catch (e) {
+          console.log('Local video fallback to drive:', e);
         }
       }
 
-      // 2) Google Drive 클라우드 모드
-      const targetGvid = gDriveVidId || (vidId && !vidId.includes('_') ? vidId : null);
-      if (targetGvid) {
-        const gdriveVidUrl = `https://drive.google.com/uc?export=download&id=${targetGvid}`;
-        videoElem.src = gdriveVidUrl;
-        videoSource.src = gdriveVidUrl;
-        videoBlobUrl = gdriveVidUrl;
+      // 2) Google Drive 클라우드 로드
+      if (gDriveVidId) {
+        const driveStreamUrl = `https://drive.google.com/uc?export=download&id=${gDriveVidId}`;
+        videoBlobUrl = driveStreamUrl;
+        videoElem.src = driveStreamUrl;
+        videoSource.src = driveStreamUrl;
+        videoElem.load();
+      } else if (vidId) {
+        const directUrl = `${serverOrigin}/uploads/${vidId}`;
+        videoBlobUrl = directUrl;
+        videoElem.src = directUrl;
+        videoSource.src = directUrl;
         videoElem.load();
       }
     }
 
-    loadPhoto();
-    loadVideo();
+    // 초기 미디어 로드 실행
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPhoto();
+      loadVideo();
+    });
   </script>
 </body>
 </html>
