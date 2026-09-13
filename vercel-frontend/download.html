@@ -44,9 +44,11 @@
 
     html, body {
       width: 100%;
-      min-height: 100vh;
+      min-height: 100%;
       overflow-x: hidden;
       overflow-y: auto;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
       background-color: #ECE7DE;
       font-family: var(--font-sans);
       color: var(--ink-black);
@@ -54,6 +56,18 @@
       justify-content: center;
       align-items: flex-start;
       padding: 0;
+    }
+
+    /* 커스텀 슬림 스크롤바 */
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #ECE7DE;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #B93826;
+      border-radius: 4px;
     }
 
     @media (min-width: 640px) {
@@ -75,6 +89,7 @@
       flex-direction: column;
       justify-content: space-between;
       padding-bottom: 24px;
+      overflow-y: visible;
     }
 
     @media (min-width: 640px) {
@@ -84,11 +99,11 @@
         box-shadow: 7px 7px 0px rgba(30, 35, 42, 0.95);
         margin: 16px auto;
         min-height: calc(100vh - 32px);
-        overflow: hidden; /* 상단 헤더 모서리 삐져나옴 완벽 방지 */
+        overflow-y: visible;
       }
       .app-header {
-        border-top-left-radius: 29px;
-        border-top-right-radius: 29px;
+        border-top-left-radius: 28px;
+        border-top-right-radius: 28px;
       }
     }
 
@@ -627,15 +642,29 @@
       });
     }
 
+    // 세션 ID 추출 유틸리티 (0bnr2y96 등 모든 문자열 패턴 완벽 지원)
+    function extractSessionId() {
+      if (sessionIdParam) return sessionIdParam;
+      if (imgId) {
+        const m = imgId.match(/(?:ai|orig)_(?:frame|postcard|single_\d+)_([a-zA-Z0-9_-]+?)(?:_[a-fA-F0-9]{6})?\.jpg/) ||
+                  imgId.match(/([a-zA-Z0-9_-]{8})/);
+        if (m) return m[1];
+      }
+      if (vidId) {
+        const m = vidId.match(/behind_video_([a-zA-Z0-9_-]+)\.mp4/) ||
+                  vidId.match(/([a-zA-Z0-9_-]{8})/);
+        if (m) return m[1];
+      }
+      return null;
+    }
+
     // Google Apps Script Webhook 공용 URL (외부 LTE/5G 환경 다이렉트 즉시 파기 Fallback)
     const GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbw1b3onN_ZUkYEI816LMT8XGV-Dl9EpHkZEjkplPaIA6L-YZSGTuGmYBcEitU6yK5N1/exec";
     const destroyedState = { photo: false, video: false };
 
     // 다운로드 확인 즉시 구글 드라이브 및 로컬 서버 세션 파일 영구 파기
     function triggerInstantDestruction(type) {
-      const sid = sessionIdParam || 
-                  (imgId ? imgId.match(/([a-f0-9]{8})/)?.[1] : null) || 
-                  (vidId ? vidId.match(/([a-f0-9]{8})/)?.[1] : null);
+      const sid = extractSessionId();
 
       let targetGdriveIds = [];
       let targetLocalFiles = [];
@@ -681,7 +710,7 @@
               headers: { 'Content-Type': 'application/json' },
               body: payload,
               keepalive: true
-            }).catch(() => {});
+            }).catch((err) => console.log('Fetch cleanup non-blocking notice:', err));
           }
         } catch (e) {
           console.warn('Local cleanup error:', e);
@@ -795,18 +824,23 @@
     // 1-Click 개별 다이렉트 즉시 저장 및 해당 파일 즉시 파기
     function downloadMedia(type) {
       if (type === 'photo') {
-        if (!imageBlobUrl) {
+        const targetUrl = imageBlobUrl || imgElem.src;
+        if (!targetUrl) {
           alert('사진을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
           return;
         }
-        triggerInstantDownload(imageBlobUrl, imageFileName);
+        triggerInstantDownload(targetUrl, imageFileName);
         triggerInstantDestruction('photo');
       } else if (type === 'video') {
-        if (!videoBlobUrl) {
+        const localDirect = serverOrigin && vidId ? `${serverOrigin}/uploads/${vidId}` : null;
+        const driveDirect = gDriveVidId ? `https://drive.google.com/uc?export=download&id=${gDriveVidId}` : null;
+        const targetUrl = videoBlobUrl || (videoElem && videoElem.src) || localDirect || driveDirect;
+        
+        if (!targetUrl) {
           alert('동영상을 불러오는 중입니다. 잠시 후 다시 시도해 주세요.');
           return;
         }
-        triggerInstantDownload(videoBlobUrl, videoFileName);
+        triggerInstantDownload(targetUrl, videoFileName);
         triggerInstantDestruction('video');
       }
     }
@@ -872,30 +906,52 @@
       }
     }
 
-    // 동영상 로드
+    // 동영상 로드 (로컬 서버 우선 시도 후 Google Drive Fallback)
     async function loadVideo() {
       const effectiveVidId = gDriveVidId || vidId;
       if (!effectiveVidId) return;
       videoFileName = effectiveVidId.endsWith('.mp4') ? effectiveVidId : `${effectiveVidId}.mp4`;
 
-      // 1) 로컬 서버 우선 시도
+      // 비디오 태그 에러 핸들러: 로드 실패 시 클라우드 스트림으로 자동 복구
+      videoElem.onerror = () => {
+        console.warn('[Video Player] 비디오 로드 에러 -> 구글 드라이브 폴백 전환');
+        if (gDriveVidId) {
+          const driveStreamUrl = `https://drive.google.com/uc?export=download&id=${gDriveVidId}`;
+          if (videoElem.src !== driveStreamUrl) {
+            videoBlobUrl = driveStreamUrl;
+            videoElem.src = driveStreamUrl;
+            videoSource.src = driveStreamUrl;
+            videoElem.load();
+          }
+        }
+      };
+
+      // 1) 로컬 서버 우선 시도 (로컬 LAN IP 접속 시 0.1초 고속 스트리밍)
       if (serverOrigin && vidId) {
         const targetUrl = `${serverOrigin}/uploads/${vidId}`;
         try {
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2500);
-          const response = await fetch(targetUrl, { signal: controller.signal });
-          clearTimeout(timeoutId);
-          if (response.ok) {
-            const blob = await response.blob();
-            videoBlobUrl = URL.createObjectURL(blob);
-            videoElem.src = videoBlobUrl;
-            videoSource.src = videoBlobUrl;
+          const isSafeToFetch = window.location.protocol === 'http:' || targetUrl.startsWith('https:');
+          if (isSafeToFetch) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 2000);
+            const response = await fetch(targetUrl, { signal: controller.signal, method: 'HEAD' });
+            clearTimeout(timeoutId);
+            if (response.ok) {
+              videoBlobUrl = targetUrl;
+              videoElem.src = targetUrl;
+              videoSource.src = targetUrl;
+              videoElem.load();
+              return;
+            }
+          } else {
+            videoBlobUrl = targetUrl;
+            videoElem.src = targetUrl;
+            videoSource.src = targetUrl;
             videoElem.load();
             return;
           }
         } catch (e) {
-          console.log('Local video fallback to drive:', e);
+          console.log('[Video Player] 로컬 비디오 접근 불가, 클라우드로 전환:', e);
         }
       }
 
@@ -906,7 +962,7 @@
         videoElem.src = driveStreamUrl;
         videoSource.src = driveStreamUrl;
         videoElem.load();
-      } else if (vidId) {
+      } else if (vidId && serverOrigin) {
         const directUrl = `${serverOrigin}/uploads/${vidId}`;
         videoBlobUrl = directUrl;
         videoElem.src = directUrl;

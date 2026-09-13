@@ -381,11 +381,14 @@ def destroy_session_files_immediately(session_id: str, gdrive_ids: Optional[List
 
     # 2. 로컬 uploads/ 폴더 내 파일 정밀 파기
     local_deleted = 0
+    clean_sid = (session_id or "").strip()
+    clean_targets = [os.path.basename(f) for f in (target_files or []) if f]
+
     try:
         if os.path.exists(UPLOAD_DIR):
             for fname in os.listdir(UPLOAD_DIR):
-                is_session_match = bool(session_id and session_id in fname)
-                is_target_match = bool(target_files and fname in target_files)
+                is_session_match = bool(clean_sid and clean_sid != "unknown" and clean_sid in fname)
+                is_target_match = bool(clean_targets and fname in clean_targets)
                 
                 if not (is_session_match or is_target_match):
                     continue
@@ -528,12 +531,14 @@ async def api_cleanup_session(req: CleanupSessionRequest):
     sid = req.session_id
     if not sid and req.files:
         for f in req.files:
-            match = re.search(r"([a-f0-9]{8})", str(f))
+            match = re.search(r"(?:ai|orig)_(?:frame|postcard|single_\d+)_([a-zA-Z0-9_-]+?)(?:_[a-fA-F0-9]{6})?\.jpg", str(f)) or \
+                    re.search(r"behind_video_([a-zA-Z0-9_-]+)\.mp4", str(f)) or \
+                    re.search(r"([a-zA-Z0-9_-]{6,16})", str(f))
             if match:
                 sid = match.group(1)
                 break
                 
-    if not sid and not req.gdrive_ids:
+    if not sid and not req.gdrive_ids and not req.files:
         raise HTTPException(status_code=400, detail="session_id, files, or gdrive_ids parameter is required")
         
     delay = 0 if req.immediate else (req.delay_seconds if req.delay_seconds is not None else 0)
@@ -868,15 +873,15 @@ async def api_transform_four_cut(
     
     # Vercel 외부 공유 도메인 설정 (환경변수 VERCEL_PUBLIC_URL 지원, 기본값: https://4cut-pjt.vercel.app)
     vercel_domain = os.environ.get("VERCEL_PUBLIC_URL", "https://4cut-pjt.vercel.app").rstrip("/")
+    use_vercel_qr = os.environ.get("USE_VERCEL_QR", "false").lower() in ("true", "1")
     
-    # 구글 드라이브 클라우드 업로드 성공 시: 전 세계 어디서나(LTE/5G) 열리는 Vercel 외부 공유 URL 우선 발급
-    if img_drive_id or vid_drive_id:
+    # 기본 QR 코드는 Mixed Content 없이 로컬 비디오 초고속 스트리밍과 100% 즉시 파기를 보장하는 로컬 직결 주소로 생성!
+    local_download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+    
+    if use_vercel_qr and (img_drive_id or vid_drive_id):
         download_url = f"{vercel_domain}/download.html?gid={img_drive_id or ''}&gvid={vid_drive_id or ''}&img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
     else:
-        # 로컬 Fallback 시: 동일 Wi-Fi LAN IP 주소 발급
-        download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
-        
-    local_download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+        download_url = local_download_url
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
@@ -998,10 +1003,13 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
     vid_drive_id = None
     
     gid_param = new_img_drive_id or ""
-    if new_img_drive_id:
+    use_vercel_qr = os.environ.get("USE_VERCEL_QR", "false").lower() in ("true", "1")
+    local_download_url = f"{server_origin}/download.html?img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={gid_param}"
+    
+    if use_vercel_qr and new_img_drive_id:
         download_url = f"{vercel_domain}/download.html?gid={gid_param}&img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
     else:
-        download_url = f"{server_origin}/download.html?img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+        download_url = local_download_url
 
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
     qr.add_data(download_url)
