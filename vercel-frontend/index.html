@@ -952,6 +952,17 @@
       };
     }
 
+    // 상대 URL을 ngrok 백엔드 절대 URL로 변환
+    function resolveMediaUrl(url) {
+      if (!url) return '';
+      // 이미 절대 URL(http/https/data:)이면 그대로 반환
+      if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+      // 상대 URL이면 백엔드 기본 URL을 붙여서 절대 URL로 변환
+      const base = getApiBaseUrl().replace(/\/$/, '');
+      const path = url.startsWith('/') ? url : '/' + url;
+      return base + path;
+    }
+
     // 전역 상태 변수
     let currentScreen = 'screen-home';
     let selectedStyle = 'time_travel'; // 기본값: 인생 사계절 (연령 변환)

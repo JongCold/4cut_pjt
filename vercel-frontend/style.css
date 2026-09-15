@@ -78,6 +78,14 @@ body {
   }
 }
 
+/* 태블릿 가로 모드: 전체 화면 활용 키오스크 레이아웃 */
+@media (min-width: 900px) and (orientation: landscape) {
+  body {
+    padding: 0;
+    overflow: hidden;
+  }
+}
+
 /* 3. 모바일/태블릿 키오스크 메인 컨테이너 */
 .app-container {
   width: 100%;
@@ -104,6 +112,24 @@ body {
     height: 880px;
     min-height: 880px;
     margin: 0 auto;
+  }
+}
+
+/* 태블릿 가로 모드: 컨테이너를 전체 화면으로 확장 */
+@media (min-width: 900px) and (orientation: landscape) {
+  .app-container {
+    max-width: 100%;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    margin: 0;
   }
 }
 
@@ -1953,3 +1979,151 @@ input:checked + .slider:before {
 }
 .diag-label { color: #666; }
 .diag-val { font-weight: 700; color: var(--ink-black); }
+
+/* ============================================
+   태블릿 가로(Landscape) 모드 전용 반응형 스타일
+   ============================================ */
+@media (min-width: 900px) and (orientation: landscape) {
+
+  /* 화면 내부 스크롤 영역 - 전체 활용 */
+  .screen {
+    align-items: center;
+    justify-content: flex-start;
+    padding-top: 8px;
+  }
+
+  /* 각 화면의 main 콘텐츠 영역 확장 */
+  .screen > main,
+  .screen > .screen-body {
+    width: 100%;
+    max-width: 960px;
+    margin: 0 auto;
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  /* 홈 화면: 중앙 정렬 및 확대 */
+  .hero-camera-doodle img {
+    max-width: 280px;
+  }
+
+  .hero-title-hand {
+    font-size: 38px !important;
+  }
+
+  .hero-subtitle-line {
+    font-size: 16px !important;
+  }
+
+  .doodle-btn-primary {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* 컨셉 선택 캐러셀: 태블릿에서 더 넓게 */
+  .carousel-item {
+    min-width: 360px;
+  }
+
+  /* 촬영 화면: 웹캠 영역 확대 */
+  .webcam-container,
+  .webcam-preview-box {
+    max-width: 640px;
+    max-height: 420px;
+    margin: 0 auto;
+  }
+
+  #webcam-preview {
+    max-height: 420px;
+  }
+
+  /* 결과 화면: 가로 레이아웃으로 변경 */
+  #screen-result > main {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: nowrap;
+    padding-top: 12px;
+  }
+
+  /* 포토 스트립 카드 - 가로 모드에서 크게 */
+  .photo-strip-preview-card {
+    width: 320px;
+    min-width: 320px;
+    flex-shrink: 0;
+    transform: rotate(0deg);
+  }
+
+  .photo-strip-preview-card img {
+    border-radius: 10px;
+  }
+
+  /* 결과 화면 하단 요소들 */
+  #screen-result .frame-color-btn {
+    width: 32px !important;
+    height: 32px !important;
+  }
+
+  /* QR/완료 화면: 가로 2컬럼 */
+  #screen-finish > main {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 32px;
+    flex-wrap: nowrap;
+    padding-top: 12px;
+  }
+
+  .qr-mobile-download-card {
+    max-width: 420px;
+    min-width: 360px;
+  }
+
+  /* 헤더/스텝 바 가로 모드 최적화 */
+  .app-header {
+    padding: 8px 24px 6px;
+  }
+
+  .step-progress-bar {
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* 촬영 컷 박스 가로 배치 */
+  .strip-cut-boxes {
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .strip-cut-box {
+    width: 80px;
+    height: 80px;
+  }
+
+  /* 카운트다운 오버레이 */
+  .countdown-doodle-overlay .countdown-doodle-num {
+    font-size: 120px;
+  }
+
+  /* 로딩 오버레이 */
+  .loading-doodle-card {
+    max-width: 540px;
+    padding: 32px;
+  }
+
+  /* 버튼들 가로 모드에서 적절한 크기 */
+  .btn-confirm-concept,
+  .btn-finish-home {
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn-finish-dual {
+    min-width: 200px;
+  }
+}
