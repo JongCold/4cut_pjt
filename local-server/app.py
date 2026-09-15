@@ -164,6 +164,7 @@ def _silent_print_postcard_worker(image_path: str, printer_name: Optional[str]) 
 executor = ThreadPoolExecutor(max_workers=10)
 TRANSFORM_TASKS = {}
 TRANSFORM_PROGRESS = {}
+SESSION_GDRIVE_MAP = {}  # session_id -> {"photo": file_id, "video": file_id}
 
 def set_progress(session_id: str, step: int, progress: int, step_name: str, message: str):
     """세션별 실시간 AI 변환 및 인화 진행률 갱신"""
@@ -684,14 +685,30 @@ async def api_transform_single(
     # 모델 선택: gpt-image-2 기본 탑재
     model_name = "gpt-image-2" if is_high_quality.lower() != "false" else "gpt-image-1.5"
     
-    # 컷별 실시간 진행 상태 등록 (조선 4컷 vs 인생 사계절)
+    # 컷별 실시간 진행 상태 등록 (조선 4컷 vs 픽셀 4컷 vs 기본 4컷 vs 인생 사계절)
     is_joseon = (style == "joseon" or sub_theme == "joseon")
+    is_pixel = (style == "pixel" or sub_theme == "pixel")
+    is_basic = (style == "basic" or sub_theme == "basic")
     if is_joseon:
         step_descriptions = {
             0: (1, 15, "1컷 국왕 변환", "조선 국왕 AI 실사 변환 분석 중... (곤룡포 & 익선관)"),
             1: (2, 35, "2컷 선비 변환", "기품 있는 선비 AI 실사 변환 분석 중... (도포 & 흑립)"),
             2: (3, 50, "3컷 보부상 변환", "팔도 보부상 AI 실사 변환 분석 중... (패랭이 & 봇짐)"),
             3: (4, 65, "4컷 노비 변환", "정겨운 민초/노비 AI 실사 변환 분석 중... (삼베옷 & 머리띠)")
+        }
+    elif is_pixel:
+        step_descriptions = {
+            0: (1, 15, "1컷 픽셀 변환", "레트로 16-bit 픽셀 캐릭터 변환 분석 중... (도트 스튜디오)"),
+            1: (2, 35, "2컷 불꽃축제 픽셀", "영등포 한강 불꽃축제 픽셀 야경 변환 중..."),
+            2: (3, 50, "3컷 청년센터 내부", "영등포 청년센터 서가 라운지 픽셀 변환 중..."),
+            3: (4, 65, "4컷 청년센터 외부", "영등포 청년센터 시그니처 로비 픽셀 변환 중...")
+        }
+    elif is_basic:
+        step_descriptions = {
+            0: (1, 15, "1컷 원본 색감 보정", "자연스러운 인생4컷 1컷 노출 및 화이트밸런스 보정 중..."),
+            1: (2, 35, "2컷 원본 색감 보정", "인물 본연의 피부톤 유지 및 2컷 인화 색감 보정 중..."),
+            2: (3, 50, "3컷 원본 색감 보정", "소프트 하이라이트 & 3컷 자연스러운 명암 보정 중..."),
+            3: (4, 65, "4컷 원본 색감 보정", "선명도 최적화 및 4컷 최종 포토부스 톤 보정 중...")
         }
     else:
         step_descriptions = {
@@ -728,6 +745,28 @@ def get_host_lan_ip() -> str:
         return ip
     except Exception:
         return "127.0.0.1"
+
+
+def get_public_server_origin(req: Request) -> str:
+    """ngrok 터널링 주소(HTTPS) 또는 로컬 LAN IP 기반 Server Origin 반환"""
+    ngrok_url = os.environ.get("NGROK_PUBLIC_URL", "").rstrip("/")
+    if not ngrok_url:
+        try:
+            import urllib.request
+            import json
+            with urllib.request.urlopen("http://127.0.0.1:4040/api/tunnels", timeout=0.3) as response:
+                t_data = json.loads(response.read().decode())
+                for tun in t_data.get("tunnels", []):
+                    p_url = tun.get("public_url", "")
+                    if p_url.startswith("https://"):
+                        return p_url.rstrip("/")
+        except Exception:
+            pass
+    if ngrok_url:
+        return ngrok_url
+    lan_ip = get_host_lan_ip()
+    port = req.base_url.port or 8000
+    return f"http://{lan_ip}:{port}"
 
 
 @app.post("/api/transform")
@@ -789,8 +828,14 @@ async def api_transform_four_cut(
     # 3. AI 변환 적용 & 4컷 프레임 생성 (웹 뷰용 3:4 & 인화 전용 1200x1800 엽서)
     set_progress(session_id, 5, 85, "4컷 인화 프레임 렌더링", "고해상도 4컷 포토 프레임을 합성 중입니다...")
     is_joseon = (style == "joseon" or sub_theme == "joseon")
+    is_pixel = (style == "pixel" or sub_theme == "pixel")
+    is_basic = (style == "basic" or sub_theme == "basic")
     if is_joseon:
         frame_title = "조선 4컷 (신분 변신)"
+    elif is_pixel:
+        frame_title = "픽셀 4컷 (RETRO PIXEL)"
+    elif is_basic:
+        frame_title = "기본 4컷 (NATURAL BASIC)"
     elif style == "time_travel":
         frame_title = "AI 4-CUT (TIME TRAVEL)"
     else:
@@ -866,22 +911,23 @@ async def api_transform_four_cut(
     img_param = img_drive_id if img_drive_id else ai_frame_filename
     vid_param = vid_drive_id if vid_drive_id else video_filename
     
-    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (스마트폰 직결 LAN IP 및 Vercel 외부 도메인 자동 전환)
-    lan_ip = get_host_lan_ip()
-    port = request.base_url.port or 8000
-    server_origin = f"http://{lan_ip}:{port}"
+    SESSION_GDRIVE_MAP[session_id] = {
+        "photo": img_drive_id or "",
+        "video": vid_drive_id or ""
+    }
+    
+    # 6. No-DB 모바일 1-클릭 즉시 다운로드 URL 및 Dynamic QR 생성 (ngrok HTTPS / 스마트폰 직결 LAN IP 및 Vercel 외부 도메인 자동 전환)
+    server_origin = get_public_server_origin(request)
     
     # Vercel 외부 공유 도메인 설정 (환경변수 VERCEL_PUBLIC_URL 지원, 기본값: https://4cut-pjt.vercel.app)
     vercel_domain = os.environ.get("VERCEL_PUBLIC_URL", "https://4cut-pjt.vercel.app").rstrip("/")
-    use_vercel_qr = os.environ.get("USE_VERCEL_QR", "false").lower() in ("true", "1")
+    force_local_qr = os.environ.get("FORCE_LOCAL_QR", "false").lower() in ("true", "1")
     
-    # 기본 QR 코드는 Mixed Content 없이 로컬 비디오 초고속 스트리밍과 100% 즉시 파기를 보장하는 로컬 직결 주소로 생성!
     local_download_url = f"{server_origin}/download.html?img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={img_drive_id or ''}&gvid={vid_drive_id or ''}"
+    vercel_download_url = f"{vercel_domain}/download.html?gid={img_drive_id or ''}&gvid={vid_drive_id or ''}&img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
     
-    if use_vercel_qr and (img_drive_id or vid_drive_id):
-        download_url = f"{vercel_domain}/download.html?gid={img_drive_id or ''}&gvid={vid_drive_id or ''}&img={ai_frame_filename}&vid={video_filename}&sid={session_id}&srv={server_origin}"
-    else:
-        download_url = local_download_url
+    # 손님의 95% 이상이 LTE/5G 모바일 데이터로 QR을 촬영하므로 기본적으로 전 세계 어디서나 접속 가능한 Vercel 주소로 발급!
+    download_url = local_download_url if force_local_qr else vercel_download_url
     
     # QR 코드 생성
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
@@ -953,6 +999,8 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
             if f.startswith(f"ai_frame_{session_id}"):
                 if "joseon" in f:
                     brand_title = "조선 4컷 (신분 변신)"
+                elif "pixel" in f:
+                    brand_title = "픽셀 4컷 (RETRO PIXEL)"
                 elif "time_travel" in f:
                     brand_title = "AI 4-CUT (TIME TRAVEL)"
                 break
@@ -989,27 +1037,34 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
     new_postcard_path = os.path.join(UPLOAD_DIR, new_postcard_name)
     new_postcard.save(new_postcard_path, format="JPEG", quality=96)
 
-    # 3. 구글 드라이브 새 색상 프레임 업로드
-    new_img_drive_id = upload_to_google_drive(new_frame_path, new_frame_name, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+    # 3. 구글 드라이브 새 색상 프레임 업로드는 백그라운드 스레드로 비동기 처리 (키오스크 화면 딜레이 0초!)
+    def _bg_upload_color_frame():
+        try:
+            uploaded_id = upload_to_google_drive(new_frame_path, new_frame_name, "image/jpeg", folder_id=GOOGLE_PHOTO_FOLDER_ID)
+            if uploaded_id:
+                if session_id not in SESSION_GDRIVE_MAP:
+                    SESSION_GDRIVE_MAP[session_id] = {}
+                SESSION_GDRIVE_MAP[session_id]["photo"] = uploaded_id
+                print(f"[Update Color BG] ✅ 구글 드라이브 새 색상 프레임 업로드 완료 (ID: {uploaded_id})")
+        except Exception as bg_err:
+            print(f"[Update Color BG Warning] 구글 드라이브 업로드 비동기 알림: {bg_err}")
+    threading.Thread(target=_bg_upload_color_frame, daemon=True).start()
 
-    # 4. 새 색상이 적용된 QR 코드 및 모바일 다운로드 URL 실시간 갱신
-    lan_ip = get_host_lan_ip()
-    port = request.base_url.port or 8000
-    server_origin = f"http://{lan_ip}:{port}"
+    # 4. 새 색상이 적용된 QR 코드 및 모바일 다운로드 URL 실시간 갱신 (ngrok HTTPS / 스마트폰 직결 LAN IP 지원)
+    server_origin = get_public_server_origin(request)
     vercel_domain = os.environ.get("VERCEL_PUBLIC_URL", "https://4cut-pjt.vercel.app").rstrip("/")
     video_filename = f"behind_video_{session_id}.mp4"
 
-    # 동영상 구글 드라이브 ID 검색 (기존 것 유지)
-    vid_drive_id = None
-    
-    gid_param = new_img_drive_id or ""
-    use_vercel_qr = os.environ.get("USE_VERCEL_QR", "false").lower() in ("true", "1")
-    local_download_url = f"{server_origin}/download.html?img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={gid_param}"
-    
-    if use_vercel_qr and new_img_drive_id:
-        download_url = f"{vercel_domain}/download.html?gid={gid_param}&img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
-    else:
-        download_url = local_download_url
+    # 기존 구글 드라이브 ID 획득
+    g_info = SESSION_GDRIVE_MAP.get(session_id, {})
+    gid_param = g_info.get("photo", "")
+    gvid_param = g_info.get("video", "")
+
+    force_local_qr = os.environ.get("FORCE_LOCAL_QR", "false").lower() in ("true", "1")
+    local_download_url = f"{server_origin}/download.html?img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}&gid={gid_param}&gvid={gvid_param}"
+    vercel_download_url = f"{vercel_domain}/download.html?gid={gid_param}&gvid={gvid_param}&img={new_frame_name}&vid={video_filename}&sid={session_id}&srv={server_origin}"
+
+    download_url = local_download_url if force_local_qr else vercel_download_url
 
     qr = qrcode.QRCode(version=1, box_size=8, border=2)
     qr.add_data(download_url)
@@ -1020,7 +1075,7 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
     qr_img.save(buffered, format="PNG")
     new_qr_base64 = "data:image/png;base64," + base64.b64encode(buffered.getvalue()).decode("utf-8")
 
-    print(f"[Update Color] ✅ 색상({req.frame_color}) 변경 완료: 프레임 생성, 구글 드라이브(ID: {new_img_drive_id}) 및 QR 코드 실시간 갱신")
+    print(f"[Update Color] ✅ 색상({req.frame_color}) 변경 완료: 프레임 생성 즉시 완료 및 QR 코드 실시간 갱신")
 
     return {
         "success": True,
@@ -1030,6 +1085,19 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
         "text_color": req.text_color,
         "qr_code_base64": new_qr_base64,
         "download_url": download_url
+    }
+
+
+@app.get("/api/session-info/{session_id}")
+async def get_session_info(session_id: str):
+    """세션의 최신 구글 드라이브 ID 및 로컬 미디어 파일명 반환"""
+    info = SESSION_GDRIVE_MAP.get(session_id, {})
+    return {
+        "session_id": session_id,
+        "photo_drive_id": info.get("photo", ""),
+        "video_drive_id": info.get("video", ""),
+        "photo_file": f"ai_frame_{session_id}.jpg",
+        "video_file": f"behind_video_{session_id}.mp4"
     }
 
 
@@ -1070,6 +1138,8 @@ async def api_print_photo(req: PrintJobRequest):
                     if f.startswith(f"ai_frame_{req.session_id}_"):
                         if "joseon" in f:
                             brand_title = "조선 4컷 (신분 변신)"
+                        elif "pixel" in f:
+                            brand_title = "픽셀 4컷 (RETRO PIXEL)"
                         elif "time_travel" in f:
                             brand_title = "AI 4-CUT (TIME TRAVEL)"
                         break

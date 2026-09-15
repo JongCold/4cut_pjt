@@ -85,9 +85,9 @@
 
       <!-- 홈 본문 콘텐츠 -->
       <main class="home-content">
-        <!-- 중앙 카메라 두들 일러스트 -->
-        <div class="home-illustration-wrap">
-          <img class="camera-doodle-img" src="https://lh3.googleusercontent.com/aida/AEtjO1WdvMoQzuXlq5ilxWcdbU9P3yqJjq0VFhI4FXCPJI_Q878XUYJNWlx4KUJ1zHpTPLHmaZ27QKgEjPtoKp_9TBRB9xh0qch2a0ng_yQ6N0NaR6wI0bfisJbJuGRpMowP2x-RLceiijYnXvRnlWoZ0AF489yp4fUSGNRLbjm4NqolhtP2tQEQpZWyndyLnS8-sTJjP9nZorN8caJqbqmcRYB_eLcblzyken9h4yZU_xgvS8ZpN_gHWfdpz8b_" alt="Camera Doodle">
+        <!-- 중앙 카메라 두들 일러스트 (stitch_4 4_1 레퍼런스 일치 및 로컬 영구 로드 보장) -->
+        <div class="home-illustration-wrap" style="display:flex; justify-content:center; align-items:center; margin: 8px 0 12px 0;">
+          <img src="/templates/camera_doodle.png" alt="Camera Doodle" class="camera-doodle-svg" style="width: 154px; height: 154px; object-fit: contain;">
         </div>
 
         <!-- 3단계 이용 가이드 카드 -->
@@ -105,7 +105,7 @@
               <span class="step-num-circle">1</span>
               <div class="step-text-wrap">
                 <span class="step-item-title">컨셉 선택하기</span>
-                <span class="step-item-desc">인생 사계절, 마법 판타지, 조선 신분 등 원하는 AI 테마 선택</span>
+                <span class="step-item-desc">기본 4컷(내추럴), 인생 사계절, 조선 4컷, 레트로 픽셀 4컷 중 원하는 테마 선택</span>
               </div>
             </div>
             <div class="guide-step-item">
@@ -180,12 +180,12 @@
         </div>
         <p class="filter-sub-hint">👈 좌우로 넘겨(스와이프) 원하는 AI 테마를 골라보세요 👉</p>
 
-        <!-- 퀵 카테고리 탭 -->
+        <!-- 퀵 카테고리 탭 (총 4개) -->
         <nav class="concept-category-tabs">
           <button class="doodle-pill tab-btn active" id="tab-cat-0" onclick="goToCarouselSlide(0)">인생 4컷</button>
-          <button class="doodle-pill tab-btn" id="tab-cat-1" onclick="goToCarouselSlide(1)">판타지 4컷</button>
-          <button class="doodle-pill tab-btn" id="tab-cat-2" onclick="goToCarouselSlide(2)">조선 4컷</button>
-          <button class="doodle-pill tab-btn" id="tab-cat-3" onclick="goToCarouselSlide(3)">감성 아트</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-1" onclick="goToCarouselSlide(1)">조선 4컷</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-2" onclick="goToCarouselSlide(2)">픽셀 4컷</button>
+          <button class="doodle-pill tab-btn" id="tab-cat-3" onclick="goToCarouselSlide(3)">기본 4컷</button>
         </nav>
       </div>
 
@@ -248,45 +248,8 @@
             </div>
           </div>
 
-          <!-- 슬라이드 1: 판타지 4컷 (마법과 환상) -->
-          <div class="concept-slide" data-style="wizard" data-slide-index="1" onclick="selectConceptByIndex(1)">
-            <div class="slide-top-badge-row">
-              <span class="slide-tag-pill" style="background-color:#EDE9FE; color:#6D28D9;">✨ 마법과 환상</span>
-              <span style="font-size:10px; font-weight:700; color:#5C2AB5;">판타지 동화</span>
-            </div>
-            <div class="slide-photo-grid">
-              <div class="photo-cell" style="background-color:#E9D5FF;">
-                <span class="cell-emoji">🧙‍♂️</span>
-                <span class="cell-label" style="color:#4C1D95;">호그와트 마법학교</span>
-                <span class="cell-sub" style="color:#6B21A8;">신비로운 로브와 지팡이</span>
-              </div>
-              <div class="photo-cell" style="background-color:#BBF7D0;">
-                <span class="cell-emoji">🧝</span>
-                <span class="cell-label" style="color:#14532D;">숲의 엘프</span>
-                <span class="cell-sub" style="color:#166534;">요정의 숲과 마법 활</span>
-              </div>
-              <div class="photo-cell" style="background-color:#FEF08A;">
-                <span class="cell-emoji">🔮</span>
-                <span class="cell-label" style="color:#713F12;">대마법사</span>
-                <span class="cell-sub" style="color:#854D0E;">빛나는 오브와 주문</span>
-              </div>
-              <div class="photo-cell" style="background-color:#BAE6FD;">
-                <span class="cell-emoji">🐉</span>
-                <span class="cell-label" style="color:#0C4A6E;">드래곤 라이더</span>
-                <span class="cell-sub" style="color:#0369A1;">하늘을 가르는 비행</span>
-              </div>
-            </div>
-            <div class="slide-footer-info">
-              <div class="slide-title-row">
-                <h3 class="slide-title-text">판타지 4컷 (마법과 환상)</h3>
-                <span class="slide-category-tag" style="background-color:#EDE9FE; color:#7C3AED;">MAGICAL</span>
-              </div>
-              <p class="slide-desc-text">마법 지팡이와 고대 서고의 신비로운 주문 속으로 들어가는 판타지 동화 테마</p>
-            </div>
-          </div>
-
-          <!-- 슬라이드 2: 조선 4컷 (신분 변신) -->
-          <div class="concept-slide" data-style="time_travel" data-sub-theme="joseon" data-slide-index="2" onclick="selectConceptByIndex(2)">
+          <!-- 슬라이드 1: 조선 4컷 (신분 변신) -->
+          <div class="concept-slide" data-style="time_travel" data-sub-theme="joseon" data-slide-index="1" onclick="selectConceptByIndex(1)">
             <div class="slide-top-badge-row">
               <span class="slide-tag-pill" style="background-color:#DCFCE7; color:#166534;">⚔️ K-히스토리</span>
               <span style="font-size:10px; font-weight:700; color:#1F5E4F;">조선 4색 신분</span>
@@ -322,46 +285,83 @@
             </div>
           </div>
 
-          <!-- 슬라이드 3: 감성 아트 4컷 (오리지널 / 지브리 / 카툰 / 네온) -->
-          <div class="concept-slide" data-style="original" data-slide-index="3" onclick="selectConceptByIndex(3)">
+          <!-- 슬라이드 2: 픽셀 4컷 (레트로 16-bit 도트 & 영등포 스페셜) -->
+          <div class="concept-slide" data-style="pixel" data-sub-theme="pixel" data-slide-index="2" onclick="selectConceptByIndex(2)">
             <div class="slide-top-badge-row">
-              <span class="slide-tag-pill" style="background-color:#FEE2E2; color:#991B1B;">🎨 감성 & 클래식</span>
-              <span style="font-size:10px; font-weight:700; color:#78350F;">아트 스튜디오</span>
+              <span class="slide-tag-pill" style="background-color:#EDE9FE; color:#6D28D9;">👾 16-bit 레트로</span>
+              <span style="font-size:10px; font-weight:700; color:#5C2AB5;">도트 아케이드</span>
             </div>
             <div class="slide-photo-grid">
-              <div class="photo-cell" style="background-color:#F1F5F9;">
-                <span class="cell-emoji">📷</span>
-                <span class="cell-label" style="color:#1E293B;">오리지널</span>
-                <span class="cell-sub" style="color:#475569;">자연스러운 원본</span>
+              <div class="photo-cell" style="background-color:#F5F3FF;">
+                <span class="cell-emoji">🕹️</span>
+                <span class="cell-label" style="color:#5B21B6;">01 픽셀 변환</span>
+                <span class="cell-sub" style="color:#7C3AED;">도트 스튜디오</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FEF3C7;">
+                <span class="cell-emoji">🎆</span>
+                <span class="cell-label" style="color:#92400E;">02 불꽃축제</span>
+                <span class="cell-sub" style="color:#B45309;">한강 불꽃 야경</span>
               </div>
               <div class="photo-cell" style="background-color:#DCFCE7;">
-                <span class="cell-emoji">🌿</span>
-                <span class="cell-label" style="color:#166534;">지브리 감성</span>
-                <span class="cell-sub" style="color:#15803D;">따뜻한 수채화</span>
+                <span class="cell-emoji">📚</span>
+                <span class="cell-label" style="color:#166534;">03 청년센터내부</span>
+                <span class="cell-sub" style="color:#15803D;">서가 라운지 마루</span>
               </div>
-              <div class="photo-cell" style="background-color:#FFEDD5;">
-                <span class="cell-emoji">🎨</span>
-                <span class="cell-label" style="color:#9A3412;">3D 카툰</span>
-                <span class="cell-sub" style="color:#C2410C;">부드러운 애니메이션</span>
-              </div>
-              <div class="photo-cell" style="background-color:#FCE7F3;">
-                <span class="cell-emoji">🌆</span>
-                <span class="cell-label" style="color:#831843;">네온 시티</span>
-                <span class="cell-sub" style="color:#9D174D;">사이버펑크 네온</span>
+              <div class="photo-cell" style="background-color:#CCFBF1;">
+                <span class="cell-emoji">🚪</span>
+                <span class="cell-label" style="color:#115E59;">04 청년센터외부</span>
+                <span class="cell-sub" style="color:#0F766E;">시그니처 민트 로비</span>
               </div>
             </div>
             <div class="slide-footer-info">
               <div class="slide-title-row">
-                <h3 class="slide-title-text">클래식 & 아트 4컷</h3>
-                <span class="slide-category-tag" style="background-color:#F3E8FF; color:#7E22CE;">ARTISTIC</span>
+                <h3 class="slide-title-text">픽셀 4컷 (레트로 게임)</h3>
+                <span class="slide-category-tag" style="background-color:#EDE9FE; color:#7C3AED;">PIXEL ART</span>
               </div>
-              <p class="slide-desc-text">원본 고유의 느낌을 살리거나 아기자기한 수채화/카툰 감성을 더하는 테마</p>
+              <p class="slide-desc-text">16-bit 레트로 게임 속 주인공으로 변신하고 영등포 시그니처 픽셀 배경을 만나는 테마</p>
+            </div>
+          </div>
+
+          <!-- 슬라이드 3: 기본 4컷 (내추럴 원본 & 미세 색감 보정) -->
+          <div class="concept-slide" data-style="basic" data-sub-theme="basic" data-slide-index="3" onclick="selectConceptByIndex(3)">
+            <div class="slide-top-badge-row">
+              <span class="slide-tag-pill" style="background-color:#FEF3C7; color:#92400E;">🌿 내추럴 원본</span>
+              <span style="font-size:10px; font-weight:700; color:#78350F;">인생 4컷 오리지널</span>
+            </div>
+            <div class="slide-photo-grid">
+              <div class="photo-cell" style="background-color:#F8FAFC;">
+                <span class="cell-emoji">📷</span>
+                <span class="cell-label" style="color:#1E293B;">01 맑은 톤</span>
+                <span class="cell-sub" style="color:#64748B;">화이트밸런스 보정</span>
+              </div>
+              <div class="photo-cell" style="background-color:#F0FDF4;">
+                <span class="cell-emoji">✨</span>
+                <span class="cell-label" style="color:#166534;">02 생기 피부</span>
+                <span class="cell-sub" style="color:#15803D;">자연스러운 피부결</span>
+              </div>
+              <div class="photo-cell" style="background-color:#EFF6FF;">
+                <span class="cell-emoji">🎞️</span>
+                <span class="cell-label" style="color:#1E40AF;">03 소프트 쉐도우</span>
+                <span class="cell-sub" style="color:#2563EB;">부드러운 명암비</span>
+              </div>
+              <div class="photo-cell" style="background-color:#FFFBEB;">
+                <span class="cell-emoji">💖</span>
+                <span class="cell-label" style="color:#92400E;">04 웜 톤 완성</span>
+                <span class="cell-sub" style="color:#B45309;">스튜디오 인화 퀄리티</span>
+              </div>
+            </div>
+            <div class="slide-footer-info">
+              <div class="slide-title-row">
+                <h3 class="slide-title-text">기본 4컷 (내추럴 보정)</h3>
+                <span class="slide-category-tag" style="background-color:#F1F5F9; color:#475569;">NATURAL</span>
+              </div>
+              <p class="slide-desc-text">왜곡이나 변형 없이 원본 100% 보존! 화사하고 자연스러운 인생4컷 전문 인화 색감 보정</p>
             </div>
           </div>
 
         </div>
 
-        <!-- 캐러셀 인디케이터 닷 -->
+        <!-- 캐러셀 인디케이터 닷 (총 4개) -->
         <div class="carousel-dots-row">
           <button class="carousel-dot active" id="dot-0" onclick="goToCarouselSlide(0)" aria-label="1번 테마"></button>
           <button class="carousel-dot" id="dot-1" onclick="goToCarouselSlide(1)" aria-label="2번 테마"></button>
@@ -925,10 +925,10 @@
     let selectedFrameChoice = 'ai';
 
     const conceptList = [
-      { style: 'time_travel', sub: '', name: '인생 사계절 (인생 4컷)', badge: '👑 인생 4컷' },
-      { style: 'wizard', sub: '', name: '판타지 마법과 환상 (판타지 4컷)', badge: '✨ 마법' },
-      { style: 'joseon', sub: 'joseon', name: '조선 4색 신분 (조선 4컷)', badge: '⚔️ 조선' },
-      { style: 'original', sub: '', name: '클래식 & 아트 4컷', badge: '🎨 아트' }
+      { style: 'time_travel', sub: '', name: '인생 사계절 (인생 4컷)', badge: '⏳ 인생 4컷' },
+      { style: 'joseon', sub: 'joseon', name: '조선 4색 신분 (조선 4컷)', badge: '⚔️ 조선 4컷' },
+      { style: 'pixel', sub: 'pixel', name: '픽셀 4컷 (레트로 게임)', badge: '👾 픽셀 4컷' },
+      { style: 'basic', sub: 'basic', name: '기본 4컷 (내추럴 원본)', badge: '🌿 기본 4컷' }
     ];
 
     let currentConceptIndex = 0;
@@ -995,7 +995,7 @@
       });
 
       // 2. 상단 카테고리 탭 active
-      for (let i = 0; i < 4; i++) {
+      for (let i = 0; i < conceptList.length; i++) {
         const tab = document.getElementById(`tab-cat-${i}`);
         const dot = document.getElementById(`dot-${i}`);
         if (tab) {
@@ -1086,8 +1086,14 @@
     });
 
     function updateShootCutEmojis() {
-      const isJoseon = selectedSubTheme === 'joseon';
-      const emojis = isJoseon ? ['👑', '📜', '🎒', '🌾'] : (selectedStyle === 'wizard' ? ['🧙‍♂️', '🧝', '🔮', '🐉'] : ['👶', '🎓', '✨', '👵']);
+      const isJoseon = selectedSubTheme === 'joseon' || selectedStyle === 'joseon';
+      const isPixel = selectedSubTheme === 'pixel' || selectedStyle === 'pixel';
+      const isBasic = selectedSubTheme === 'basic' || selectedStyle === 'basic';
+      
+      let emojis = ['👶', '🎓', '✨', '👵'];
+      if (isJoseon) emojis = ['👑', '📜', '🎒', '🌾'];
+      else if (isPixel) emojis = ['🕹️', '🎆', '📚', '🚪'];
+      else if (isBasic) emojis = ['📷', '✨', '🎞️', '💖'];
       
       for (let i = 1; i <= 4; i++) {
         const emEl = document.getElementById(`cut-box-emoji-${i}`);
@@ -1169,12 +1175,17 @@
         mediaRecorder.start();
       }
 
-      const isJoseon = selectedSubTheme === 'joseon';
-      const cutNames = isJoseon 
-        ? ['1컷: 왕 (위엄 가득 곤룡포)', '2컷: 양반 (풍류 흑립과 도포)', '3컷: 보부상 (팔도 패랭이 봇짐)', '4컷: 노비 (정겨운 삼베옷과 짚신)']
-        : (selectedStyle === 'wizard'
-          ? ['1컷: 호그와트 마법학교', '2컷: 숲의 엘프', '3컷: 대마법사', '4컷: 드래곤 라이더']
-          : ['1컷: 유년기 (어린 시절)', '2컷: 학창시절 (교복 감성)', '3컷: 현재모습 (빛나는 청춘)', '4컷: 노년기 (온화한 미래)']);
+      const isJoseon = selectedSubTheme === 'joseon' || selectedStyle === 'joseon';
+      const isPixel = selectedSubTheme === 'pixel' || selectedStyle === 'pixel';
+      const isBasic = selectedSubTheme === 'basic' || selectedStyle === 'basic';
+      let cutNames = ['1컷: 유년기 (어린 시절)', '2컷: 학창시절 (교복 감성)', '3컷: 현재모습 (빛나는 청춘)', '4컷: 노년기 (온화한 미래)'];
+      if (isJoseon) {
+        cutNames = ['1컷: 왕 (위엄 가득 곤룡포)', '2컷: 양반 (풍류 흑립과 도포)', '3컷: 보부상 (팔도 패랭이 봇짐)', '4컷: 노비 (정겨운 삼베옷과 짚신)'];
+      } else if (isPixel) {
+        cutNames = ['1컷: 레트로 픽셀 (도트 스튜디오)', '2컷: 영등포 불꽃축제 (한강 야경)', '3컷: 청년센터 내부 (서가 라운지)', '4컷: 청년센터 외부 (시그니처 민트 로비)'];
+      } else if (isBasic) {
+        cutNames = ['1컷: 맑은 화이트밸런스 (내추럴)', '2컷: 생기 있는 피부톤 (원본 보존)', '3컷: 부드러운 명암비 (소프트 톤)', '4컷: 따뜻한 스튜디오 감성 (포토부스)'];
+      }
 
       for (let cut = 1; cut <= 4; cut++) {
         // 현재 컷 박스 active
@@ -1548,13 +1559,34 @@
       navigateTo('screen-finish');
     });
 
-    // 4컷 다시보기
+    // 4컷 다시보기 (이미지 즉시 복원 보장)
+    function restoreResultPreview() {
+      const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
+      if (activeImg) {
+        activeImg.style.display = 'block';
+        // src가 누락되었거나 손실된 경우 안전하게 복구
+        if (!activeImg.src || activeImg.src === window.location.href || activeImg.naturalWidth === 0) {
+          if (transformResult) {
+            if (selectedFrameChoice === 'ai' && transformResult.ai_frame_base64) {
+              activeImg.src = transformResult.ai_frame_base64;
+            } else if (selectedFrameChoice === 'orig' && transformResult.orig_frame_base64) {
+              activeImg.src = transformResult.orig_frame_base64;
+            } else if (transformResult.ai_frame_url) {
+              activeImg.src = transformResult.ai_frame_url + '?t=' + Date.now();
+            }
+          }
+        }
+      }
+    }
+
     document.getElementById('btn-back-to-result').addEventListener('click', () => {
+      restoreResultPreview();
       navigateTo('screen-result');
     });
     const thumbCard = document.getElementById('btn-thumb-preview-card');
     if (thumbCard) {
       thumbCard.addEventListener('click', () => {
+        restoreResultPreview();
         navigateTo('screen-result');
       });
     }

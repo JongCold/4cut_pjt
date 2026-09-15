@@ -171,6 +171,138 @@ PROMPTS_JOSEON = {
     )
 }
 
+# 3. [픽셀 4컷] 레트로 아케이드 16-bit 도트 & 영등포 시그니처 테마 프롬프트
+# 0컷: 16-bit 픽셀 캐릭터 + 레트로 픽셀 스튜디오 실내 배경 임의 생성
+# 1컷: 16-bit 픽셀 캐릭터 + 영등포 한강 불꽃축제 픽셀 야경 배경 (영등포불꽃축제.png 레퍼런스)
+# 2컷: 16-bit 픽셀 캐릭터 + 영등포 청년센터 내부 라운지/서가 마루 벤치 배경 (영등포청년센터내부.png 레퍼런스)
+# 3컷: 16-bit 픽셀 캐릭터 + 영등포 청년센터 외부 시그니처 민트벽 로비 배경 (영등포청년센터외부.png 레퍼런스)
+PIXEL_CORE_BASE = (
+    "AUTHENTIC 16-BIT RETRO ARCADE VIDEO GAME PIXEL ART TRANSFORMATION: "
+    "Transform the provided photograph into a genuine, nostalgic 16-bit retro arcade video game pixel-art scene (reminiscent of classic 1990s Capcom CPS2, SNK Neo-Geo, and Super Nintendo games). "
+    "CRITICAL CHUNKY PIXEL STRUCTURE & INTENSE PIXELATION (MANDATORY): "
+    "- VERY CHUNKY, VISIBLE SQUARE PIXELS THROUGHOUT: The entire image MUST have a distinct, low-resolution pixel grid with chunky, prominent square pixel blocks scaled up using sharp nearest-neighbor interpolation. "
+    "- NO SMOOTHING, NO DIGITAL PAINTING, NO HIGH-DENSITY SMOOTH ILLUSTRATION: Do NOT render smooth webtoon/manhwa or digital illustration. Every shape — face, skin, hair, eyes, teeth, clothes, and the ENTIRE background — must be visibly made of thick, stepped square pixel tiles. "
+    "- STEPPED FLAT POSTERIZED SHADING: Absolutely NO smooth skin gradients or airbrushing. Shading across skin, fabric, and objects must consist strictly of 3 to 4 stepped flat color tones with sharp, stair-stepped pixel borders. "
+    "SUBJECT & IDENTITY PRESERVATION: "
+    "- Preserve the exact pose, head tilt, body angle, hand gestures, facial expression, and relative position of every person in the original photo. "
+    "- Recognize and treat EVERY SINGLE PERSON as an independent primary subject. Do not add, remove, duplicate, or merge anyone. "
+    "- Reconstruct each individual's unmistakable identity (hair parting, glasses frame, eye shape, smile, clothing silhouette) faithfully into retro game sprite proportions. "
+    "- If a person wears glasses, render the glasses with distinct, crisp pixel-art frames naturally on their face. "
+    "STRICT NEGATIVE CONSTRAINTS: "
+    "No smooth digital painting, no webtoon manhwa style, no smooth 2D anime illustration, no vector graphics, no smooth skin gradients, no airbrushing, no realistic photorealism, no 3D CGI rendering, no anti-aliased soft edges, no sub-pixel blur, no high-density smoothed micro-pixels, no generic facial replacement. The entire composition from foreground characters to the furthest background scenery MUST be completely unified in heavy 16-bit arcade pixel art. "
+)
+
+PROMPTS_PIXEL = {
+    0: (
+        PIXEL_CORE_BASE +
+        "BACKGROUND & SCENERY - RETRO 16-BIT PIXEL PHOTO STUDIO: "
+        "- Render the studio interior entirely as a charming 16-bit retro game stage background. "
+        "- Walls, studio lights, warm curtains, and floor must be drawn with chunky, stepped pixel tiles, hard pixel shadows, and a warm nostalgic arcade color palette (32-color limited palette aesthetic)."
+    ),
+    1: (
+        PIXEL_CORE_BASE +
+        "BACKGROUND & SCENERY - YEONGDEUNGPO HAN RIVER FIREWORKS FESTIVAL (16-BIT ARCADE NIGHT STAGE): "
+        "- Transform the entire background into an iconic 16-bit arcade night stage inspired by the Yeongdeungpo Han River Fireworks Festival (reference: Neo-Geo / classic 90s side-scroller city night backgrounds). "
+        "- Deep navy night sky lit by grand, exploding fireworks rendered strictly in chunky starburst pixel clusters, vibrant amber, gold, and magenta stepped pixel sparks. "
+        "- Yeouido & Yeongdeungpo city skyline with skyscrapers and the 63 Building, rendered with blocky pixel silhouettes and glowing yellow square window pixels. "
+        "- River bridges spanning the dark water with stepped neon vehicle light pixels, reflecting in horizontal stepped pixel ribbons across the Han River surface. "
+        "- The background MUST NOT look like a smooth photo or digital painting; it must be 100% chunky 16-bit retro game pixel art."
+    ),
+    2: (
+        PIXEL_CORE_BASE +
+        "BACKGROUND & SCENERY - SEOUL YOUTH CENTER YEONGDEUNGPO LOUNGE (FAITHFUL TO '영등포청년센터내부.png'): "
+        "- Faithfully recreate the cozy, modern interior lounge of Seoul Youth Center Yeongdeungpo exactly matching the environment, lighting, and composition of '영등포청년센터내부.png' in authentic 16-bit retro pixel art. "
+        "- MULTI-TIERED WOOD DECK & SEATING: Stepped natural oak wooden platform benches forming a multi-tiered terrace lounge. On the wooden steps, feature vibrant triangular floor cushions (warm mustard yellow, deep navy blue, forest green, and charcoal gray) with faceted geometric pixel shading. "
+        "- BACKGROUND BOOKSHELVES & DECOR: In the background, tall open-frame black metal bookshelves neatly arranged with colorful pixelated book spines, small potted green plants, and stylish decorative objects. "
+        "- CEILING & ARCHITECTURE: Clean white modern ceiling with recessed square LED spotlights and warm indirect cove lighting. Tall floor-to-ceiling glass windows showing bright daylight from the city outside. "
+        "- STRICT NEGATIVE CONSTRAINTS FOR CUT 2: NO artificial signboard bar, NO yellow banner board, NO floating wooden billboard at the top, NO intrusive commercial signs across the ceiling. The background must look like the natural, elegant, studious library-lounge space seen in '영등포청년센터내부.png'."
+    ),
+    3: (
+        PIXEL_CORE_BASE +
+        "BACKGROUND & SCENERY - SEOUL YOUTH CENTER YEONGDEUNGPO ENTRANCE (FAITHFUL TO '영등포청년센터외부.png'): "
+        "- Faithfully recreate the iconic entrance lobby of Seoul Youth Center Yeongdeungpo exactly matching the perspective composition and branding of '영등포청년센터외부.png' in authentic 16-bit retro pixel art. "
+        "- PERSPECTIVE COMPOSITION & FULL SIGNAGE VISIBILITY: "
+        "  * The prominent vibrant teal/emerald green accent wall dominates the LEFT SIDE of the frame in an angled hallway perspective. "
+        "  * On this expansive teal wall, the complete authentic 3-line white Korean signage MUST be 100% clearly legible, uncropped, and fully visible: "
+        "    Line 1: '서울청년센터' "
+        "    Line 2: '영등포오랑' (distinctive signature logo with connected circular stroke) "
+        "    Line 3: '청년의 오늘을 함께' "
+        "  * SPATIAL ARRANGEMENT: Position the subjects naturally in the center-right of the lobby in front of the automatic glass doors and tiled corridor, leaving the entire left teal accent wall and its iconic text completely unobstructed, never hidden behind heads or shoulders. "
+        "- LOBBY ARCHITECTURE: Modern black-framed automatic sliding glass doors with red/blue square indicator stickers, bright overhead recessed ceiling spotlights in a receding perspective, and glossy floor tiles reflecting the teal wall and light in stepped pixel dither patterns."
+    )
+}
+
+# 4. [기본 테마] 한국형 인생4컷 원본 보존 & 미세 색감 보정 프롬프트
+BASIC_CORE_BASE = (
+    "AUTHENTIC ORIGINAL PHOTO-BASED LIFE FOUR CUT PHOTO BOOTH TRANSFORMATION: "
+    "Transform the provided photograph into a natural, authentic Korean photo-booth 'Life Four Cut' photograph while preserving the original photograph as faithfully as possible. "
+    "The result MUST look like a real photograph taken inside a modern professional photo booth, NOT an AI-generated reinterpretation. "
+    "PRIMARY PRINCIPLE - PRESERVE THE ORIGINAL PHOTOGRAPH: "
+    "- Treat the provided photograph as the absolute visual source of truth. "
+    "- Preserve the original person's identity, facial features, skin characteristics, hairstyle, hair color, glasses, clothing, body proportions, pose, hand gestures, facial expression, and overall appearance. "
+    "- Do NOT redesign, beautify, stylize, redraw, or reinterpret the person. "
+    "- Do NOT replace or reconstruct the face unnecessarily. "
+    "- Do NOT make the person look like a different individual. "
+    "- Every person in the source image must remain the same person. "
+    "SUBJECT & IDENTITY PRESERVATION: "
+    "- Preserve the exact number of people appearing in the original photograph. "
+    "- Never add, remove, duplicate, merge, or replace a person. "
+    "- Preserve each person's unique facial structure, eye shape, nose, mouth, jawline, hairstyle, hair parting, glasses, and other recognizable characteristics. "
+    "- Preserve the original age and natural appearance of each person. "
+    "- Preserve the original clothing, accessories, jewelry, bags, and other visible personal items unless a minor photographic cleanup is absolutely necessary. "
+    "- Preserve the original pose, body angle, head tilt, hand position, and gesture. "
+    "- Preserve the original facial expression and emotional mood. "
+    "- If the person is smiling, maintain the same smile. "
+    "- If the person has a neutral expression, do not force a smile. "
+    "- If the person is wearing glasses, preserve the exact glasses shape, position, frame color, and lens appearance. "
+    "NATURAL PHOTOGRAPHIC REALISM: "
+    "- The final image MUST remain a genuine-looking photograph. "
+    "- Maintain realistic human skin texture, natural hair strands, realistic fabric texture, and authentic photographic lighting. "
+    "- Do NOT convert the image into an illustration, cartoon, anime, webtoon, painting, 3D render, or graphic design. "
+    "- Do NOT apply artificial beauty filters or excessive facial retouching. "
+    "- Do NOT create unnaturally perfect skin. "
+    "- Do NOT alter facial proportions or body proportions. "
+    "- Do NOT create an exaggerated cinematic look. "
+    "MINIMAL COLOR CORRECTION ONLY: "
+    "- Apply only subtle, professional photographic color correction when necessary. "
+    "- Slightly correct white balance, exposure, contrast, color temperature, and overall tonal balance. "
+    "- Maintain natural skin tones. "
+    "- A very subtle increase in color clarity and warmth is acceptable if it improves the photograph. "
+    "- Preserve the original colors of clothing, hair, skin, and background as much as possible. "
+    "- Do NOT apply strong color grading, cinematic LUTs, heavy filters, dramatic teal-orange grading, vintage effects, or artificial color casts. "
+    "- Do NOT significantly change the lighting mood of the original photograph. "
+    "PHOTOGRAPHIC QUALITY: "
+    "- Improve overall photographic consistency and clarity while preserving the source image. "
+    "- Maintain natural sharpness and realistic photographic detail. "
+    "- Reduce only obvious technical artifacts such as excessive noise, compression artifacts, or minor color imbalance when necessary. "
+    "- Do NOT oversharpen skin or hair. "
+    "- Do NOT create artificial HDR effects. "
+    "- Do NOT introduce excessive clarity, micro-contrast, or digital crispness. "
+    "- Preserve realistic depth, shadows, highlights, and texture. "
+    "STRICT NEGATIVE CONSTRAINTS: "
+    "No illustration, no cartoon, no anime, no webtoon, no manhwa, no painting, no watercolor, no vector graphics, no 3D CGI, no plastic skin, no beauty-filter face, no face replacement, no facial reconstruction, no identity change, no age change, no body reshaping, no eye enlargement, no nose reshaping, no jawline reshaping, no artificial smile, no excessive skin smoothing, no airbrushing, no excessive makeup, no dramatic cinematic color grading, no strong vintage filter, no artificial bokeh, no unrealistic lighting, no excessive HDR, no oversharpening, no surreal effects. "
+    "The output MUST remain visually faithful to the original photograph. "
+)
+
+PROMPTS_BASIC = {
+    0: (
+        BASIC_CORE_BASE +
+        "FRAME SEQUENCE & CUT 1: Treat this frame as the first shot of the Korean photo-booth session. Maintain the original pose, candid expression, and authentic background with subtle exposure and white-balance calibration."
+    ),
+    1: (
+        BASIC_CORE_BASE +
+        "FRAME SEQUENCE & CUT 2: Treat this frame as the second shot of the photo-booth session. Preserve consistent lighting, skin tone warmth, and natural photographic clarity with frame 1 while maintaining original identity and pose."
+    ),
+    2: (
+        BASIC_CORE_BASE +
+        "FRAME SEQUENCE & CUT 3: Treat this frame as the third shot of the photo-booth session. Maintain natural highlights, soft shadows, uncrushed blacks, and authentic eye contact exactly as captured in the source photo."
+    ),
+    3: (
+        BASIC_CORE_BASE +
+        "FRAME SEQUENCE & CUT 4: Treat this frame as the fourth shot completing the photo-booth strip. Harmonize overall tonal depth and print clarity with all preceding frames without altering identity or clothing."
+    )
+}
+
 def transform_single_image_openai(
     image: Image.Image,
     cut_index: int,
@@ -181,14 +313,24 @@ def transform_single_image_openai(
     """
     단일 이미지를 받아 OpenAI Edit API(Image-to-Image)를 통해 원본 얼굴/포즈 기반 고화질 변환을 수행합니다.
     - style: 'joseon' 또는 sub_theme == 'joseon' -> 조선시대 4색 신분 변신 (0:왕, 1:선비, 2:보부상, 3:노비)
+    - style: 'pixel' 또는 sub_theme == 'pixel' -> 픽셀 4컷 (0:스튜디오, 1:불꽃축제, 2:청년센터내부, 3:청년센터외부)
+    - style: 'basic' 또는 sub_theme == 'basic' -> 기본 테마 (자연스러운 한국형 인생4컷 원본 보존 & 미세 색감 보정)
     - style: 'time_travel' -> 인생 사계절 연령 변환 (0:유년기, 1:청소년기, 2:현재원본유지, 3:노년기)
     - model_name: 'gpt-image-2' 기본 탑재 (고화질 디폴트)
     """
     # 1. 테마에 따른 프롬프트 선택
     is_joseon = (style == "joseon" or sub_theme == "joseon")
+    is_pixel = (style == "pixel" or sub_theme == "pixel")
+    is_basic = (style == "basic" or sub_theme == "basic")
 
     if is_joseon:
         prompt = PROMPTS_JOSEON.get(cut_index, "")
+    elif is_pixel:
+        # 픽셀 4컷은 4장 모두 100% AI 픽셀 이미지로 개별 변환 (3번째 컷도 변환)
+        prompt = PROMPTS_PIXEL.get(cut_index, "")
+    elif is_basic:
+        # 기본 테마: 4컷 모두 원본 완벽 보존 + 전문 포토부스 인화톤 미세 보정
+        prompt = PROMPTS_BASIC.get(cut_index, "")
     else:
         # 인생 사계절 (3번째 컷은 현재 본연의 모습 100% 원본 유지)
         if cut_index == 2:

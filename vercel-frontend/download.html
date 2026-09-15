@@ -618,7 +618,7 @@
     const imgId = urlParams.get('img');
     const vidId = urlParams.get('vid');
     const gDriveImgId = urlParams.get('gid');
-    const gDriveVidId = urlParams.get('gvid');
+    let gDriveVidId = urlParams.get('gvid');
     const sessionIdParam = urlParams.get('sid');
     const serverOrigin = urlParams.get('srv') || '';
 
@@ -707,7 +707,7 @@
           } else {
             fetch(cleanupUrl, {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
               body: payload,
               keepalive: true
             }).catch((err) => console.log('Fetch cleanup non-blocking notice:', err));
@@ -858,19 +858,23 @@
       }, 500);
     }
 
-    // 사진 로드 (로컬 서버 우선 시도 후 Google Drive Fallback)
+    // 사진 로드 (로컬 호스트 시 로컬 시도, 외부 LTE 접속 시 Google Drive 초고속 즉시 로드)
     async function loadPhoto() {
       const effectiveImgId = gDriveImgId || imgId;
       if (!effectiveImgId) return;
       imageFileName = effectiveImgId.endsWith('.jpg') ? effectiveImgId : `${effectiveImgId}.jpg`;
 
-      // 1) 로컬 서버 URL 우선 시도
-      if (serverOrigin && (imgId && (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')))) {
+      const isLocalHost = window.location.hostname === '127.0.0.1' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname.startsWith('192.168.');
+
+      // 1) 로컬 Wi-Fi 또는 동일 서브넷 환경일 때만 로컬 서버 고속 스트리밍 우선 시도
+      if (isLocalHost && serverOrigin && (imgId && (imgId.startsWith('ai_frame_') || imgId.startsWith('orig_frame_')))) {
         const targetUrl = `${serverOrigin}/uploads/${imgId}`;
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 2500);
-          const response = await fetch(targetUrl, { signal: controller.signal });
+          const timeoutId = setTimeout(() => controller.abort(), 1200);
+          const response = await fetch(targetUrl, { signal: controller.signal, headers: { 'ngrok-skip-browser-warning': 'true' } });
           clearTimeout(timeoutId);
           if (response.ok) {
             const blob = await response.blob();
@@ -883,7 +887,7 @@
         }
       }
 
-      // 2) Google Drive 클라우드 로드
+      // 2) 외부 LTE/5G 모바일 환경: Google Drive 고화질 CDN 즉시 로드 (0.1초 렌더링)
       if (gDriveImgId) {
         const driveUrl = `https://lh3.googleusercontent.com/u/0/d/${gDriveImgId}=s2048`;
         imgElem.crossOrigin = "anonymous";
@@ -906,48 +910,46 @@
       }
     }
 
-    // 동영상 로드 (로컬 서버 우선 시도 후 Google Drive Fallback)
+    // 동영상 로드 (모바일 브라우저 100% 호환 Blob 프리로드 & Google Drive 다중 스트림 Fallback)
     async function loadVideo() {
       const effectiveVidId = gDriveVidId || vidId;
-      if (!effectiveVidId) return;
+      if (!effectiveVidId) {
+        console.warn('[Video Player] 동영상 ID 또는 파일명이 없습니다.');
+        return;
+      }
       videoFileName = effectiveVidId.endsWith('.mp4') ? effectiveVidId : `${effectiveVidId}.mp4`;
 
-      // 비디오 태그 에러 핸들러: 로드 실패 시 클라우드 스트림으로 자동 복구
+      const isLocalHost = window.location.hostname === '127.0.0.1' || 
+                          window.location.hostname === 'localhost' || 
+                          window.location.hostname.startsWith('192.168.');
+
+      // 비디오 태그 재생 실패 시 다중 Fallback 핸들러
       videoElem.onerror = () => {
-        console.warn('[Video Player] 비디오 로드 에러 -> 구글 드라이브 폴백 전환');
+        console.warn('[Video Player] ⚠️ 비디오 태그 로드 에러 -> 클라우드 다이렉트 스트림 전환 시도');
         if (gDriveVidId) {
-          const driveStreamUrl = `https://drive.google.com/uc?export=download&id=${gDriveVidId}`;
-          if (videoElem.src !== driveStreamUrl) {
-            videoBlobUrl = driveStreamUrl;
-            videoElem.src = driveStreamUrl;
-            videoSource.src = driveStreamUrl;
+          const streamFallback = `https://lh3.googleusercontent.com/d/${gDriveVidId}`;
+          if (videoElem.src !== streamFallback) {
+            videoElem.src = streamFallback;
+            videoSource.src = streamFallback;
             videoElem.load();
           }
         }
       };
 
-      // 1) 로컬 서버 우선 시도 (로컬 LAN IP 접속 시 0.1초 고속 스트리밍)
-      if (serverOrigin && vidId) {
+      // 1) 로컬 동일 서브넷(Wi-Fi) 환경일 때: 로컬 서버 0.1초 고속 스트리밍 우선 시도
+      if (isLocalHost && serverOrigin && vidId) {
         const targetUrl = `${serverOrigin}/uploads/${vidId}`;
         try {
-          const isSafeToFetch = window.location.protocol === 'http:' || targetUrl.startsWith('https:');
-          if (isSafeToFetch) {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-            const response = await fetch(targetUrl, { signal: controller.signal, method: 'HEAD' });
-            clearTimeout(timeoutId);
-            if (response.ok) {
-              videoBlobUrl = targetUrl;
-              videoElem.src = targetUrl;
-              videoSource.src = targetUrl;
-              videoElem.load();
-              return;
-            }
-          } else {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 1500);
+          const response = await fetch(targetUrl, { signal: controller.signal, method: 'HEAD', headers: { 'ngrok-skip-browser-warning': 'true' } });
+          clearTimeout(timeoutId);
+          if (response.ok) {
             videoBlobUrl = targetUrl;
             videoElem.src = targetUrl;
             videoSource.src = targetUrl;
             videoElem.load();
+            console.log('[Video Player] ✅ 로컬 고속 비디오 스트리밍 연결 완료');
             return;
           }
         } catch (e) {
@@ -955,14 +957,43 @@
         }
       }
 
-      // 2) Google Drive 클라우드 로드
+      // 2) 외부 LTE/5G 모바일 데이터 환경: Google Drive 비디오 로드
       if (gDriveVidId) {
-        const driveStreamUrl = `https://drive.google.com/uc?export=download&id=${gDriveVidId}`;
-        videoBlobUrl = driveStreamUrl;
-        videoElem.src = driveStreamUrl;
-        videoSource.src = driveStreamUrl;
+        // 모바일 브라우저(Chrome/Safari)는 구글 드라이브 uc?export 링크의 HTTP 206 부분 전송을 파싱하지 못하는 경우가 있으므로,
+        // Blob으로 다운로드하여 로컬 Object URL로 메모리 바인딩 (100% 확실한 즉시 재생 보장!)
+        const driveDownloadUrl = `https://drive.google.com/uc?export=download&id=${gDriveVidId}`;
+        const lh3StreamUrl = `https://lh3.googleusercontent.com/d/${gDriveVidId}`;
+
+        try {
+          // 백그라운드에서 비디오 Blob 가져오기 시도 (2배속 인코딩된 파일이라 약 2MB 내외로 0.5초 소요)
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 4000);
+          const res = await fetch(driveDownloadUrl, { signal: controller.signal });
+          clearTimeout(timeoutId);
+          
+          if (res.ok) {
+            const blob = await res.blob();
+            // 유효한 비디오 mime 또는 사이즈 확인
+            if (blob.size > 1000) {
+              videoBlobUrl = URL.createObjectURL(blob);
+              videoElem.src = videoBlobUrl;
+              videoSource.src = videoBlobUrl;
+              videoElem.load();
+              console.log('[Video Player] ✅ Google Drive 비디오 Blob 변환 완료 -> 모바일 완벽 재생');
+              return;
+            }
+          }
+        } catch (blobErr) {
+          console.log('[Video Player] Blob 사전 캐싱 우회 (직접 스트림 시도):', blobErr);
+        }
+
+        // Fetch Blob 불가 시(CORS 등): lh3 및 drive.google.com 다이렉트 바인딩
+        videoBlobUrl = driveDownloadUrl;
+        videoElem.src = lh3StreamUrl;
+        videoSource.src = lh3StreamUrl;
         videoElem.load();
       } else if (vidId && serverOrigin) {
+        // gvid가 없는 경우 로컬 URL 연결
         const directUrl = `${serverOrigin}/uploads/${vidId}`;
         videoBlobUrl = directUrl;
         videoElem.src = directUrl;
@@ -972,9 +1003,31 @@
     }
 
     // 초기 미디어 로드 실행
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       loadPhoto();
       loadVideo();
+
+      // gDriveVidId가 누락된 경우 세션 정보 API를 통한 자동 복구 시도
+      if (!gDriveVidId) {
+        const sid = extractSessionId();
+        if (sid && serverOrigin) {
+          try {
+            const res = await fetch(`${serverOrigin}/api/session-info/${sid}`, {
+              headers: { 'ngrok-skip-browser-warning': 'true' }
+            });
+            if (res.ok) {
+              const sData = await res.json();
+              if (sData.video_drive_id) {
+                gDriveVidId = sData.video_drive_id;
+                console.log('[Video Player] ✅ 세션 API를 통해 video_drive_id 복구 완료:', gDriveVidId);
+                loadVideo();
+              }
+            }
+          } catch (apiErr) {
+            // 외부 LTE 환경 등으로 서버 접근 불가 시 무시
+          }
+        }
+      }
     });
   </script>
 </body>

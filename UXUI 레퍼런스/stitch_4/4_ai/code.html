@@ -1,0 +1,413 @@
+<!DOCTYPE html><html lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>청년4컷 - AI 이미지 변환 및 다운받기</title>
+<!-- Tailwind CSS v3 CDN with forms & container queries -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              teal: '#009775',
+              dark: '#231f20',
+              crimson: '#b93828',
+              cream: '#faf8f4',
+              gold: '#e09f3e',
+              dancheong: '#c84b31'
+            }
+          },
+          fontFamily: {
+            sans: ['Pretendard', '-apple-system', 'BlinkMacSystemFont', 'system-ui', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+<!-- Google Fonts: Noto Serif KR for traditional Joseon flair & Gaegu for playful doodle notes -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Serif+KR:wght@600;900&amp;display=swap" rel="stylesheet">
+<style data-purpose="custom-layout-patterns">
+    /* Subtle warm-gray dot grid background */
+    .bg-dot-grid {
+      background-color: #faf8f4;
+      background-image: radial-gradient(#d1cdc7 1.2px, transparent 1.2px);
+      background-size: 16px 16px;
+    }
+    .font-doodle {
+      font-family: 'Gaegu', cursive, sans-serif;
+    }
+    .font-traditional {
+      font-family: 'Noto Serif KR', serif;
+    }
+    /* Hard neo-brutalist shadow utility */
+    .shadow-hard {
+      box-shadow: 3.5px 3.5px 0px #1f2937;
+    }
+    .shadow-hard-sm {
+      box-shadow: 2px 2px 0px #1f2937;
+    }
+    .shadow-hard-lg {
+      box-shadow: 5px 5px 0px #1f2937;
+    }
+    .active-press:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1.5px 1.5px 0px #1f2937;
+    }
+  </style>
+</head>
+<body class="bg-dot-grid text-zinc-900 font-sans min-h-screen flex justify-center selection:bg-teal-100 selection:text-teal-900">
+<!-- BEGIN: MobileKioskContainer -->
+<main class="w-full max-w-[430px] min-h-screen flex flex-col bg-dot-grid border-x-2 border-zinc-900 relative pb-10 shadow-2xl overflow-x-hidden" data-purpose="kiosk-screen-container">
+<!-- BEGIN: TopBarHeader -->
+
+<!-- END: TopBarHeader -->
+<!-- BEGIN: StepIndicatorAndTitle -->
+<header class="px-5 pt-4 pb-3 flex items-center justify-between sticky top-0 z-20" data-purpose="kiosk-top-header">
+  <div class="flex items-center gap-2">
+    <img alt="서울청년센터 영등포" class="h-7 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_l10yzNumCkmMGRndlipCkgekmlCBhMKRVk3M2jc2opiO56x3xNdzeSrI8NFiAKfHRBkApbLNm7WgR7pfjrkSfpHg2LSQefeQXaUkRB_qAZlU39gi-ieKqjRj3bX39LUojJQZlgysVuAubYExpVXxV_v01evEX-OF9nNvFCbUx7MKGdE53h68W1WV5OWmpCXuxvfuvWaAqmMEqw-5WML2Ud82_sMcQO156lKG_ci_RV9zVlveNpE1M7SLBU3WZRK_h-I" style="height: 36.4px; width: auto;">
+    <div class="h-4 w-[1.5px] bg-zinc-300"></div>
+    <div class="flex flex-col">
+      <span class="font-doodle text-sm font-bold text-zinc-900 leading-none"><span style="color: rgb(34, 34, 34); font-size: 20px; background-color: rgb(250, 248, 245);">놀면뭐AI</span></span>
+      <span class="text-[9px] font-mono font-bold text-emerald-700 tracking-wider leading-none mt-0.5"><span style="color: rgba(30, 35, 42, 0.6); font-weight: 400; letter-spacing: -0.45px; text-transform: uppercase; background-color: rgb(247, 245, 238);" class="">AI SYSTEM</span></span>
+    </div>
+  </div>
+  <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full border-2 border-zinc-900 bg-emerald-50 text-emerald-800 text-xs font-bold shadow-hard-sm">
+    <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+    <span class="font-mono text-[11px] tracking-tight">COMPLETE</span>
+  </div>
+</header><section class="px-5 pb-2 pt-4" data-purpose="screen-title-banner">
+<!-- Step Pill -->
+<div class="w-full bg-white border-2 border-zinc-900 rounded-full px-3 py-1.5 shadow-hard-sm flex items-center justify-between mb-3">
+  <div class="flex items-center gap-2">
+    <span class="px-2 py-0.5 bg-zinc-900 text-amber-400 font-black text-xs rounded-full font-mono">STEP 3</span>
+    <span class="text-xs font-bold text-zinc-800">AI 변환 완료 &amp; 사진 받기</span>
+  </div>
+  <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-300">QR 다운로드</span>
+</div>
+<!-- Main Headline -->
+<h1 class="text-xl sm:text-2xl font-black tracking-tight leading-snug text-zinc-900">
+        나만의 특별한 <span class="text-[#b93828] underline decoration-wavy decoration-[#e09f3e] underline-offset-4">조선 4컷</span>이<br>
+        성공적으로 완성되었습니다! ✨
+      </h1>
+<p class="text-xs text-zinc-600 mt-1.5 font-medium flex items-center gap-1">
+<span class="">선택 테마: <strong class="text-emerald-700">조선 4색 신분 (왕 · 양반 · 보부상 · 노비)</strong>&nbsp;</span>
+</p>
+</section>
+<!-- END: StepIndicatorAndTitle -->
+<!-- BEGIN: PhotoStripFrameSelection -->
+
+<!-- END: PhotoStripFrameSelection -->
+<!-- BEGIN: CentralPhotoStripPreview -->
+<section class="px-5 py-4 flex justify-center" data-purpose="4cut-strip-preview">
+<!-- 4-Cut Realistic Paper Card -->
+<article class="w-[268px] bg-[#fffdf9] border-2 border-zinc-900 rounded-2xl p-3 shadow-hard-lg relative transition-all duration-300 transform rotate-[-0.5deg] hover:rotate-0" id="photo-strip-card">
+<!-- Traditional Corner Stamp Decors -->
+<div class="absolute -top-2.5 -left-2.5 bg-amber-400 text-zinc-900 font-doodle text-xs font-black px-2 py-0.5 rounded-md border-2 border-zinc-900 shadow-hard-sm rotate-[-8deg] z-10">
+          최종 인화본 ✨
+        </div>
+<div class="absolute -top-2 -right-2 w-7 h-7 bg-red-600 text-white rounded-full border-2 border-zinc-900 shadow-hard-sm flex items-center justify-center font-traditional font-black text-[11px] rotate-12 z-10">
+          通
+        </div>
+<!-- Inner Strip Content (Vertical 4 Cuts) -->
+<div class="flex flex-col gap-2.5">
+<!-- CUT 1: 왕 (King) -->
+<div class="relative bg-amber-50 rounded-xl border-2 border-zinc-900 overflow-hidden group">
+<div class="w-full h-32 bg-gradient-to-b from-amber-100 via-red-50 to-amber-200 relative flex items-center justify-center">
+<!-- Illustrated Joseon King Artwork -->
+<svg class="w-full h-full object-contain" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Traditional Sun & Moon backdrop motif -->
+<circle cx="35" cy="30" fill="#d9534f" opacity="0.8" r="14"></circle>
+<circle cx="125" cy="30" fill="#f0ad4e" opacity="0.6" r="12"></circle>
+<path d="M10,80 Q40,55 80,75 T150,70 L150,120 L10,120 Z" fill="#2d6a4f" opacity="0.3"></path>
+<!-- Dragon Robe Body (곤룡포) -->
+<path d="M45,70 L115,70 L130,120 L30,120 Z" fill="#b93828" stroke="#231f20" stroke-width="2"></path>
+<!-- Golden Dragon Emblem Breastplate (보) -->
+<circle cx="80" cy="95" fill="#e09f3e" r="13" stroke="#231f20" stroke-width="1.5"></circle>
+<path d="M74,93 Q80,88 86,95 Q80,102 75,95" fill="none" stroke="#231f20" stroke-width="1.5"></path>
+<!-- Head & Face -->
+<ellipse cx="80" cy="55" fill="#fde2cb" rx="16" ry="18" stroke="#231f20" stroke-width="2"></ellipse>
+<!-- Cute Doodle Eyes & Beard -->
+<circle cx="74" cy="53" fill="#231f20" r="2"></circle>
+<circle cx="86" cy="53" fill="#231f20" r="2"></circle>
+<path d="M77,59 Q80,63 83,59" fill="none" stroke="#231f20" stroke-width="1.5"></path>
+<path d="M73,63 Q80,72 87,63" fill="none" stroke="#231f20" stroke-width="1.8"></path>
+<!-- Ikseongwan Hat (익선관) -->
+<path d="M62,45 C62,32 70,25 80,25 C90,25 98,32 98,45 Z" fill="#1f2937" stroke="#231f20" stroke-width="2"></path>
+<path d="M72,25 C72,15 76,14 80,14 C84,14 88,15 88,25" fill="#1f2937" stroke="#231f20" stroke-width="1.5"></path>
+<path d="M70,18 L64,10 M90,18 L96,10" stroke="#1f2937" stroke-linecap="round" stroke-width="2"></path>
+</svg>
+<!-- Traditional Minhwa Texture Overlay -->
+<div class="absolute inset-0 bg-amber-500/5 mix-blend-multiply pointer-events-none"></div>
+</div>
+<!-- Cut Label Bar -->
+<div class="px-2 py-1 bg-white border-t border-zinc-900 flex items-center justify-between text-[10px]">
+<span class="font-black text-red-700 flex items-center gap-1">
+<span class="">01</span> 👑 왕 (King)
+              </span>
+<span class="text-zinc-500 font-medium">위엄 가득 곤룡포</span>
+</div>
+</div>
+<!-- CUT 2: 양반 (Scholar / Noble) -->
+<div class="relative bg-sky-50 rounded-xl border-2 border-zinc-900 overflow-hidden group">
+<div class="w-full h-32 bg-gradient-to-b from-sky-100 via-teal-50 to-emerald-100 relative flex items-center justify-center">
+<!-- Illustrated Joseon Scholar Artwork -->
+<svg class="w-full h-full object-contain" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Bamboo motif sketch -->
+<line opacity="0.3" stroke="#009775" stroke-dasharray="8,2" stroke-width="2" x1="20" x2="20" y1="120" y2="20"></line>
+<line opacity="0.3" stroke="#009775" stroke-dasharray="8,2" stroke-width="2" x1="140" x2="140" y1="120" y2="30"></line>
+<!-- Hanbok Robe (도포) -->
+<path d="M45,72 L115,72 L132,120 L28,120 Z" fill="#ebf4f6" stroke="#231f20" stroke-width="2"></path>
+<path d="M80,72 L80,120" stroke="#009775" stroke-width="2"></path>
+<path d="M68,85 L92,85" stroke="#009775" stroke-linecap="round" stroke-width="2.5"></path>
+<!-- Face -->
+<ellipse cx="80" cy="56" fill="#ffe0c8" rx="15" ry="17" stroke="#231f20" stroke-width="2"></ellipse>
+<circle cx="75" cy="55" fill="#231f20" r="2"></circle>
+<circle cx="85" cy="55" fill="#231f20" r="2"></circle>
+<path d="M78,61 Q80,64 82,61" fill="none" stroke="#231f20" stroke-width="1.5"></path>
+<!-- Fan (부채) in Hand -->
+<path d="M102,86 Q122,76 126,96 Z" fill="#fdf0d5" stroke="#231f20" stroke-width="1.5"></path>
+<!-- Gat Hat (갓) -->
+<ellipse cx="80" cy="46" fill="#1f2937" rx="38" ry="8" stroke="#231f20" stroke-width="2"></ellipse>
+<rect fill="#1f2937" height="22" rx="3" stroke="#231f20" stroke-width="1.8" width="18" x="71" y="24"></rect>
+<!-- Gat String (갓끈) -->
+<path d="M68,48 Q70,72 80,72 Q90,72 92,48" fill="none" stroke="#d97706" stroke-dasharray="3,1" stroke-width="1.5"></path>
+</svg>
+<div class="absolute inset-0 bg-teal-600/5 mix-blend-multiply pointer-events-none"></div>
+</div>
+<!-- Cut Label Bar -->
+<div class="px-2 py-1 bg-white border-t border-zinc-900 flex items-center justify-between text-[10px]">
+<span class="font-black text-emerald-800 flex items-center gap-1">
+<span class="">02</span> 📜 양반 (Scholar)
+              </span>
+<span class="text-zinc-500 font-medium">풍류 흑립과 도포</span>
+</div>
+</div>
+<!-- CUT 3: 보부상 (Peddler / Merchant) -->
+<div class="relative bg-orange-50 rounded-xl border-2 border-zinc-900 overflow-hidden group">
+<div class="w-full h-32 bg-gradient-to-b from-orange-100 via-amber-50 to-stone-200 relative flex items-center justify-center">
+<!-- Illustrated Joseon Peddler Artwork -->
+<svg class="w-full h-full object-contain" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Merchant pack on back (봇짐) -->
+<rect fill="#a3704c" height="42" rx="4" stroke="#231f20" stroke-width="2" width="26" x="36" y="55"></rect>
+<line stroke="#231f20" stroke-width="1.5" x1="36" x2="62" y1="70" y2="70"></line>
+<!-- Clothes -->
+<path d="M52,72 L112,72 L124,120 L40,120 Z" fill="#d4a373" stroke="#231f20" stroke-width="2"></path>
+<path d="M60,78 L104,115" opacity="0.8" stroke="#fff" stroke-width="3"></path>
+<!-- Head -->
+<ellipse cx="80" cy="55" fill="#f8cfa6" rx="15" ry="16" stroke="#231f20" stroke-width="2"></ellipse>
+<circle cx="75" cy="54" fill="#231f20" r="1.8"></circle>
+<circle cx="85" cy="54" fill="#231f20" r="1.8"></circle>
+<path d="M77,61 Q80,64 83,61" fill="none" stroke="#231f20" stroke-width="1.5"></path>
+<!-- Cotton Straw Hat (패랭이 & 목화솜) -->
+<path d="M54,46 Q80,38 106,46 L96,36 Q80,32 64,36 Z" fill="#c49a6c" stroke="#231f20" stroke-width="1.8"></path>
+<circle cx="68" cy="38" fill="#ffffff" r="4.5" stroke="#231f20" stroke-width="1.2"></circle>
+<circle cx="92" cy="38" fill="#ffffff" r="4.5" stroke="#231f20" stroke-width="1.2"></circle>
+<!-- Walking Stick (지팡이) -->
+<line stroke="#5c4033" stroke-linecap="round" stroke-width="3" x1="116" x2="122" y1="62" y2="120"></line>
+</svg>
+</div>
+<!-- Cut Label Bar -->
+<div class="px-2 py-1 bg-white border-t border-zinc-900 flex items-center justify-between text-[10px]">
+<span class="font-black text-amber-800 flex items-center gap-1">
+<span class="">03</span> 🎒 보부상 (Merchant)
+              </span>
+<span class="text-zinc-500 font-medium">팔도 패랭이 봇짐</span>
+</div>
+</div>
+<!-- CUT 4: 노비 (Commoner / Folk) -->
+<div class="relative bg-stone-100 rounded-xl border-2 border-zinc-900 overflow-hidden group">
+<div class="w-full h-32 bg-gradient-to-b from-stone-200 via-amber-50 to-stone-300 relative flex items-center justify-center">
+<!-- Illustrated Joseon Commoner Artwork -->
+<svg class="w-full h-full object-contain" viewBox="0 0 160 120" xmlns="http://www.w3.org/2000/svg">
+<!-- Warm hearth fire spark doodles -->
+<circle cx="30" cy="40" fill="#e09f3e" r="1.5"></circle>
+<circle cx="130" cy="50" fill="#e09f3e" r="2"></circle>
+<!-- Coarse Linen clothes (삼베옷) -->
+<path d="M48,72 L112,72 L126,120 L34,120 Z" fill="#e9d8a6" stroke="#231f20" stroke-width="2"></path>
+<!-- Patch on vest -->
+<rect fill="#94d2bd" height="10" stroke="#231f20" stroke-width="1.2" width="10" x="90" y="86"></rect>
+<!-- Head & Tied Headband (머리띠) -->
+<ellipse cx="80" cy="56" fill="#f4a261" rx="15" ry="17" stroke="#231f20" stroke-width="2"></ellipse>
+<path d="M64,47 Q80,44 96,47" stroke="#ffffff" stroke-linecap="round" stroke-width="3.5"></path>
+<!-- Funny energetic face expression -->
+<circle cx="74" cy="55" fill="#231f20" r="2"></circle>
+<circle cx="86" cy="55" fill="#231f20" r="2"></circle>
+<path d="M74,62 Q80,68 86,62" fill="#b93828" stroke="#231f20" stroke-width="1.5"></path>
+<!-- Cute Rice Straw (볏짚) in mouth -->
+<line stroke="#cca43b" stroke-linecap="round" stroke-width="2" x1="84" x2="98" y1="64" y2="58"></line>
+</svg>
+</div>
+<!-- Cut Label Bar -->
+<div class="px-2 py-1 bg-white border-t border-zinc-900 flex items-center justify-between text-[10px]">
+<span class="font-black text-stone-800 flex items-center gap-1">
+<span class="">04</span> 🌾 노비 (Folk)
+              </span>
+<span class="text-zinc-500 font-medium">정겨운 삼베옷과 짚신</span>
+</div>
+</div>
+</div>
+<!-- Strip Bottom Signature Footer -->
+<footer class="pt-3 pb-1 border-t-2 border-dashed border-zinc-300 mt-3 text-center flex flex-col items-center">
+<div class="flex items-center justify-between w-full px-1 mb-1">
+<span class="font-traditional font-black text-xs tracking-widest text-zinc-900">조선청년사컷</span>
+<span class="text-[10px] font-bold text-zinc-500 font-mono tracking-tighter">2025.05.15 · SEOUL</span>
+</div>
+<!-- Barcode simulation graphic -->
+<div class="w-full flex items-center justify-center gap-[2px] h-5 my-0.5 opacity-80">
+<span class="w-[2px] h-full bg-zinc-800"></span>
+<span class="w-[1px] h-full bg-zinc-800"></span>
+<span class="w-[3px] h-full bg-zinc-800"></span>
+<span class="w-[1px] h-full bg-zinc-800"></span>
+<span class="w-[4px] h-full bg-zinc-800"></span>
+<span class="w-[2px] h-full bg-zinc-800"></span>
+<span class="w-[1px] h-full bg-zinc-800"></span>
+<span class="w-[3px] h-full bg-zinc-800"></span>
+<span class="w-[1.5px] h-full bg-zinc-800"></span>
+<span class="w-[2px] h-full bg-zinc-800"></span>
+<span class="w-[4px] h-full bg-zinc-800"></span>
+<span class="w-[1px] h-full bg-zinc-800"></span>
+<span class="w-[3px] h-full bg-zinc-800"></span>
+</div>
+<p class="text-[9px] font-bold text-zinc-500 mt-1">
+            서울청년센터 영등포 × 청년 4컷 스튜디오
+          </p>
+</footer>
+</article>
+</section>
+<!-- END: CentralPhotoStripPreview -->
+<!-- BEGIN: DownloadAndPrintControls -->
+<section class="px-5 space-y-3.5 mt-2" data-purpose="user-actions-section">
+<!-- QR Code Mobile Download Card -->
+<div class="bg-white rounded-2xl border-2 border-zinc-900 p-4 shadow-hard flex items-center gap-3.5 relative overflow-hidden" data-purpose="qr-download-card">
+<!-- Badge -->
+<span class="absolute top-2 right-2 px-1.5 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-extrabold rounded border border-rose-300">다운로 이후 삭제</span>
+<!-- Handcrafted Stylized QR Graphic -->
+<div class="w-20 h-20 bg-amber-50 rounded-xl border-2 border-zinc-900 p-1.5 flex-shrink-0 flex items-center justify-center shadow-hard-sm relative">
+<svg class="w-full h-full" fill="#1f2937" viewBox="0 0 100 100">
+<!-- Corner marker 1 -->
+<rect fill="none" height="26" rx="3" stroke="#1f2937" stroke-width="5" width="26" x="8" y="8"></rect>
+<rect height="12" width="12" x="15" y="15"></rect>
+<!-- Corner marker 2 -->
+<rect fill="none" height="26" rx="3" stroke="#1f2937" stroke-width="5" width="26" x="66" y="8"></rect>
+<rect height="12" width="12" x="73" y="15"></rect>
+<!-- Corner marker 3 -->
+<rect fill="none" height="26" rx="3" stroke="#1f2937" stroke-width="5" width="26" x="8" y="66"></rect>
+<rect height="12" width="12" x="15" y="73"></rect>
+<!-- QR Data Bits -->
+<rect height="7" width="7" x="42" y="10"></rect>
+<rect height="7" width="7" x="52" y="14"></rect>
+<rect height="8" width="8" x="40" y="24"></rect>
+<rect height="8" width="8" x="10" y="44"></rect>
+<rect height="7" width="7" x="22" y="44"></rect>
+<rect height="9" width="9" x="36" y="40"></rect>
+<rect height="8" width="8" x="50" y="38"></rect>
+<rect height="7" width="7" x="64" y="42"></rect>
+<rect height="8" width="8" x="78" y="40"></rect>
+<rect height="8" width="8" x="40" y="58"></rect>
+<rect height="8" width="8" x="54" y="54"></rect>
+<rect height="7" width="7" x="70" y="58"></rect>
+<rect height="8" width="8" x="82" y="68"></rect>
+<rect height="7" width="7" x="42" y="76"></rect>
+<rect height="8" width="8" x="56" y="72"></rect>
+<rect height="9" width="9" x="72" y="80"></rect>
+<!-- Camera icon at center -->
+<circle cx="50" cy="50" fill="#ffffff" r="10" stroke="#1f2937" stroke-width="3"></circle>
+<circle cx="50" cy="50" fill="#009775" r="4"></circle>
+</svg>
+</div>
+<!-- QR Description -->
+<div class="flex-1 pr-4">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="text-sm font-black text-zinc-900">📱 모바일 즉시 다운로드</span>
+</div>
+<p class="text-[11px] text-zinc-600 font-medium leading-relaxed">스마트폰 카메라로 QR코드를 비추면 <strong class="text-zinc-900">고화질 원본 사진</strong> 및 <strong class="text-emerald-700">움직이는 GIF</strong>를 무료로 저장할 수 있습니다.</p>
+</div>
+</div>
+<!-- Print Quantity Setting Section -->
+
+</section>
+<!-- END: DownloadAndPrintControls -->
+<!-- BEGIN: PrimaryCTABottomActions -->
+<section class="px-5 pt-4 pb-2 mt-auto flex flex-col gap-2.5" data-purpose="bottom-buttons"><!-- Primary Completion / Restart Button -->
+<button class="w-full py-3.5 rounded-2xl bg-[#b93828] hover:bg-[#a63022] text-white border-2 border-zinc-900 shadow-hard text-base font-black tracking-wide flex items-center justify-center gap-2 transition-all active-press" type="button">
+  <span class="">🔄</span>
+  <span class="">완료하고 처음으로 돌아가기</span>
+</button>
+
+<!-- Kiosk Footnote -->
+<div class="text-center mt-2 flex flex-col items-center gap-0.5">
+  <span class="font-doodle text-base font-bold text-zinc-600">서울청년센터 영등포 × 놀면뭐AI</span>
+  <span class="text-[10px] text-zinc-400 font-mono tracking-wider">FREE PHOTO SERVICE FOR SEOUL YOUTH</span>
+</div></section>
+<!-- END: PrimaryCTABottomActions -->
+</main>
+<!-- END: MobileKioskContainer -->
+<!-- BEGIN: InteractiveScripts -->
+<script data-purpose="stepper-and-color-picker">
+    // Interactive Frame Color Selection
+    const frameButtons = document.querySelectorAll('#frame-color-selector button');
+    const photoStrip = document.getElementById('photo-strip-card');
+    const colorClasses = {
+      0: '#fffdf9', // Classic Cream
+      1: '#262626', // Squid Ink Black
+      2: '#b93828', // Dancheong Red
+      3: '#1b3b6f'  // Navy
+    };
+
+    frameButtons.forEach((btn, index) => {
+      btn.addEventListener('click', () => {
+        // Reset active ring
+        frameButtons.forEach(b => {
+          b.classList.remove('ring-2', 'ring-emerald-600');
+          b.classList.add('opacity-80');
+        });
+        btn.classList.add('ring-2', 'ring-emerald-600');
+        btn.classList.remove('opacity-80');
+
+        // Apply background color to strip preview
+        if (index === 0) {
+          photoStrip.style.backgroundColor = '#fffdf9';
+          photoStrip.style.color = '#18181b';
+        } else if (index === 1) {
+          photoStrip.style.backgroundColor = '#222222';
+          photoStrip.style.color = '#ffffff';
+        } else if (index === 2) {
+          photoStrip.style.backgroundColor = '#8f291d';
+          photoStrip.style.color = '#ffffff';
+        } else if (index === 3) {
+          photoStrip.style.backgroundColor = '#152e55';
+          photoStrip.style.color = '#ffffff';
+        }
+      });
+    });
+
+    // Simple Print Stepper Logic
+    const countDisplay = document.getElementById('print-count');
+    const [minusBtn, plusBtn] = document.querySelectorAll('[aria-label="수량 감소"], [aria-label="수량 증가"]');
+    
+    let currentCount = 2;
+    minusBtn.addEventListener('click', () => {
+      if (currentCount > 1) {
+        currentCount--;
+        countDisplay.textContent = currentCount;
+      }
+    });
+
+    plusBtn.addEventListener('click', () => {
+      if (currentCount < 4) {
+        currentCount++;
+        countDisplay.textContent = currentCount;
+      }
+    });
+  </script>
+<!-- END: InteractiveScripts -->
+
+
+
+
+
+
+</body></html>

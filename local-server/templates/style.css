@@ -426,11 +426,16 @@ body {
   padding: 8px 0;
 }
 
-.camera-doodle-img {
-  width: 130px;
-  height: 130px;
+.camera-doodle-img,
+.camera-doodle-svg {
+  width: 140px;
+  height: 120px;
   object-fit: contain;
-  filter: drop-shadow(3px 3px 0px rgba(30, 35, 42, 0.15));
+  filter: drop-shadow(4px 4px 0px rgba(30, 35, 42, 0.2));
+  transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.camera-doodle-svg:hover {
+  transform: scale(1.05) rotate(-2deg);
 }
 
 .home-guide-card {
@@ -1478,14 +1483,24 @@ input:checked + .slider:before {
 
 .strip-single-img-wrap {
   width: 100%;
+  aspect-ratio: 900 / 1350;
+  min-height: 330px;
   border: 2px solid var(--ink-black);
   border-radius: 10px;
   overflow: hidden;
-  background-color: #f0ebe0;
+  background-color: #FAF6EF;
+  background-image: radial-gradient(#d3cebc 1px, transparent 1px);
+  background-size: 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
 .strip-single-img-wrap img {
   width: 100%;
+  height: 100%;
+  aspect-ratio: 900 / 1350;
   display: block;
   object-fit: cover;
 }

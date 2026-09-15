@@ -1,0 +1,475 @@
+<!DOCTYPE html><html lang="ko" style="width: 390px; height: 884px; overflow: hidden; position: relative;"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>청년 4컷 - 컨셉 선택</title>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts for Korean Doodle/Hand-drawn aesthetic -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Nanum+Pen+Script&amp;family=Noto+Sans+KR:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet">
+<style data-purpose="doodle-theme">
+    :root {
+      --bg-cream: #fbf9f4;
+      --ink-black: #242220;
+      --point-red: #b93828;
+      --point-teal: #088366;
+      --point-yellow: #fde047;
+      --paper-shadow: 3px 3px 0px rgba(36, 34, 32, 0.95);
+      --card-shadow: 4px 4px 0px rgba(36, 34, 32, 0.95);
+      --card-shadow-active: 5px 5px 0px rgba(36, 34, 32, 1);
+    }
+
+    body {
+      background-color: #ede8dc;
+      color: var(--ink-black);
+      font-family: 'Noto Sans KR', sans-serif;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    .font-doodle {
+      font-family: 'Gaegu', cursive, 'Noto Sans KR', sans-serif;
+    }
+
+    /* Hand-drawn wobbly borders & vintage paper feel */
+    .doodle-box {
+      border: 2.5px solid var(--ink-black);
+      border-radius: 20px 18px 22px 19px;
+      box-shadow: var(--paper-shadow);
+      background-color: #ffffff;
+      position: relative;
+    }
+
+    .doodle-pill {
+      border: 2px solid var(--ink-black);
+      border-radius: 9999px;
+      box-shadow: 2px 2px 0px var(--ink-black);
+    }
+
+    .doodle-btn {
+      border: 2.5px solid var(--ink-black);
+      border-radius: 18px 16px 20px 17px;
+      box-shadow: 3.5px 3.5px 0px var(--ink-black);
+      transition: all 0.12s ease-in-out;
+    }
+
+    .doodle-btn:active {
+      transform: translate(2px, 2px);
+      box-shadow: 1px 1px 0px var(--ink-black);
+    }
+
+    /* Subdued vintage paper grid texture */
+    .paper-texture {
+      background-color: var(--bg-cream);
+      background-image: radial-gradient(#dcd5c4 0.75px, transparent 0.75px);
+      background-size: 14px 14px;
+    }
+
+    /* Concept Card Frames */
+    .photo-cell {
+      border: 2px solid var(--ink-black);
+      border-radius: 14px 12px 13px 15px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Custom scrollbar hiding */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="flex justify-center items-center min-h-screen p-0 sm:p-4">
+<!-- BEGIN: MobileDeviceContainer -->
+<main class="w-full max-w-[420px] h-[100dvh] sm:h-[880px] paper-texture flex flex-col justify-between overflow-hidden sm:rounded-[36px] border-[3px] border-[#242220] shadow-[8px_8px_0px_rgba(36,34,32,0.9)] relative" data-purpose="kiosk-app-viewport">
+<!-- BEGIN: HeaderSection -->
+<header class="pt-4 px-4 pb-2 flex-shrink-0" data-purpose="app-header">
+<!-- Top Branding Bar aligned with STEP 2, 3 -->
+<div class="flex items-center justify-between gap-2 mb-2 pb-1 border-b border-[#e5dec9]">
+<!-- Left: Seoul Youth Center Yeongdeungpo Logo + Divider + AI System -->
+<div class="flex items-center gap-2">
+<img alt="서울청년센터 영등포 로고" class="h-[44px] object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNUzwh8YGu3hkfVKwrUyi-esVebGUvNSwI6r6d6KBoAOEWVhjDfl_AACoPV3IfkU-voH_FdIhurgHOyKz9zfrKBJiHOpCGxbyD6Y7R0t8k6MBGjxxo1qYOGwqeYgSUJ6CTCPbARgeao7WlFAL8VVLlmoPuDfT4rnc-qfeGFTMWAqXWH8TIgv0e9RqY00PuIJNz9Cssr4UUw_iqVkfilE9nKeMWwwEhJrfCLhfOiLGuODPUiEEuJ8Pxu77wQrGYSdk6S5g">
+<div class="w-[1.5px] h-3.5 bg-[#cfc5b0]"></div>
+<div class="flex items-center gap-1 font-doodle text-[12px] font-bold text-[#575045] tracking-tight">
+<span class="text-[#088366]"><span style="color: rgb(102, 102, 102); font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, &quot;Liberation Mono&quot;, &quot;Courier New&quot;, monospace; font-size: 10px; letter-spacing: 1px; background-color: rgb(250, 248, 245);" class=""><span style="color: rgb(34, 34, 34); font-family: Gaegu, cursive, sans-serif; font-size: 20px; letter-spacing: normal;">놀면뭐AI</span><br>AI SYSTEM</span></span>
+
+</div>
+</div>
+<!-- Right: Status Badge -->
+<div class="flex items-center gap-1.5">
+<span class="doodle-pill bg-[#e0f7ef] text-[#088366] font-extrabold text-[11px] px-2.5 py-0.5 flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#088366] inline-block animate-pulse"></span>
+        READY
+      </span>
+</div>
+</div>
+<!-- Center Banner Badge (STEP 1) -->
+<div class="flex items-center justify-between border-2 border-[#242220] rounded-full px-3.5 py-1.5 bg-white shadow-[2px_2px_0px_#242220]">
+<div class="flex items-center gap-2">
+<span class="bg-[#242220] text-white text-[10px] font-black px-2 py-0.5 rounded-full tracking-wider">STEP 1</span>
+<span class="text-[13px] font-bold text-[#242220]">컨셉 선택하기</span>
+</div>
+<span class="text-[11px] text-[#655f56] font-medium">3가지 AI 테마</span>
+</div>
+</header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: TitleSection -->
+<section class="px-5 text-center flex-shrink-0 pt-0.5" data-purpose="title-section">
+<div class="inline-block relative">
+<h1 class="text-[21px] sm:text-[22px] font-black text-[#242220] tracking-tight leading-tight">
+      원하는 4컷 컨셉을 선택해주세요
+    </h1>
+<!-- Marker underline doodle -->
+<svg class="absolute -bottom-1 left-0 w-full h-2.5 text-[#ffd000] -z-10 opacity-70" preserveAspectRatio="none" viewBox="0 0 100 12">
+<path d="M0,8 Q50,0 100,6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-width="9"></path>
+</svg>
+</div>
+<p class="text-[11.5px] font-medium text-[#655f56] mt-1 flex items-center justify-center gap-1">
+<span class="">👈</span> 원하는 AI 테마 필터를 좌우로 넘겨(스와이프) 선택해 보세요. <span class="">👉</span>
+</p>
+<!-- Concept Category Quick Tabs -->
+<nav class="flex justify-center gap-2 mt-2.5" data-purpose="concept-tabs">
+<button class="tab-btn active doodle-pill px-3 py-0.5 text-[12px] font-bold transition-all cursor-pointer bg-white text-[#4a453e]" id="tab-btn-0" onclick="scrollToSlide(0)">
+      인생 4컷
+    </button>
+<button class="tab-btn doodle-pill px-3 py-0.5 text-[12px] font-bold hover:bg-[#fff9e6] transition-all cursor-pointer bg-white text-[#4a453e]" id="tab-btn-1" onclick="scrollToSlide(1)">
+      판타지 4컷
+    </button>
+<button class="tab-btn doodle-pill px-3 py-0.5 text-[12px] font-bold hover:bg-[#fff9e6] transition-all cursor-pointer bg-[#b93828] text-white" id="tab-btn-2" onclick="scrollToSlide(2)">
+      조선 4컷
+    </button>
+</nav>
+</section>
+<!-- END: TitleSection -->
+<!-- BEGIN: CarouselSection -->
+<section class="relative px-2 flex-1 flex flex-col justify-center items-center my-1 min-h-0" data-purpose="concept-carousel-container">
+<!-- Prev/Next floating arrows for kiosk touch convenience -->
+<button aria-label="이전 컨셉" class="absolute left-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white border-2 border-[#242220] shadow-[2px_2px_0px_#242220] flex items-center justify-center text-[#242220] font-black text-xl hover:scale-105 active:translate-y-0.5 transition-transform cursor-pointer" onclick="prevSlide()">
+    ‹
+  </button>
+<button aria-label="다음 컨셉" class="absolute right-2.5 top-1/2 -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white border-2 border-[#242220] shadow-[2px_2px_0px_#242220] flex items-center justify-center text-[#242220] font-black text-xl hover:scale-105 active:translate-y-0.5 transition-transform cursor-pointer" onclick="nextSlide()">
+    ›
+  </button>
+<!-- Interactive Scroll-Snap & Touch/Drag Carousel Container -->
+<div class="w-full flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar px-6 sm:px-8 py-2 gap-4 cursor-grab active:cursor-grabbing select-none active" id="carousel-viewport" style="scroll-behavior: smooth;">
+<!-- ================= SLIDE 1: 인생 4컷 (연령 변환) ================= -->
+<div class="snap-center shrink-0 w-[300px] sm:w-[325px] h-[405px] doodle-box p-3 flex flex-col justify-between shadow-[4px_4px_0px_#242220] transition-transform duration-200" data-slide-index="0">
+<!-- Top Badge Bar -->
+<div class="flex items-center justify-between mb-1.5">
+<span class="doodle-pill bg-[#fff275] text-[#3e3415] px-2 py-0.5 text-[10.5px] font-black tracking-wide flex items-center gap-1 shadow-sm">
+          ⏳ AI 연령 변환
+        </span>
+<span class="text-[10px] font-bold text-[#6a6358] bg-[#f4eee1] px-2 py-0.5 rounded-md border border-[#dfd6c6]">
+          인생 사계절
+        </span>
+</div>
+<!-- 4-Quadrant Photo Grid -->
+<div class="grid grid-cols-2 gap-1.5 flex-1 p-1 bg-[#faf8f5] rounded-xl border-2 border-dashed border-[#d8cfbe]">
+<!-- Cell 1: 유년기 (Childhood - Yellow) -->
+<div class="photo-cell bg-[#ffeb84] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">👶</span>
+<span class="font-extrabold text-[12.5px] text-[#3e3415] tracking-tight">유년기</span>
+<span class="text-[9px] text-[#6c5d2b] font-medium leading-tight">순수했던 어린 시절</span>
+</div>
+<!-- Cell 2: 학창시절 (School Days - Light Blue) -->
+<div class="photo-cell bg-[#a2d8f9] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🎓</span>
+<span class="font-extrabold text-[12.5px] text-[#18394e] tracking-tight">학창시절</span>
+<span class="text-[9px] text-[#2c5874] font-medium leading-tight">꿈 많던 교복 감성</span>
+</div>
+<!-- Cell 3: 현재모습 (Present - Soft Purple) -->
+<div class="photo-cell bg-[#d3c8fa] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">✨</span>
+<span class="font-extrabold text-[12.5px] text-[#2f2256] tracking-tight">현재모습</span>
+<span class="text-[9px] text-[#55428c] font-medium leading-tight">가장 빛나는 청춘</span>
+</div>
+<!-- Cell 4: 노년기 (Golden Age - Warm Gray) -->
+<div class="photo-cell bg-[#e1e4ea] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">👵</span>
+<span class="font-extrabold text-[12.5px] text-[#3b414a] tracking-tight">노년기</span>
+<span class="text-[9px] text-[#5f6570] font-medium leading-tight">우아하고 따뜻한 미래</span>
+</div>
+</div>
+<!-- Description Footer -->
+<div class="mt-2 pt-1.5 border-t border-[#ede5d6]">
+<div class="flex items-center justify-between mb-0.5">
+<h3 class="font-black text-[14.5px] text-[#242220]">인생 4컷 (연령 변환)</h3>
+<span class="text-[10px] font-bold text-[#b93828] bg-[#fee2e2] px-1.5 py-0.5 rounded">TIME TRIP</span>
+</div>
+<p class="text-[10.5px] text-[#6d665b] leading-tight">
+          시간을 달리는 4컷! 유년기부터 노년기까지 내 인생의 사계절을 한 번에 담아내는 AI 변환 테마
+        </p>
+</div>
+</div>
+<!-- ================= SLIDE 2: 판타지 4컷 (마법사 테마) ================= -->
+<div class="snap-center shrink-0 w-[300px] sm:w-[325px] h-[405px] doodle-box p-3 flex flex-col justify-between shadow-[4px_4px_0px_#242220] transition-transform duration-200" data-slide-index="1">
+<!-- Top Badge Bar -->
+<div class="flex items-center justify-between mb-1.5">
+<span class="doodle-pill bg-[#ede9fe] text-[#6d28d9] px-2 py-0.5 text-[10.5px] font-black tracking-wide flex items-center gap-1 shadow-sm">
+          ✨ 마법과 환상
+        </span>
+<span class="text-[10px] font-bold text-[#5c2ab5] bg-[#f5f3ff] px-2 py-0.5 rounded-md border border-[#ddd6fe]">
+          판타지 동화
+        </span>
+</div>
+<!-- 4-Quadrant Photo Grid for Fantasy Wizard -->
+<div class="grid grid-cols-2 gap-1.5 flex-1 p-1 bg-[#fdfcff] rounded-xl border-2 border-dashed border-[#d8d0ee]">
+<!-- Cell 1: 호그와트 마법학교 학생 -->
+<div class="photo-cell bg-[#e9d5ff] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🧙‍♂️</span>
+<span class="font-extrabold text-[12px] text-[#4c1d95] tracking-tight">호그와트 마법학교</span>
+<span class="text-[9px] text-[#6b21a8] font-medium leading-tight">신비로운 모자와 로브</span>
+</div>
+<!-- Cell 2: 신비로운 숲의 엘프 -->
+<div class="photo-cell bg-[#bbf7d0] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🧝</span>
+<span class="font-extrabold text-[12px] text-[#14532d] tracking-tight">숲의 엘프</span>
+<span class="text-[9px] text-[#166534] font-medium leading-tight">요정의 숲과 마법 활</span>
+</div>
+<!-- Cell 3: 대마법사 -->
+<div class="photo-cell bg-[#fef08a] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🔮</span>
+<span class="font-extrabold text-[12px] text-[#713f12] tracking-tight">대마법사</span>
+<span class="text-[9px] text-[#854d0e] font-medium leading-tight">빛나는 오브와 강력한 주문</span>
+</div>
+<!-- Cell 4: 드래곤 라이더 -->
+<div class="photo-cell bg-[#bae6fd] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🐉</span>
+<span class="font-extrabold text-[12px] text-[#0c4a6e] tracking-tight">드래곤 라이더</span>
+<span class="text-[9px] text-[#0369a1] font-medium leading-tight">푸른 하늘을 가르는 비행</span>
+</div>
+</div>
+<!-- Description Footer -->
+<div class="mt-2 pt-1.5 border-t border-[#ede5d6]">
+<div class="flex items-center justify-between mb-0.5">
+<h3 class="font-black text-[14.5px] text-[#242220]">판타지 4컷 (마법과 환상)</h3>
+<span class="text-[10px] font-bold text-[#7c3aed] bg-[#ede9fe] px-1.5 py-0.5 rounded">MAGICAL</span>
+</div>
+<p class="text-[10.5px] text-[#6d665b] leading-tight">
+          마법 주문과 환상적인 일러스트 필터로 변신하는 판타지 동화 테마
+        </p>
+</div>
+</div>
+<!-- ================= SLIDE 3: 조선 4컷 (신분 변신) ================= -->
+<div class="snap-center shrink-0 w-[300px] sm:w-[325px] h-[405px] doodle-box p-3 flex flex-col justify-between shadow-[4px_4px_0px_#242220] transition-transform duration-200" data-slide-index="2">
+<!-- Top Badge Bar -->
+<div class="flex items-center justify-between mb-1.5">
+<span class="doodle-pill bg-[#dcfce7] text-[#166534] px-2 py-0.5 text-[10.5px] font-black tracking-wide flex items-center gap-1 shadow-sm">
+          ⚔️ K-히스토리 타임머신
+        </span>
+<span class="text-[10px] font-bold text-[#1f5e4f] bg-[#e3f6f0] px-2 py-0.5 rounded-md border border-[#b2e5d6]">
+          조선 4색 신분
+        </span>
+</div>
+<!-- 4-Quadrant Photo Grid for 4 Joseon Characters -->
+<div class="grid grid-cols-2 gap-1.5 flex-1 p-1 bg-[#fffbf2] rounded-xl border-2 border-dashed border-[#cfbe9e]">
+<!-- Cell 1: 왕 (King) -->
+<div class="photo-cell bg-[#fee2e2] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">👑</span>
+<span class="font-extrabold text-[12.5px] text-[#881337] tracking-tight">01 왕</span>
+<span class="text-[9px] text-[#b91c1c] font-medium leading-tight">위엄 가득 곤룡포</span>
+</div>
+<!-- Cell 2: 양반 (Yangban) -->
+<div class="photo-cell bg-[#e0f2fe] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">📜</span>
+<span class="font-extrabold text-[12.5px] text-[#0c4a6e] tracking-tight">02 양반</span>
+<span class="text-[9px] text-[#0369a1] font-medium leading-tight">풍류 흑립과 도포</span>
+</div>
+<!-- Cell 3: 보부상 (Bobusang) -->
+<div class="photo-cell bg-[#fef3c7] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🎒</span>
+<span class="font-extrabold text-[12.5px] text-[#78350f] tracking-tight">03 보부상</span>
+<span class="text-[9px] text-[#b45309] font-medium leading-tight">팔도 패랭이 봇짐</span>
+</div>
+<!-- Cell 4: 노비 (Nobi) -->
+<div class="photo-cell bg-[#f5f5f4] flex flex-col items-center justify-center p-1.5 text-center shadow-inner">
+<span class="text-3xl mb-0.5 filter drop-shadow-sm">🌾</span>
+<span class="font-extrabold text-[12.5px] text-[#292524] tracking-tight">04 노비</span>
+<span class="text-[9px] text-[#57534e] font-medium leading-tight">정겨운 삼베옷과 짚신</span>
+</div>
+</div>
+<!-- Description Footer -->
+<div class="mt-2 pt-1.5 border-t border-[#ede5d6]">
+<div class="flex items-center justify-between mb-0.5">
+<h3 class="font-black text-[14.5px] text-[#242220]">조선 4컷 (신분 변신)</h3>
+<span class="text-[10px] font-bold text-[#088366] bg-[#e6f4ea] px-1.5 py-0.5 rounded">HISTORIC</span>
+</div>
+<p class="text-[10.5px] text-[#6d665b] leading-tight">
+          왕부터 노비까지! 타임머신을 타고 조선시대로 떠나는 신분 역전 AI 테마
+        </p>
+</div>
+</div>
+</div>
+<!-- Carousel Pagination Dots -->
+<div class="flex items-center justify-center gap-2 mt-1.5" data-purpose="carousel-dots">
+<button aria-label="1번 컨셉" class="w-2.5 h-2.5 rounded-full transition-all border border-[#242220] cursor-pointer bg-[#d0c7b7]" id="dot-0" onclick="scrollToSlide(0)"></button>
+<button aria-label="2번 컨셉" class="w-2.5 h-2.5 rounded-full transition-all border border-[#242220] cursor-pointer bg-[#d0c7b7]" id="dot-1" onclick="scrollToSlide(1)"></button>
+<button aria-label="3번 컨셉" class="w-2.5 h-2.5 rounded-full transition-all border border-[#242220] cursor-pointer bg-[#b93828] scale-125" id="dot-2" onclick="scrollToSlide(2)"></button>
+</div>
+</section>
+<!-- END: CarouselSection -->
+<!-- BEGIN: BottomActionSection -->
+<footer class="p-4 pt-1.5 pb-4 flex-shrink-0 bg-[#fbf9f4]/90 border-t border-[#e2dac9]" data-purpose="bottom-cta-section">
+<!-- Selected Concept Notice -->
+<div class="text-center text-[12px] font-bold text-[#554d43] mb-1.5 flex items-center justify-center gap-1.5">
+<span class="inline-block w-2 h-2 rounded-full bg-[#b93828]"></span>
+<span class="">선택된 테마: </span>
+<span class="text-[#b93828] font-black underline decoration-wavy underline-offset-2" id="selected-concept-title">조선 4색 신분 (조선 4컷)</span>
+</div>
+<!-- Main CTA Button -->
+<button class="w-full py-3 px-4 bg-[#b93828] text-white text-[15px] font-black tracking-wide doodle-btn flex items-center justify-center gap-2 hover:bg-[#a62f20] active:bg-[#92281a] cursor-pointer" id="submit-btn" onclick="goToPhotoBooth()">
+<span class="">컨셉 선택 완료 (촬영 부스로 입장하기)</span>
+<span class="text-lg">➔</span>
+</button>
+<!-- Center Branding Subtext -->
+<div class="text-center mt-2">
+<div class="font-doodle text-[15px] font-bold text-[#666666] tracking-wide">
+      서울청년센터 영등포 × 놀면뭐AI
+    </div>
+<div class="text-[9.5px] font-mono text-[#999999] tracking-tight">
+      FREE PHOTO SERVICE FOR SEOUL YOUTH
+    </div>
+</div>
+</footer>
+<!-- END: BottomActionSection -->
+</main>
+<!-- END: MobileDeviceContainer -->
+<!-- BEGIN: InteractiveScript -->
+<script data-purpose="carousel-controller">
+  let currentConceptIndex = 0;
+  const totalConcepts = 3;
+
+  const conceptNames = [
+    "인생 사계절 (인생 4컷)",
+    "판타지 마법과 환상 (판타지 4컷)",
+    "조선 4색 신분 (조선 4컷)"
+  ];
+
+  const viewport = document.getElementById('carousel-viewport');
+  const slides = viewport.querySelectorAll('[data-slide-index]');
+
+  function updateActiveUI(index) {
+    currentConceptIndex = index;
+
+    // Update Quick Tabs
+    for (let i = 0; i < totalConcepts; i++) {
+      const tabBtn = document.getElementById(`tab-btn-${i}`);
+      const dot = document.getElementById(`dot-${i}`);
+
+      if (i === currentConceptIndex) {
+        tabBtn.classList.remove('bg-white', 'text-[#4a453e]');
+        tabBtn.classList.add('bg-[#b93828]', 'text-white');
+
+        dot.classList.remove('bg-[#d0c7b7]');
+        dot.classList.add('bg-[#b93828]', 'scale-125');
+      } else {
+        tabBtn.classList.add('bg-white', 'text-[#4a453e]');
+        tabBtn.classList.remove('bg-[#b93828]', 'text-white');
+
+        dot.classList.add('bg-[#d0c7b7]');
+        dot.classList.remove('bg-[#b93828]', 'scale-125');
+      }
+    }
+
+    // Update Selected Theme label
+    const label = document.getElementById('selected-concept-title');
+    if (label) {
+      label.textContent = conceptNames[currentConceptIndex];
+    }
+  }
+
+  function scrollToSlide(index) {
+    if (slides[index]) {
+      slides[index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      updateActiveUI(index);
+    }
+  }
+
+  function nextSlide() {
+    const next = (currentConceptIndex + 1) % totalConcepts;
+    scrollToSlide(next);
+  }
+
+  function prevSlide() {
+    const prev = (currentConceptIndex - 1 + totalConcepts) % totalConcepts;
+    scrollToSlide(prev);
+  }
+
+  // Scroll Sync via IntersectionObserver or scroll listener
+  let scrollTimeout;
+  viewport.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const viewportCenter = viewport.scrollLeft + viewport.offsetWidth / 2;
+      let closestIdx = 0;
+      let minDistance = Infinity;
+
+      slides.forEach((slide, idx) => {
+        const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+        const dist = Math.abs(slideCenter - viewportCenter);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestIdx = idx;
+        }
+      });
+
+      if (closestIdx !== currentConceptIndex) {
+        updateActiveUI(closestIdx);
+      }
+    }, 50);
+  }, { passive: true });
+
+  // Mouse Drag to Swipe support
+  let isDown = false;
+  let startX;
+  let scrollLeft;
+
+  viewport.addEventListener('mousedown', (e) => {
+    isDown = true;
+    viewport.classList.add('active');
+    startX = e.pageX - viewport.offsetLeft;
+    scrollLeft = viewport.scrollLeft;
+  });
+
+  viewport.addEventListener('mouseleave', () => {
+    isDown = false;
+  });
+
+  viewport.addEventListener('mouseup', () => {
+    isDown = false;
+  });
+
+  viewport.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - viewport.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    viewport.scrollLeft = scrollLeft - walk;
+  });
+
+  // CTA Proceed Handler
+  function goToPhotoBooth() {
+    const chosen = conceptNames[currentConceptIndex];
+    if (navigator.vibrate) {
+      navigator.vibrate(40);
+    }
+    alert(`[${chosen}] 컨셉이 선택되었습니다!\nSTEP 2 촬영 안내 화면으로 이동합니다.`);
+  }
+
+  // Keyboard navigation
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'Enter') goToPhotoBooth();
+  });
+</script>
+<!-- END: InteractiveScript -->
+
+
+</body></html>
