@@ -932,6 +932,26 @@
        자바스크립트 비즈니스 로직 & 인터랙션
        ========================================== -->
   <script>
+    // ==========================================
+    // API 백엔드 URL 및 헤더 헬퍼 함수 (Vercel 전용)
+    // ==========================================
+    const DEFAULT_BACKEND_URL = 'https://seducing-issue-overflow.ngrok-free.dev';
+
+    function getApiBaseUrl() {
+      return localStorage.getItem('fourcuts_backend_url') || DEFAULT_BACKEND_URL;
+    }
+
+    function setApiBaseUrl(url) {
+      localStorage.setItem('fourcuts_backend_url', url);
+    }
+
+    function getApiHeaders(extra = {}) {
+      return {
+        'ngrok-skip-browser-warning': 'true',
+        ...extra
+      };
+    }
+
     // 전역 상태 변수
     let currentScreen = 'screen-home';
     let selectedStyle = 'time_travel'; // 기본값: 인생 사계절 (연령 변환)
