@@ -10,3 +10,5 @@ google-auth-oauthlib>=1.0.0
 diffusers>=0.21.0
 transformers>=4.30.0
 accelerate>=0.20.0
+openai>=1.0.0
+python-dotenv

@@ -27,7 +27,8 @@ echo.
 
 REM --- Step 2: Start FastAPI backend (foreground with logs) ---
 echo [2/2] Starting FastAPI AI Engine...
+set NGROK_PUBLIC_URL=https://seducing-issue-overflow.ngrok-free.dev
 cd /d "%~dp0local-server"
-C:\Python313\python.exe -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+python -m uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 
 pause

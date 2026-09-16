@@ -23,8 +23,25 @@
 const PHOTO_FOLDER_ID = "13KXZ_W7vurFPHbC_1tImac7ZLBlRuS3Q";
 const VIDEO_FOLDER_ID = "1RgvKVq-J7JItVRD6M_9asnU8NfnaQ_dU";
 
-// GET 요청 헬스체크 및 302 리디렉션 응답 보장
+// GET 요청 헬스체크 및 302 리디렉션 응답 보장 & 파일 Base64 수신
 function doGet(e) {
+  if (e && e.parameter && (e.parameter.action === "get_file_base64" || e.parameter.action === "get_video_base64") && e.parameter.fileId) {
+    try {
+      const file = DriveApp.getFileById(e.parameter.fileId);
+      const b64 = Utilities.base64Encode(file.getBlob().getBytes());
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "success",
+        base64: b64,
+        mimeType: file.getMimeType(),
+        filename: file.getName()
+      })).setMimeType(ContentService.MimeType.JSON);
+    } catch (err) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: "error",
+        message: err.toString()
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
   return ContentService.createTextOutput(JSON.stringify({
     status: "success",
     message: "AI 4-Cut Studio Google Drive GAS Webhook Service Online"
@@ -42,6 +59,25 @@ function doPost(e) {
     }
 
     const data = JSON.parse(e.postData.contents);
+
+    // 0. 파일 Base64 스트리밍 요청 수신 시 (구글 드라이브 계정 선택 팝업 우회용)
+    if ((data.action === "get_file_base64" || data.action === "get_video_base64") && data.fileId) {
+      try {
+        const file = DriveApp.getFileById(data.fileId);
+        const b64 = Utilities.base64Encode(file.getBlob().getBytes());
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "success",
+          base64: b64,
+          mimeType: file.getMimeType(),
+          filename: file.getName()
+        })).setMimeType(ContentService.MimeType.JSON);
+      } catch (err) {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "error",
+          message: err.toString()
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
     
     // 1. 고객 다운로드 즉시 파기 명령 수신 시 (구글 드라이브 파일 즉시 삭제)
     if (data.action === "delete_files") {
