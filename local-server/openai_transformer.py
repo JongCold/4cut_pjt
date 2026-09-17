@@ -232,74 +232,58 @@ PROMPTS_PIXEL = {
     )
 }
 
-# 4. [기본 테마] 한국형 인생4컷 원본 보존 & 미세 색감 보정 프롬프트
+# 4. [기본 테마] 단일 톤/파스텔 스튜디오 배경 교체 & 뷰티 보정 (피부톤/잡티 정돈 & 1프레임 단일 인물 보장)
 BASIC_CORE_BASE = (
-    "AUTHENTIC ORIGINAL PHOTO-BASED LIFE FOUR CUT PHOTO BOOTH TRANSFORMATION: "
-    "Transform the provided photograph into a natural, authentic Korean photo-booth 'Life Four Cut' photograph while preserving the original photograph as faithfully as possible. "
-    "The result MUST look like a real photograph taken inside a modern professional photo booth, NOT an AI-generated reinterpretation. "
-    "PRIMARY PRINCIPLE - PRESERVE THE ORIGINAL PHOTOGRAPH: "
-    "- Treat the provided photograph as the absolute visual source of truth. "
-    "- Preserve the original person's identity, facial features, skin characteristics, hairstyle, hair color, glasses, clothing, body proportions, pose, hand gestures, facial expression, and overall appearance. "
-    "- Do NOT redesign, beautify, stylize, redraw, or reinterpret the person. "
-    "- Do NOT replace or reconstruct the face unnecessarily. "
-    "- Do NOT make the person look like a different individual. "
-    "- Every person in the source image must remain the same person. "
-    "SUBJECT & IDENTITY PRESERVATION: "
-    "- Preserve the exact number of people appearing in the original photograph. "
-    "- Never add, remove, duplicate, merge, or replace a person. "
-    "- Preserve each person's unique facial structure, eye shape, nose, mouth, jawline, hairstyle, hair parting, glasses, and other recognizable characteristics. "
-    "- Preserve the original age and natural appearance of each person. "
-    "- Preserve the original clothing, accessories, jewelry, bags, and other visible personal items unless a minor photographic cleanup is absolutely necessary. "
-    "- Preserve the original pose, body angle, head tilt, hand position, and gesture. "
-    "- Preserve the original facial expression and emotional mood. "
-    "- If the person is smiling, maintain the same smile. "
-    "- If the person has a neutral expression, do not force a smile. "
-    "- If the person is wearing glasses, preserve the exact glasses shape, position, frame color, and lens appearance. "
-    "NATURAL PHOTOGRAPHIC REALISM: "
-    "- The final image MUST remain a genuine-looking photograph. "
-    "- Maintain realistic human skin texture, natural hair strands, realistic fabric texture, and authentic photographic lighting. "
-    "- Do NOT convert the image into an illustration, cartoon, anime, webtoon, painting, 3D render, or graphic design. "
-    "- Do NOT apply artificial beauty filters or excessive facial retouching. "
-    "- Do NOT create unnaturally perfect skin. "
-    "- Do NOT alter facial proportions or body proportions. "
-    "- Do NOT create an exaggerated cinematic look. "
-    "MINIMAL COLOR CORRECTION ONLY: "
-    "- Apply only subtle, professional photographic color correction when necessary. "
-    "- Slightly correct white balance, exposure, contrast, color temperature, and overall tonal balance. "
-    "- Maintain natural skin tones. "
-    "- A very subtle increase in color clarity and warmth is acceptable if it improves the photograph. "
-    "- Preserve the original colors of clothing, hair, skin, and background as much as possible. "
-    "- Do NOT apply strong color grading, cinematic LUTs, heavy filters, dramatic teal-orange grading, vintage effects, or artificial color casts. "
-    "- Do NOT significantly change the lighting mood of the original photograph. "
-    "PHOTOGRAPHIC QUALITY: "
-    "- Improve overall photographic consistency and clarity while preserving the source image. "
-    "- Maintain natural sharpness and realistic photographic detail. "
-    "- Reduce only obvious technical artifacts such as excessive noise, compression artifacts, or minor color imbalance when necessary. "
-    "- Do NOT oversharpen skin or hair. "
-    "- Do NOT create artificial HDR effects. "
-    "- Do NOT introduce excessive clarity, micro-contrast, or digital crispness. "
-    "- Preserve realistic depth, shadows, highlights, and texture. "
-    "STRICT NEGATIVE CONSTRAINTS: "
-    "No illustration, no cartoon, no anime, no webtoon, no manhwa, no painting, no watercolor, no vector graphics, no 3D CGI, no plastic skin, no beauty-filter face, no face replacement, no facial reconstruction, no identity change, no age change, no body reshaping, no eye enlargement, no nose reshaping, no jawline reshaping, no artificial smile, no excessive skin smoothing, no airbrushing, no excessive makeup, no dramatic cinematic color grading, no strong vintage filter, no artificial bokeh, no unrealistic lighting, no excessive HDR, no oversharpening, no surreal effects. "
-    "The output MUST remain visually faithful to the original photograph. "
+    "PROFESSIONAL STUDIO PORTRAIT PHOTOGRAPHY & BEAUTY RETOUCHING: "
+    "Transform the input camera photo into a clean, magazine-quality professional studio portrait photograph with flattering skin retouching and an elegant solid studio backdrop, while strictly preserving the person's true biological facial identity, pose, clothing, and natural expression. "
+    "The output MUST be a real, authentic, high-resolution photograph taken in a professional photo studio. "
+
+    "1. CRITICAL MANDATORY FORMAT - SINGLE PORTRAIT FRAME ONLY: "
+    "- The generated output MUST be exactly ONE SINGLE, UNIFIED, FULL-FRAME PORTRAIT photograph filling the entire canvas (1024x1024). "
+    "- Absolutely NO 2x2 grids, NO 4-cut collage, NO split panels, NO multi-panel layouts, NO comic strip frames, NO sub-frames, NO picture-in-picture, NO black borders, and NO text or brand logos. "
+    "- There is exactly ONE single continuous photograph depicting the subject, exactly matching the single camera frame composition. "
+
+    "2. CLEAN SOLID SINGLE-TONE / PASTEL STUDIO BACKDROP (REMOVE ALL CLUTTER): "
+    "- COMPLETELY REMOVE and REPLACE the original background (including office furniture, chairs, coat racks, printers, boxes, windows, blinds, cords, and room clutter). "
+    "- Place the subject against a clean, smooth, solid, seamless photography studio cyclorama wall in a soft neutral warm light grey / elegant soft pastel tone (깔끔한 스튜디오 단일 톤 / 파스텔 톤 단색 배경). "
+    "- The background must be completely uniform, minimal, clean, and distraction-free, with soft natural studio light falloff, identical to a high-end professional photo studio portrait. "
+    "- Maintain 100% visual consistency in background color, texture, and studio lighting across all cuts in the session. "
+
+    "3. NATURAL BEAUTY RETOUCHING & FLATTERING SKIN ENHANCEMENT: "
+    "- RADIANT SKIN TONE: Brighten, clarify, and even out the skin tone naturally (화사하고 맑고 생기 있는 피부톤 연출). Eliminate dullness, tired shadows, and harsh skin redness. "
+    "- BLEMISH & SPOT CLEANUP: Automatically remove and smooth out facial blemishes, acne, spots, temporary skin redness, and under-eye dark circles, creating a clean, refined, healthy complexion. "
+    "- REALISTIC TEXTURE PRESERVATION: Retain authentic, fine human skin texture, natural pores, and realistic facial depth. Absolutely NO plastic waxy skin, NO porcelain doll look, and NO artificial blur filter. "
+    "- FLATTERING STUDIO LIGHTING: Illuminate the face with soft, flattering studio beauty lighting (softbox key light and gentle ambient fill) that highlights facial contours gracefully, softens unflattering shadows, and adds lively, sparkling catchlights to the pupils. "
+    "- NEAT GROOMING: Neatly groom flyaway hair strands while keeping natural hair volume, style, and texture. Lips and eyes look crisp, fresh, and attractively defined (더 예쁘고 단정하게 잘 나온 스튜디오 인물 사진). "
+
+    "4. STRICT SUBJECT & IDENTITY PRESERVATION: "
+    "- The subject MUST remain undeniably and recognizably the EXACT SAME PERSON. "
+    "- Strictly preserve each person's unique biological facial structure: eye shape, eyelid creases, eyebrow arch, nose bridge, nostril shape, philtrum, mouth shape, lips, jawline, and cheekbone contours directly from the source photo. "
+    "- Strictly preserve the original age, natural expression (smile, gaze, head tilt), and emotional mood. "
+    "- Strictly preserve the original pose, body angle, posture, and hand gesture from the input camera frame. Do NOT invent new poses or unnatural hand positions. "
+    "- Preserve the original clothing, collar, accessories, and glasses accurately with crisp fabric detail and true colors. "
+
+    "5. STRICT NEGATIVE CONSTRAINTS: "
+    "No 4-cut grid, no 2x2 collage, no multi-panel split, no split frame, no photo strip layout, no black borders, no sub-frames, no picture frames, no text, no watermark, no logos, no multiple people, no strange poses, no awkward hands, no extra limbs, no office background, no furniture, no printer, no clothes rack, no window, no cluttered background, no illustration, no cartoon, no anime, no 3D render, no CGI, no plastic waxy skin, no beauty-filter alien face, no face morphing, no identity replacement, no blurred face, no low quality. "
+    "The output MUST be one beautiful, clean, single-cut professional studio photograph. "
 )
 
 PROMPTS_BASIC = {
     0: (
         BASIC_CORE_BASE +
-        "FRAME SEQUENCE & CUT 1: Treat this frame as the first shot of the Korean photo-booth session. Maintain the original pose, candid expression, and authentic background with subtle exposure and white-balance calibration."
+        "FRAME SPECIFICATION - SHOT 1: Single portrait shot 1. Seamless clean soft neutral warm light grey studio backdrop, flattering bright skin tone, blemish cleanup, and soft beauty lighting while faithfully maintaining the original Shot 1 pose, gaze, and expression."
     ),
     1: (
         BASIC_CORE_BASE +
-        "FRAME SEQUENCE & CUT 2: Treat this frame as the second shot of the photo-booth session. Preserve consistent lighting, skin tone warmth, and natural photographic clarity with frame 1 while maintaining original identity and pose."
+        "FRAME SPECIFICATION - SHOT 2: Single portrait shot 2. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching with Shot 1, faithfully preserving the original Shot 2 pose, hand gesture, and expression."
     ),
     2: (
         BASIC_CORE_BASE +
-        "FRAME SEQUENCE & CUT 3: Treat this frame as the third shot of the photo-booth session. Maintain natural highlights, soft shadows, uncrushed blacks, and authentic eye contact exactly as captured in the source photo."
+        "FRAME SPECIFICATION - SHOT 3: Single portrait shot 3. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching with all shots, faithfully preserving the original Shot 3 pose, hand gesture, and expression."
     ),
     3: (
         BASIC_CORE_BASE +
-        "FRAME SEQUENCE & CUT 4: Treat this frame as the fourth shot completing the photo-booth strip. Harmonize overall tonal depth and print clarity with all preceding frames without altering identity or clothing."
+        "FRAME SPECIFICATION - SHOT 4: Single portrait shot 4. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching across the set, faithfully preserving the original Shot 4 pose, hand gesture, and expression."
     )
 }
 
