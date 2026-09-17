@@ -9,11 +9,19 @@ __pycache__/
 local-server/uploads/*
 !local-server/uploads/.gitkeep
 
+# Binaries and Logs
+ngrok.exe
+*.exe
+*.log
+
+# User Media Storage & Large Video/Temp Files
+이용자 동영상 저장소/
+이용자 사진 저장소/
+*.mp4
+*.webm
+
 # Temporary tests
 local-server/test_frame_*.jpg
 local-server/test_dummy_video.webm
 local-server/test_gdrive_upload.py
 
-# Executables & logs
-*.exe
-ngrok.log

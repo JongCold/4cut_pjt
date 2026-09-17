@@ -705,11 +705,12 @@ async def api_transform_single(
         }
     elif is_basic:
         step_descriptions = {
-            0: (1, 15, "1컷 스튜디오 뷰티 보정", "스튜디오 단일톤 배경 교체 및 1컷 화사한 피부톤·잡티 정돈 중..."),
-            1: (2, 35, "2컷 스튜디오 뷰티 보정", "매끄러운 피부결 개선 및 2컷 소프트 스튜디오 조명 연출 중..."),
-            2: (3, 50, "3컷 스튜디오 뷰티 보정", "잡티 케어 및 3컷 스튜디오 배경 일관성 동기화 중..."),
-            3: (4, 65, "4컷 스튜디오 뷰티 보정", "고품격 스튜디오 뷰티 보정 및 4컷 최종 완성 중...")
+            0: (1, 15, "1컷 스튜디오 뷰티 보정", "단일톤 파스텔 스튜디오 배경 및 피부결/잡티 정돈 중..."),
+            1: (2, 35, "2컷 스튜디오 뷰티 보정", "화사한 피부톤 보정 및 소프트 조명 최적화 중..."),
+            2: (3, 50, "3컷 스튜디오 뷰티 보정", "원본 포즈/미소 보존 및 깨끗한 인물 리터칭 중..."),
+            3: (4, 65, "4컷 스튜디오 뷰티 보정", "일관된 파스텔 톤 및 최종 4컷 인화 밸런스 조정 중...")
         }
+
     else:
         step_descriptions = {
             0: (1, 15, "1컷 유년기 변환", "어린이 AI 실사 변환 분석 중... (골격 100% 보존)"),
@@ -979,8 +980,26 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
     for idx in range(1, 5):
         fn = f"{prefix}_single_{idx}_{session_id}.jpg"
         fp = os.path.join(UPLOAD_DIR, fn)
-        if not os.path.exists(fp):
+        if not os.path.exists(fp) and prefix == "orig":
             fp = os.path.join(UPLOAD_DIR, f"orig_single_{idx}_{session_id}.jpg")
+        elif not os.path.exists(fp) and prefix == "ai":
+            # AI 변환 파일 대체 후보 탐색 (AI 사진 유실 방지)
+            alt_candidates = [
+                f"ai_single_{idx}_{session_id}.png",
+                f"ai_{idx}_{session_id}.jpg",
+                f"transformed_{idx}_{session_id}.jpg"
+            ]
+            for alt in alt_candidates:
+                alt_fp = os.path.join(UPLOAD_DIR, alt)
+                if os.path.exists(alt_fp):
+                    fp = alt_fp
+                    break
+            # 만약 AI 컷 파일이 아직 생성 전이면 orig으로 fallback하기 전 로그 기록
+            if not os.path.exists(fp):
+                orig_fp = os.path.join(UPLOAD_DIR, f"orig_single_{idx}_{session_id}.jpg")
+                if os.path.exists(orig_fp):
+                    fp = orig_fp
+                    print(f"[Update Color Warning] AI 컷({idx}) 미발견 -> orig 임시 참조")
         if os.path.exists(fp):
             try:
                 single_images.append(Image.open(fp).convert("RGB"))
@@ -988,6 +1007,14 @@ async def api_update_frame_color(req: FrameColorRequest, request: Request):
                 pass
 
     if len(single_images) < 4:
+        # 만약 기존 ai_frame 파일이 이미 완성되어 있다면 이를 바로 반환하여 유실 방지
+        existing_ai_frame = os.path.join(UPLOAD_DIR, f"{prefix}_frame_{session_id}.jpg")
+        if os.path.exists(existing_ai_frame):
+            return {
+                "success": True,
+                "frame_url": f"/uploads/{prefix}_frame_{session_id}.jpg",
+                "message": "기존 AI 프레임 보존 유지"
+            }
         raise HTTPException(status_code=404, detail="프레임 재생성을 위한 개별 사진을 찾을 수 없습니다.")
 
     # 타이틀 결정

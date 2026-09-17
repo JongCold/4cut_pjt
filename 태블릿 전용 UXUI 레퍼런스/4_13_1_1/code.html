@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>청년4컷 - 컨셉 선택</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Custom Style: Background Dot Grid & Ink Shadow Style -->
+<style data-purpose="kiosk-theme">
+    @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+
+    body {
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+      background-color: #f7f4ec;
+      background-image: radial-gradient(#d1cbbe 1.2px, transparent 1.2px);
+      background-size: 20px 20px;
+    }
+
+    /* Tactile Doodle Ink Stroke & Hard Drop Shadow */
+    .ink-border {
+      border: 2.5px solid #18181b;
+    }
+    .ink-shadow {
+      box-shadow: 4px 4px 0px #18181b;
+    }
+    .ink-shadow-lg {
+      box-shadow: 6px 6px 0px #18181b;
+    }
+    .ink-shadow-btn {
+      box-shadow: 0 4px 0 #18181b;
+      transition: all 0.1s ease;
+    }
+    .ink-shadow-btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #18181b;
+    }
+
+    /* Hand-drawn marker highlight */
+    .highlight-marker {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    .highlight-marker::after {
+      content: '';
+      position: absolute;
+      left: -4px;
+      right: -4px;
+      bottom: 2px;
+      height: 11px;
+      background-color: #fde047;
+      opacity: 0.7;
+      border-radius: 4px;
+      z-index: -1;
+      transform: rotate(-0.5deg);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3 select-none text-zinc-900">
+<!-- BEGIN: TabletScreenContainer (13-inch Landscape Frame) -->
+<div class="w-full max-w-[1240px] h-[780px] bg-[#fcfaf5] rounded-3xl ink-border ink-shadow-lg flex flex-col overflow-hidden relative p-6" data-purpose="tablet-kiosk-frame">
+<!-- BEGIN: MainHeader -->
+<header class="flex items-center justify-between pb-3 border-b-2 border-zinc-300">
+<!-- Left: Youth Center & AI Brand Logos -->
+<div class="flex items-center space-x-3">
+<div class="flex items-center space-x-2">
+<span class="text-xl">🎨</span>
+<div class="leading-tight">
+<span class="text-xs font-bold text-emerald-700 block tracking-tight">서울청년센터 영등포</span>
+<span class="text-lg font-black tracking-tight text-zinc-900">청년4컷</span>
+</div>
+</div>
+<div class="h-6 w-px bg-zinc-300 mx-1"></div>
+<div class="leading-none">
+<span class="text-xs font-extrabold tracking-widest text-zinc-700 block">놀면뭐AI</span>
+<span class="text-[9px] font-semibold text-zinc-400 tracking-wider">AI SYSTEM</span>
+</div>
+</div>
+<!-- Right: Step Indicator & Ready Status Badges -->
+<div class="flex items-center space-x-3">
+<!-- Step Badge -->
+<div class="flex items-center bg-white ink-border rounded-full px-4 py-1 space-x-2 ink-shadow-btn">
+<span class="bg-zinc-900 text-amber-400 text-xs font-black px-2 py-0.5 rounded-full">STEP 1</span>
+<span class="text-xs font-bold text-zinc-800">컨셉 선택하기</span>
+</div>
+<!-- Kiosk Ready Indicator -->
+<div class="flex items-center bg-white ink-border rounded-full px-3 py-1 space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-xs font-black text-emerald-700 tracking-wider">READY</span>
+</div>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: ScreenTitleSection -->
+<!-- Title strictly with only the requested single sentence, centered and clean -->
+<div class="pt-5 pb-3 text-center">
+<h1 class="text-2xl font-black text-zinc-900 tracking-tight highlight-marker">
+        원하는 4컷 컨셉을 터치하여 선택해주세요
+      </h1>
+</div>
+<!-- END: ScreenTitleSection -->
+<!-- BEGIN: MainContentGrid (1:1 Equal Split) -->
+<main class="flex-1 grid grid-cols-2 gap-7 px-4 items-center">
+<!-- BEGIN: LeftConceptCarouselArea -->
+<section class="flex flex-col items-center justify-center h-full" data-purpose="concept-carousel-section">
+<div class="relative w-full max-w-[390px] flex items-center justify-center">
+<!-- Previous Concept Button -->
+<button aria-label="이전 컨셉" class="absolute -left-12 z-20 w-11 h-11 rounded-full bg-white ink-border ink-shadow-btn flex items-center justify-center text-zinc-900 text-xl font-black hover:bg-zinc-100 cursor-pointer" id="prevBtn" type="button">
+            ❮
+          </button>
+<!-- Selected 4-Cut Frame Mockup Container -->
+<div class="w-full bg-white ink-border ink-shadow-lg rounded-2xl p-4 flex flex-col items-center transition-all duration-200" id="conceptCard">
+<!-- Top Tag Pill -->
+<div class="w-full flex justify-between items-center mb-3">
+<span class="bg-amber-100 text-zinc-800 border border-zinc-900 rounded-full text-[11px] font-extrabold px-2.5 py-0.5" id="cardBadge">
+                ✨ AI 테마
+              </span>
+<span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-400">
+                선택 가능
+              </span>
+</div>
+<!-- 2x2 Cuts Grid Container -->
+<div class="w-full grid grid-cols-2 gap-2.5 mb-3.5" id="gridCuts">
+<!-- Cuts are dynamically rendered via JavaScript -->
+</div>
+<!-- Concept Title Below the Cuts -->
+<div class="w-full text-center border-t-2 border-zinc-200 pt-2.5">
+<h2 class="text-xl font-black text-zinc-900 tracking-tight" id="conceptNameLeft">
+                인생 4컷
+              </h2>
+</div>
+</div>
+<!-- Next Concept Button -->
+<button aria-label="다음 컨셉" class="absolute -right-12 z-20 w-11 h-11 rounded-full bg-white ink-border ink-shadow-btn flex items-center justify-center text-zinc-900 text-xl font-black hover:bg-zinc-100 cursor-pointer" id="nextBtn" type="button">
+            ❯
+          </button>
+</div>
+<!-- Carousel Pagination Indicator Dots -->
+<div class="flex items-center space-x-2.5 mt-4" data-purpose="carousel-dots">
+<button aria-label="1번 컨셉" class="dot-btn w-3 h-3 rounded-full bg-zinc-900 transition-all cursor-pointer" data-index="0"></button>
+<button aria-label="2번 컨셉" class="dot-btn w-3 h-3 rounded-full bg-zinc-300 hover:bg-zinc-400 transition-all cursor-pointer" data-index="1"></button>
+<button aria-label="3번 컨셉" class="dot-btn w-3 h-3 rounded-full bg-zinc-300 hover:bg-zinc-400 transition-all cursor-pointer" data-index="2"></button>
+<button aria-label="4번 컨셉" class="dot-btn w-3 h-3 rounded-full bg-zinc-300 hover:bg-zinc-400 transition-all cursor-pointer" data-index="3"></button>
+</div>
+</section>
+<!-- END: LeftConceptCarouselArea -->
+<!-- BEGIN: RightSelectionConfirmationArea -->
+<section class="flex flex-col justify-between h-full max-h-[490px] bg-white ink-border ink-shadow-lg rounded-2xl p-6" data-purpose="selection-summary-section">
+<!-- Concept Summary Top Info -->
+<div>
+<div class="flex items-center justify-between pb-3 border-b-2 border-zinc-200">
+<span class="inline-flex items-center text-xs font-black text-emerald-800 bg-emerald-100 border border-emerald-500 rounded-md px-2.5 py-1">
+              선택된 컨셉
+            </span>
+<span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Theme Preview</span>
+</div>
+<!-- Dynamic Active Concept Title -->
+<div class="mt-4">
+<h3 class="text-3xl font-black text-zinc-900 tracking-tight" id="activeThemeTitle">
+              인생 4컷
+            </h3>
+</div>
+<!-- 4-Cut Sequence Visual Steps -->
+<div class="mt-6">
+<span class="text-xs font-bold text-zinc-500 mb-2 block">촬영 순서 (4컷 구성)</span>
+<div class="grid grid-cols-2 gap-3" id="sequenceList">
+<!-- Rendered dynamically: 1컷 ~ 4컷 -->
+</div>
+</div>
+</div>
+<!-- Prominent Large CTA Button (선택 완료) -->
+<div class="pt-4">
+<button class="w-full py-4 px-6 bg-[#c23a2b] hover:bg-[#a82f22] text-white text-lg font-black rounded-xl ink-border ink-shadow-btn flex items-center justify-center space-x-3 transition-colors cursor-pointer" id="submitBtn" type="button">
+<span>컨셉 선택 완료 (촬영 부스로 입장하기)</span>
+<span class="text-xl">➔</span>
+</button>
+</div>
+</section>
+<!-- END: RightSelectionConfirmationArea -->
+</main>
+<!-- END: MainContentGrid -->
+<!-- BEGIN: MainFooter -->
+<footer class="pt-2 text-center text-[11px] text-zinc-400 font-medium tracking-wider">
+      서울청년센터 영등포 × 놀면뭐AI  |  FREE PHOTO SERVICE FOR SEOUL YOUTH
+    </footer>
+<!-- END: MainFooter -->
+</div>
+<!-- END: TabletScreenContainer -->
+<!-- BEGIN: Carousel & Dynamic Data Scripts -->
+<script data-purpose="concept-data-and-renderer">
+    // 4 Distinct Concepts Definition (Strictly names & 4 cut titles, no descriptive subtitles)
+    const CONCEPTS = [
+      {
+        id: 1,
+        name: "인생 4컷",
+        badge: "✨ AI 연령 변환",
+        cuts: [
+          { label: "유년기", icon: "👶", bg: "bg-amber-100", border: "border-amber-300" },
+          { label: "학창시절", icon: "🎓", bg: "bg-sky-100", border: "border-sky-300" },
+          { label: "현재모습", icon: "✨", bg: "bg-purple-100", border: "border-purple-300" },
+          { label: "노년기", icon: "👵", bg: "bg-stone-200", border: "border-stone-300" }
+        ]
+      },
+      {
+        id: 2,
+        name: "조선 4컷",
+        badge: "👑 AI 신분 변환",
+        cuts: [
+          { label: "왕", icon: "👑", bg: "bg-rose-100", border: "border-rose-300" },
+          { label: "양반", icon: "📜", bg: "bg-emerald-100", border: "border-emerald-300" },
+          { label: "보부상", icon: "🎒", bg: "bg-amber-100", border: "border-amber-300" },
+          { label: "노비", icon: "🌾", bg: "bg-orange-100", border: "border-orange-300" }
+        ]
+      },
+      {
+        id: 3,
+        name: "판타지 4컷",
+        badge: "🔮 AI 마법 판타지",
+        cuts: [
+          { label: "마법학교", icon: "🏰", bg: "bg-indigo-100", border: "border-indigo-300" },
+          { label: "마법사", icon: "🧙‍♂️", bg: "bg-violet-100", border: "border-violet-300" },
+          { label: "마법", icon: "🪄", bg: "bg-blue-100", border: "border-blue-300" },
+          { label: "magician", icon: "✨", bg: "bg-teal-100", border: "border-teal-300" }
+        ]
+      },
+      {
+        id: 4,
+        name: "픽셀 4컷",
+        badge: "👾 AI 레트로 픽셀",
+        cuts: [
+          { label: "픽셀", icon: "🕹️", bg: "bg-lime-100", border: "border-lime-300" },
+          { label: "Pixel", icon: "👾", bg: "bg-cyan-100", border: "border-cyan-300" },
+          { label: "픽셀", icon: "🎮", bg: "bg-yellow-100", border: "border-yellow-300" },
+          { label: "Pixel", icon: "💾", bg: "bg-pink-100", border: "border-pink-300" }
+        ]
+      }
+    ];
+
+    let currentIndex = 0;
+
+    // DOM Elements
+    const gridCutsEl = document.getElementById("gridCuts");
+    const conceptNameLeftEl = document.getElementById("conceptNameLeft");
+    const cardBadgeEl = document.getElementById("cardBadge");
+    const activeThemeTitleEl = document.getElementById("activeThemeTitle");
+    const sequenceListEl = document.getElementById("sequenceList");
+    const dotButtons = document.querySelectorAll(".dot-btn");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+
+    // Render Function
+    function renderConcept(index) {
+      const concept = CONCEPTS[index];
+
+      // Update Titles
+      conceptNameLeftEl.textContent = concept.name;
+      cardBadgeEl.textContent = concept.badge;
+      activeThemeTitleEl.textContent = concept.name;
+
+      // Render 2x2 Grid Cuts on Left Card
+      gridCutsEl.innerHTML = "";
+      concept.cuts.forEach((cut) => {
+        const cutBox = document.createElement("div");
+        cutBox.className = `${cut.bg} ${cut.border} border-2 rounded-xl h-24 flex flex-col items-center justify-center p-2 shadow-sm`;
+        cutBox.innerHTML = `
+          <span class="text-2xl mb-1">${cut.icon}</span>
+          <span class="text-xs font-black text-zinc-800 tracking-tight">${cut.label}</span>
+        `;
+        gridCutsEl.appendChild(cutBox);
+      });
+
+      // Render Sequence on Right Card
+      sequenceListEl.innerHTML = "";
+      concept.cuts.forEach((cut, idx) => {
+        const item = document.createElement("div");
+        item.className = "flex items-center space-x-2.5 p-3 rounded-xl border-2 border-zinc-200 bg-zinc-50";
+        item.innerHTML = `
+          <span class="w-6 h-6 rounded-full bg-zinc-900 text-amber-300 text-xs font-black flex items-center justify-center flex-shrink-0">
+            ${idx + 1}
+          </span>
+          <span class="text-base">${cut.icon}</span>
+          <span class="text-sm font-bold text-zinc-900 tracking-tight">${cut.label}</span>
+        `;
+        sequenceListEl.appendChild(item);
+      });
+
+      // Update Pagination Dots
+      dotButtons.forEach((dot, dotIdx) => {
+        if (dotIdx === index) {
+          dot.className = "dot-btn w-6 h-3 rounded-full bg-zinc-900 transition-all cursor-pointer";
+        } else {
+          dot.className = "dot-btn w-3 h-3 rounded-full bg-zinc-300 hover:bg-zinc-400 transition-all cursor-pointer";
+        }
+      });
+    }
+
+    // Carousel Navigation
+    function prevConcept() {
+      currentIndex = (currentIndex - 1 + CONCEPTS.length) % CONCEPTS.length;
+      renderConcept(currentIndex);
+    }
+
+    function nextConcept() {
+      currentIndex = (currentIndex + 1) % CONCEPTS.length;
+      renderConcept(currentIndex);
+    }
+
+    // Event Listeners
+    prevBtn.addEventListener("click", prevConcept);
+    nextBtn.addEventListener("click", nextConcept);
+
+    dotButtons.forEach((dot) => {
+      dot.addEventListener("click", (e) => {
+        const targetIndex = parseInt(e.currentTarget.getAttribute("data-index"), 10);
+        if (!isNaN(targetIndex)) {
+          currentIndex = targetIndex;
+          renderConcept(currentIndex);
+        }
+      });
+    });
+
+    // Touch Swipe Support for Tablets
+    let touchStartX = 0;
+    let touchEndX = 0;
+    const cardEl = document.getElementById("conceptCard");
+
+    cardEl.addEventListener("touchstart", (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    cardEl.addEventListener("touchend", (e) => {
+      touchEndX = e.changedTouches[0].screenX;
+      if (touchStartX - touchEndX > 45) {
+        nextConcept(); // swipe left -> next
+      } else if (touchEndX - touchStartX > 45) {
+        prevConcept(); // swipe right -> prev
+      }
+    }, { passive: true });
+
+    // Action Button Click Feedback
+    submitBtn.addEventListener("click", () => {
+      const selected = CONCEPTS[currentIndex].name;
+      alert(`[${selected}] 이(가) 선택되었습니다. 촬영 부스로 이동합니다!`);
+    });
+
+    // Initial render
+    renderConcept(currentIndex);
+  </script>
+<!-- END: Carousel & Dynamic Data Scripts -->
+</body></html>

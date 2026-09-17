@@ -1,0 +1,97 @@
+<!DOCTYPE html><html lang="ko" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>청년 4컷 - 서울청년센터 영등포</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Gaegu & Pretendard for hand-drawn / crisp Korean typography -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&amp;family=Noto+Sans+KR:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            paper: '#FAF8F5',
+            ink: '#222222',
+            primaryRed: '#B83227',
+            accentGreen: '#009775',
+            sketchGray: '#E8E4DD'
+          },
+          fontFamily: {
+            hand: ['"Gaegu"', 'cursive', 'sans-serif'],
+            sans: ['"Noto Sans KR"', 'sans-serif']
+          },
+          boxShadow: {
+            'doodle': '3px 3px 0px #222222',
+            'doodle-lg': '4px 5px 0px #222222',
+            'doodle-active': '1px 1px 0px #222222'
+          }
+        }
+      }
+    }
+  </script>
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="hand-drawn-borders">
+    /* Hand-drawn sketchy borders and organic curves */
+    .doodle-border {
+      border: 2.5px solid #222222;
+      border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+    }
+    .doodle-border-card {
+      border: 2px solid #222222;
+      border-radius: 18px 14px 20px 16px;
+    }
+    .doodle-button {
+      border: 2.5px solid #222222;
+      transition: all 0.15s ease-in-out;
+    }
+    .doodle-button:active {
+      transform: translate(2px, 2px);
+    }
+    .scribble-tag {
+      border: 1.5px dashed #222222;
+      border-radius: 12px 20px 14px 18px;
+    }
+  </style>
+<!-- END: Custom Styles -->
+</head>
+<body class="bg-[#ECE7DE] min-h-screen w-screen flex justify-center items-center antialiased text-ink font-sans selection:bg-[#009775] selection:text-white p-2 sm:p-6 overflow-hidden">
+<!-- BEGIN: MobileDeviceFrame -->
+<div class="w-full max-w-6xl aspect-[16/10] bg-paper rounded-3xl border-4 border-ink shadow-doodle-lg flex flex-col justify-between overflow-hidden relative" style="aspect-ratio: 16 / 10; max-height: 94vh; width: 100%; max-width: 1200px;">
+<!-- BEGIN: TopHeader -->
+<header class="py-4 px-8 border-b-2 border-dashed border-[#DDD7CD] flex items-center justify-between bg-paper shrink-0" data-purpose="main-header"><div class="flex items-center gap-4"><img alt="서울청년센터 영등포" class="h-12 w-auto object-contain drop-shadow-sm" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAC4p5FnFuafP0zZ01tdd5h56iZ_vJdsiYbINrHsEUUEEKzVMn6Vyi49j1Ey2ZeagpZspOB97DTmxYrrjtbwef9y9tOKYeRN5VRttaQU7YTxQSp73rtwuRi3VAcA0VGtdt6AHIkniDpUugKdqR4e-eqHVMvdBF-ahrlqo9u21pvmMSArx7pcTGPEfKOYns1fVY9nE2-9qd9cKjXTK8HJtJZrpQu0azOAyR8wcerTh9saIh2VJYraD8Dqni3tJlCbmH1aKA"><div class="border-l-2 border-ink h-8 mx-1 opacity-60"></div><div class="flex flex-col"><span class="font-hand text-2xl font-bold text-ink leading-tight">놀면뭐AI</span><span class="text-[10px] tracking-widest text-[#666] font-mono font-bold uppercase">AI Photo Booth System</span></div><div class="ml-4 flex items-center gap-2 bg-[#F4EFE6] px-3.5 py-1.5 doodle-border-card"><span class="w-5 h-5 rounded-full bg-primaryRed text-white flex items-center justify-center font-bold text-[11px] shadow-sm">₩0</span><span class="text-xs text-[#555] font-bold">서울청년센터 영등포 전용</span></div></div><div class="flex items-center gap-2 px-4 py-1.5 bg-white doodle-border shadow-doodle"><span class="w-3 h-3 rounded-full bg-accentGreen animate-pulse"></span><span class="font-mono text-sm font-bold tracking-tight text-ink">KIOSK ONLINE</span></div></header>
+<!-- END: TopHeader -->
+<!-- BEGIN: MainContentArea -->
+<main class="flex-1 px-6 py-3 flex flex-col justify-center overflow-hidden" data-purpose="kiosk-interactive-view"><div class="grid grid-cols-12 gap-6 items-stretch h-full px-2"><div class="col-span-5 flex flex-col justify-between items-center bg-[#F8F5EE] p-6 text-center"><div class="flex flex-col items-center gap-1"><span class="font-hand text-2xl text-accentGreen font-bold tracking-wide">추억을 담아드려요! ✨</span><h1 class="text-3xl font-extrabold text-ink tracking-tight font-sans mt-1">청년 인생 4컷<br><span class="text-primaryRed">포토부스</span></h1></div><div class="my-auto py-2"><img alt="카메라 일러스트" class="w-44 h-44 object-contain mx-auto drop-shadow-md transition-transform hover:scale-105 duration-300" src="https://lh3.googleusercontent.com/aida/AEtjO1UD-tR8XG7SsHMYEwJ3Q0DAdFEzuF2_28OjiQbkz2ruRjJyPTnAfrC_43p0gJS6mPNfv3LpAlkzGHu3w1oJOVmrCoGrDylcA-0KH8WcB0otaUFQmt8XeUxMwNXQuZoLv62mcSJPDNII8nFHdtDv8wEdzI8WGtrsTx698Ft-16aD_tPnDF1TPcANa9KsSFoQlwOwuhIqNY2HeoPEpd4VGcPYG434uJS6X9V7BFohsdNPIYBVC5KXitq-c786"></div><div class="w-full bg-white doodle-border-card py-2.5 px-4 shadow-[1.5px_1.5px_0px_#222222]"><p class="text-xs font-medium text-[#555]">영등포 청년들을 위한 무료 셀프 AI 즉석사진관</p></div></div><div class="col-span-7 flex flex-col justify-between gap-4"><section class="bg-[#F8F5EE] doodle-border p-5 shadow-doodle flex flex-col gap-3 flex-1 justify-center"><div class="flex items-center justify-between pb-2 border-b border-dashed border-[#D2CBBF]"><div class="flex items-center gap-2"><span class="flex items-center justify-center w-7 h-7 rounded-full bg-ink text-white font-hand text-lg font-bold">?</span><h2 class="text-lg font-bold tracking-tight text-ink font-sans">청년 4컷 이용 방법</h2></div><span class="font-mono text-xs text-[#666] font-bold tracking-wider bg-white px-2.5 py-1 rounded-full border border-ink">TOTAL: 90 SEC</span></div><div class="flex flex-col gap-3"><div class="bg-white p-3.5 rounded-xl border border-ink flex items-center gap-3.5 shadow-[2px_2px_0px_#222222]"><div class="w-8 h-8 shrink-0 rounded-full bg-ink text-white flex items-center justify-center font-hand text-lg font-bold">1</div><div class="flex flex-col"><span class="text-base font-bold text-ink">컨셉 선택하기</span><span class="text-xs text-[#666] font-normal leading-relaxed">다양한 청년 맞춤 AI 테마 및 프레임 선택</span></div></div><div class="bg-white p-3.5 rounded-xl border border-ink flex items-center gap-3.5 shadow-[2px_2px_0px_#222222]"><div class="w-8 h-8 shrink-0 rounded-full bg-ink text-white flex items-center justify-center font-hand text-lg font-bold">2</div><div class="flex flex-col"><span class="text-base font-bold text-ink">카운트다운 후 4컷 연사 촬영</span><span class="text-xs text-[#666] font-normal leading-relaxed">3초 간격으로 셔터 찰칵! 자동 포즈 가이드 지원</span></div></div><div class="bg-white p-3.5 rounded-xl border border-ink flex items-center gap-3.5 shadow-[2px_2px_0px_#222222]"><div class="w-8 h-8 shrink-0 rounded-full bg-primaryRed text-white flex items-center justify-center font-hand text-lg font-bold">3</div><div class="flex flex-col"><span class="text-base font-bold text-ink">이미지 변환 및 다운받기</span><span class="text-xs text-[#666] font-normal leading-relaxed">나만의 4컷 완성 및 즉시 인쇄 / 모바일 다운로드</span></div></div></div></section><div class="w-full shrink-0"><button class="w-full py-5 px-8 bg-primaryRed hover:bg-[#a12b21] active:bg-[#8f251c] text-white font-bold doodle-button rounded-2xl shadow-doodle-lg flex items-center justify-center gap-4 group cursor-pointer" type="button"><span class="text-3xl transition-transform group-hover:scale-125 duration-200">📷</span><span class="text-2xl font-bold tracking-tight">촬영 시작하기</span><span class="font-mono text-xs bg-black/30 text-white/95 px-3 py-1.5 rounded-full uppercase tracking-wider font-bold">TOUCH</span></button></div></div></div></main>
+<!-- END: MainContentArea -->
+<!-- BEGIN: Footer -->
+<footer class="py-3 px-5 text-center bg-paper border-t-2 border-dashed border-[#DDD7CD]" data-purpose="minimal-footer"><div class="flex items-center justify-center gap-3"><p class="font-hand text-lg text-[#555] tracking-wide font-bold">서울청년센터 영등포 × 놀면뭐AI</p><span class="text-[#bbb]">|</span><p class="text-xs text-[#888] font-mono">FREE PHOTO SERVICE FOR SEOUL YOUTH</p></div></footer>
+<!-- END: Footer -->
+</div>
+<!-- END: MobileDeviceFrame -->
+<!-- BEGIN: Interactive Logic -->
+<script data-purpose="toggle-handling">
+    // Interactive film tone toggle handler
+    const bwBtn = document.getElementById('tone-bw-btn');
+    const colorBtn = document.getElementById('tone-color-btn');
+
+    bwBtn.addEventListener('click', () => {
+      bwBtn.classList.add('bg-ink', 'text-white', 'shadow-sm');
+      bwBtn.classList.remove('text-[#666]');
+      
+      colorBtn.classList.remove('bg-ink', 'text-white', 'shadow-sm');
+      colorBtn.classList.add('text-[#666]');
+    });
+
+    colorBtn.addEventListener('click', () => {
+      colorBtn.classList.add('bg-ink', 'text-white', 'shadow-sm');
+      colorBtn.classList.remove('text-[#666]');
+      
+      bwBtn.classList.remove('bg-ink', 'text-white', 'shadow-sm');
+      bwBtn.classList.add('text-[#666]');
+    });
+  </script>
+<!-- END: Interactive Logic -->
+</body></html>

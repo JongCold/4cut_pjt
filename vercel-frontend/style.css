@@ -1981,149 +1981,707 @@ input:checked + .slider:before {
 .diag-val { font-weight: 700; color: var(--ink-black); }
 
 /* ============================================
-   태블릿 가로(Landscape) 모드 전용 반응형 스타일
+   태블릿 가로(Landscape) 16:10 전용 반응형 스타일
+   갤럭시 탭 S7+ (13인치, 2800x1752) 최적화
    ============================================ */
 @media (min-width: 900px) and (orientation: landscape) {
 
-  /* 화면 내부 스크롤 영역 - 전체 활용 */
+  /* --- 전역 기본 --- */
   .screen {
-    align-items: center;
+    overflow: hidden;
     justify-content: flex-start;
-    padding-top: 8px;
   }
 
-  /* 각 화면의 main 콘텐츠 영역 확장 */
-  .screen > main,
-  .screen > .screen-body {
-    width: 100%;
-    max-width: 960px;
-    margin: 0 auto;
-    padding-left: 24px;
-    padding-right: 24px;
+  .app-header {
+    padding: 10px 28px 8px;
+    border-bottom: 2px solid var(--border-color);
+    border-bottom-style: dashed;
   }
 
-  /* 홈 화면: 중앙 정렬 및 확대 */
-  .hero-camera-doodle img {
-    max-width: 280px;
+  .header-top-row {
+    gap: 12px;
   }
 
-  .hero-title-hand {
-    font-size: 38px !important;
+  .brand-logo-img {
+    height: 44px;
   }
 
-  .hero-subtitle-line {
-    font-size: 16px !important;
+  .brand-title-hand {
+    font-size: 24px;
+    font-weight: 700;
   }
 
-  .doodle-btn-primary {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+  .brand-sub-mono {
+    font-size: 10px;
+    letter-spacing: 1.5px;
   }
 
-  /* 컨셉 선택 캐러셀: 태블릿에서 더 넓게 */
-  .carousel-item {
-    min-width: 360px;
+  .step-banner-bar {
+    margin-top: 0;
+    margin-left: 16px;
   }
 
-  /* 촬영 화면: 웹캠 영역 확대 */
-  .webcam-container,
-  .webcam-preview-box {
-    max-width: 640px;
-    max-height: 420px;
-    margin: 0 auto;
+  .step-tag-pill {
+    font-size: 11px;
+    padding: 3px 10px;
   }
 
-  #webcam-preview {
-    max-height: 420px;
+  .step-banner-title {
+    font-size: 14px;
   }
 
-  /* 결과 화면: 가로 레이아웃으로 변경 */
-  #screen-result > main {
+  .app-footer {
+    padding: 6px 28px 8px;
+  }
+
+  .footer-hand-text {
+    font-size: 16px;
+  }
+
+  .footer-sub-mono {
+    font-size: 10px;
+  }
+
+  /* --- 화면 1: 홈 (16:10 가로 분할) --- */
+  .home-content {
+    flex: 1;
+    padding: 16px 28px;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    grid-template-rows: 1fr;
+    gap: 28px;
+    align-items: stretch;
+    overflow: hidden;
+  }
+
+  .home-left-col {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 32px;
-    flex-wrap: nowrap;
-    padding-top: 12px;
+    text-align: center;
+    background-color: #F8F5EE;
+    border-radius: 16px;
+    padding: 24px;
+    gap: 12px;
   }
 
-  /* 포토 스트립 카드 - 가로 모드에서 크게 */
+  .home-right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .home-illustration-wrap {
+    margin: 0;
+    padding: 0;
+  }
+
+  .camera-doodle-svg,
+  .camera-doodle-img {
+    width: 180px !important;
+    height: 180px !important;
+  }
+
+  .home-guide-card {
+    flex: 1;
+    padding: 20px;
+    gap: 14px;
+  }
+
+  .guide-header-title {
+    font-size: 18px;
+  }
+
+  .guide-time-tag {
+    font-size: 12px;
+  }
+
+  .guide-step-item {
+    padding: 14px 16px;
+    gap: 14px;
+  }
+
+  .step-num-circle {
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
+  }
+
+  .step-item-title {
+    font-size: 16px;
+  }
+
+  .step-item-desc {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  .btn-start-hero {
+    padding: 22px;
+    font-size: 24px;
+    gap: 12px;
+    border-radius: 20px;
+  }
+
+  .touch-badge {
+    font-size: 11px;
+    padding: 4px 12px;
+  }
+
+  .service-free-badge {
+    padding: 10px 14px;
+    gap: 12px;
+  }
+
+  .service-free-badge span {
+    font-size: 13px !important;
+  }
+
+  /* --- 화면 2: 컨셉 선택 (좌우 1:1 분할) --- */
+  #screen-filter .filter-title-section {
+    padding: 12px 28px 4px;
+  }
+
+  .filter-main-h1 {
+    font-size: 24px;
+  }
+
+  .filter-sub-hint {
+    font-size: 13px;
+  }
+
+  .concept-category-tabs {
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .tab-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+  }
+
+  .quality-mode-bar {
+    margin: 8px 28px 0;
+    padding: 8px 16px;
+  }
+
+  .quality-name {
+    font-size: 14px;
+  }
+
+  .quality-sub {
+    font-size: 11px;
+  }
+
+  /* 필터 메인: 좌우 분할 그리드 */
+  .filter-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    flex: 1;
+    align-items: stretch;
+  }
+
+  .filter-left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .filter-right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: #ffffff;
+    border: 2.5px solid var(--ink-black);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: 24px;
+  }
+
+  .concept-carousel-wrap {
+    padding: 4px 0;
+  }
+
+  .carousel-nav-arrow {
+    width: 44px;
+    height: 44px;
+    font-size: 24px;
+  }
+
+  .carousel-nav-arrow.left { left: -16px; }
+  .carousel-nav-arrow.right { right: -16px; }
+
+  .concept-slide {
+    width: 360px;
+    height: auto;
+    min-height: 340px;
+    padding: 14px;
+  }
+
+  .slide-photo-grid {
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .photo-cell {
+    padding: 6px;
+  }
+
+  .cell-emoji {
+    font-size: 28px;
+    margin-bottom: 3px;
+  }
+
+  .cell-label {
+    font-size: 13px;
+  }
+
+  .cell-sub {
+    font-size: 10px;
+  }
+
+  .slide-title-text {
+    font-size: 18px;
+  }
+
+  .slide-desc-text {
+    font-size: 12px;
+  }
+
+  .carousel-dots-row {
+    margin-top: 8px;
+    gap: 10px;
+  }
+
+  .carousel-dot {
+    width: 12px;
+    height: 12px;
+  }
+
+  .carousel-dot.active {
+    width: 24px;
+    border-radius: 9999px;
+  }
+
+  .filter-bottom-action {
+    padding: 12px 28px 16px;
+  }
+
+  .selected-concept-notice {
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+
+  .btn-confirm-concept {
+    padding: 18px;
+    font-size: 18px;
+    border-radius: 16px;
+  }
+
+  /* --- 화면 3: 촬영 부스 (좌8:우4 분할) --- */
+  .shoot-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 8fr 4fr;
+    grid-template-rows: 1fr;
+    gap: 20px;
+    padding: 12px 28px;
+    overflow: hidden;
+  }
+
+  .shoot-left-col {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .shoot-right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  .viewfinder-outer-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .video-screen-container {
+    flex: 1;
+    aspect-ratio: unset;
+    min-height: 0;
+  }
+
+  .cam-name-tag {
+    font-size: 12px;
+  }
+
+  .countdown-circle {
+    width: 80px;
+    height: 80px;
+    border: 4px solid #ffffff;
+  }
+
+  .countdown-num-text {
+    font-size: 48px;
+  }
+
+  .countdown-sub-hint {
+    font-size: 13px;
+    padding: 3px 10px;
+  }
+
+  .shot-progress-strip {
+    margin-top: 0;
+    padding: 12px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .strip-count-title {
+    font-size: 14px;
+  }
+
+  .strip-sub-text {
+    font-size: 12px;
+  }
+
+  .strip-boxes-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .strip-cut-box {
+    aspect-ratio: auto;
+    padding: 8px 4px;
+  }
+
+  .cut-box-emoji {
+    font-size: 22px;
+    margin-top: 4px;
+  }
+
+  .cut-box-status {
+    font-size: 10px;
+  }
+
+  .tip-sticker-note {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .tip-sticker-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .tip-title-row {
+    font-size: 13px;
+  }
+
+  .tip-desc-text {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  #btn-manual-trigger {
+    padding: 16px !important;
+    font-size: 16px !important;
+    border-radius: 16px;
+  }
+
+  /* --- 화면 4: 촬영본 확인 --- */
+  .select-content {
+    padding: 16px 28px;
+    gap: 16px;
+  }
+
+  .captured-photos-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .captured-card {
+    aspect-ratio: 3 / 4;
+    border-radius: 16px;
+  }
+
+  .captured-card-badge {
+    width: 28px;
+    height: 28px;
+    font-size: 15px;
+  }
+
+  .dual-action-row {
+    max-width: 600px;
+    margin: 0 auto;
+    gap: 12px;
+  }
+
+  .btn-dual {
+    padding: 16px;
+    font-size: 17px;
+    border-radius: 16px;
+  }
+
+  /* --- 화면 5: 변환 결과 (좌우 분할) --- */
+  .result-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    grid-template-rows: 1fr;
+    gap: 24px;
+    padding: 12px 28px;
+    overflow: hidden;
+  }
+
+  .result-left-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  .result-right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .result-tabs-row {
+    gap: 12px;
+  }
+
+  .result-tab-btn {
+    padding: 10px;
+    font-size: 14px;
+    border-radius: 14px;
+  }
+
   .photo-strip-preview-card {
-    width: 320px;
-    min-width: 320px;
-    flex-shrink: 0;
+    width: 280px;
+    margin: 0 auto;
     transform: rotate(0deg);
+    border-radius: 20px;
+    padding: 12px;
   }
 
-  .photo-strip-preview-card img {
-    border-radius: 10px;
+  .strip-single-img-wrap {
+    min-height: 300px;
+    border-radius: 12px;
   }
 
-  /* 결과 화면 하단 요소들 */
   #screen-result .frame-color-btn {
     width: 32px !important;
     height: 32px !important;
   }
 
-  /* QR/완료 화면: 가로 2컬럼 */
-  #screen-finish > main {
+  #btn-to-finish {
+    padding: 16px !important;
+    font-size: 17px !important;
+    border-radius: 16px;
+  }
+
+  /* --- 화면 6: 완료/QR (좌5:우7 분할) --- */
+  .finish-content {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    grid-template-rows: 1fr;
+    gap: 28px;
+    padding: 12px 28px;
+    overflow: hidden;
+  }
+
+  .finish-left-col {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    gap: 32px;
-    flex-wrap: nowrap;
-    padding-top: 12px;
+    background-color: rgba(255,255,255,0.6);
+    padding: 16px;
+    border-radius: 20px;
+    border: 2px dashed var(--border-color);
+  }
+
+  .finish-right-col {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .finish-media-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .finish-media-box {
+    padding: 8px;
+    border-radius: 16px;
+  }
+
+  .finish-box-header {
+    font-size: 12px;
   }
 
   .qr-mobile-download-card {
-    max-width: 420px;
-    min-width: 360px;
+    padding: 16px;
+    border-radius: 20px;
+    flex-direction: row;
+    gap: 16px;
   }
 
-  /* 헤더/스텝 바 가로 모드 최적화 */
-  .app-header {
-    padding: 8px 24px 6px;
+  .qr-frame-box {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    padding: 6px;
   }
 
-  .step-progress-bar {
-    max-width: 700px;
-    margin: 0 auto;
+  .qr-headline {
+    font-size: 16px;
+    margin-bottom: 6px;
   }
 
-  /* 촬영 컷 박스 가로 배치 */
-  .strip-cut-boxes {
+  .qr-body-text {
+    font-size: 13px;
+    line-height: 1.45;
+  }
+
+  .qr-top-del-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+  }
+
+  .finish-action-panel {
+    gap: 8px;
+  }
+
+  .finish-dual-row {
     gap: 12px;
-    justify-content: center;
   }
 
-  .strip-cut-box {
-    width: 80px;
-    height: 80px;
+  .btn-finish-dual {
+    padding: 14px;
+    font-size: 15px;
+    border-radius: 14px;
   }
 
-  /* 카운트다운 오버레이 */
-  .countdown-doodle-overlay .countdown-doodle-num {
-    font-size: 120px;
+  .btn-finish-home {
+    padding: 16px;
+    font-size: 16px;
+    border-radius: 16px;
   }
 
-  /* 로딩 오버레이 */
+  /* --- 모달 태블릿 최적화 --- */
+  .modal-card {
+    max-width: 540px;
+    padding: 24px;
+    gap: 14px;
+    border-radius: 28px;
+  }
+
   .loading-doodle-card {
     max-width: 540px;
     padding: 32px;
   }
 
-  /* 버튼들 가로 모드에서 적절한 크기 */
-  .btn-confirm-concept,
-  .btn-finish-home {
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
+  .loading-title-hand {
+    font-size: 26px;
   }
 
-  .btn-finish-dual {
-    min-width: 200px;
+  .diag-items-list {
+    max-height: 480px;
   }
+}
+
+/* ==========================================
+   추가 커스텀 스타일 (뒤로가기, 타이머 선택 등)
+   ========================================== */
+.btn-header-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #FFFFFF;
+  border: 2px solid var(--ink-black);
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-black);
+  box-shadow: 2px 2px 0px var(--ink-black);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+.btn-header-back:hover {
+  background-color: #FFF9E6;
+  transform: translateY(-1px);
+  box-shadow: 3px 3px 0px var(--ink-black);
+}
+.btn-header-back:active {
+  transform: translate(1.5px, 1.5px);
+  box-shadow: 1px 1px 0px var(--ink-black);
+}
+
+/* 촬영 시간 선택기 */
+.shoot-timer-selector-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #FAF8F2;
+  border: 2px solid var(--ink-black);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: 2.5px 2.5px 0px var(--ink-black);
+  margin-bottom: 4px;
+}
+.shoot-timer-label {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--ink-black);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.shoot-timer-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.timer-opt-btn {
+  background-color: #FFFFFF;
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.timer-opt-btn:hover {
+  border-color: var(--ink-black);
+  color: var(--ink-black);
+}
+.timer-opt-btn.active {
+  background-color: var(--point-red);
+  border-color: var(--ink-black);
+  color: #FFFFFF;
+  box-shadow: 2px 2px 0px var(--ink-black);
+  transform: scale(1.04);
 }

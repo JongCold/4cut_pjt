@@ -232,60 +232,49 @@ PROMPTS_PIXEL = {
     )
 }
 
-# 4. [기본 테마] 단일 톤/파스텔 스튜디오 배경 교체 & 뷰티 보정 (피부톤/잡티 정돈 & 1프레임 단일 인물 보장)
+# 4. [기본 테마] 한국형 스튜디오 4컷 - 단일톤/파스텔 스튜디오 배경 & 자연스러운 피부/잡티 뷰티 보정 프롬프트
 BASIC_CORE_BASE = (
-    "PROFESSIONAL STUDIO PORTRAIT PHOTOGRAPHY & BEAUTY RETOUCHING: "
-    "Transform the input camera photo into a clean, magazine-quality professional studio portrait photograph with flattering skin retouching and an elegant solid studio backdrop, while strictly preserving the person's true biological facial identity, pose, clothing, and natural expression. "
-    "The output MUST be a real, authentic, high-resolution photograph taken in a professional photo studio. "
-
-    "1. CRITICAL MANDATORY FORMAT - SINGLE PORTRAIT FRAME ONLY: "
-    "- The generated output MUST be exactly ONE SINGLE, UNIFIED, FULL-FRAME PORTRAIT photograph filling the entire canvas (1024x1024). "
-    "- Absolutely NO 2x2 grids, NO 4-cut collage, NO split panels, NO multi-panel layouts, NO comic strip frames, NO sub-frames, NO picture-in-picture, NO black borders, and NO text or brand logos. "
-    "- There is exactly ONE single continuous photograph depicting the subject, exactly matching the single camera frame composition. "
-
-    "2. CLEAN SOLID SINGLE-TONE / PASTEL STUDIO BACKDROP (REMOVE ALL CLUTTER): "
-    "- COMPLETELY REMOVE and REPLACE the original background (including office furniture, chairs, coat racks, printers, boxes, windows, blinds, cords, and room clutter). "
-    "- Place the subject against a clean, smooth, solid, seamless photography studio cyclorama wall in a soft neutral warm light grey / elegant soft pastel tone (깔끔한 스튜디오 단일 톤 / 파스텔 톤 단색 배경). "
-    "- The background must be completely uniform, minimal, clean, and distraction-free, with soft natural studio light falloff, identical to a high-end professional photo studio portrait. "
-    "- Maintain 100% visual consistency in background color, texture, and studio lighting across all cuts in the session. "
-
-    "3. NATURAL BEAUTY RETOUCHING & FLATTERING SKIN ENHANCEMENT: "
-    "- RADIANT SKIN TONE: Brighten, clarify, and even out the skin tone naturally (화사하고 맑고 생기 있는 피부톤 연출). Eliminate dullness, tired shadows, and harsh skin redness. "
-    "- BLEMISH & SPOT CLEANUP: Automatically remove and smooth out facial blemishes, acne, spots, temporary skin redness, and under-eye dark circles, creating a clean, refined, healthy complexion. "
-    "- REALISTIC TEXTURE PRESERVATION: Retain authentic, fine human skin texture, natural pores, and realistic facial depth. Absolutely NO plastic waxy skin, NO porcelain doll look, and NO artificial blur filter. "
-    "- FLATTERING STUDIO LIGHTING: Illuminate the face with soft, flattering studio beauty lighting (softbox key light and gentle ambient fill) that highlights facial contours gracefully, softens unflattering shadows, and adds lively, sparkling catchlights to the pupils. "
-    "- NEAT GROOMING: Neatly groom flyaway hair strands while keeping natural hair volume, style, and texture. Lips and eyes look crisp, fresh, and attractively defined (더 예쁘고 단정하게 잘 나온 스튜디오 인물 사진). "
-
-    "4. STRICT SUBJECT & IDENTITY PRESERVATION: "
-    "- The subject MUST remain undeniably and recognizably the EXACT SAME PERSON. "
-    "- Strictly preserve each person's unique biological facial structure: eye shape, eyelid creases, eyebrow arch, nose bridge, nostril shape, philtrum, mouth shape, lips, jawline, and cheekbone contours directly from the source photo. "
-    "- Strictly preserve the original age, natural expression (smile, gaze, head tilt), and emotional mood. "
-    "- Strictly preserve the original pose, body angle, posture, and hand gesture from the input camera frame. Do NOT invent new poses or unnatural hand positions. "
-    "- Preserve the original clothing, collar, accessories, and glasses accurately with crisp fabric detail and true colors. "
-
-    "5. STRICT NEGATIVE CONSTRAINTS: "
-    "No 4-cut grid, no 2x2 collage, no multi-panel split, no split frame, no photo strip layout, no black borders, no sub-frames, no picture frames, no text, no watermark, no logos, no multiple people, no strange poses, no awkward hands, no extra limbs, no office background, no furniture, no printer, no clothes rack, no window, no cluttered background, no illustration, no cartoon, no anime, no 3D render, no CGI, no plastic waxy skin, no beauty-filter alien face, no face morphing, no identity replacement, no blurred face, no low quality. "
-    "The output MUST be one beautiful, clean, single-cut professional studio photograph. "
+    "AUTHENTIC KOREAN STUDIO 'LIFE FOUR CUT' PORTRAIT RETOUCHING: "
+    "Transform the input photo into a single, high-end professional Korean photo-booth portrait cut. "
+    "CRITICAL COMPOSITION RULE - SINGLE FRAME ONLY: "
+    "- Generate strictly ONE single, unified portrait frame corresponding to this cut index. "
+    "- NEVER split the output into 4 smaller sub-quadrants or multiple sub-images. "
+    "- Do not create a collage or internal grid within this single cut. "
+    "BACKGROUND REPLACEMENT (CLEAN MONOCHROME / PASTEL STUDIO BACKDROP): "
+    "- Remove all cluttered, distracting indoor/outdoor background elements from the original shot. "
+    "- Replace the background with an impeccably clean, seamless studio paper backdrop with a gentle, premium pastel tone (soft warm ivory-beige, delicate pastel powder tint, or ultra-clean smooth studio grey) with subtle, soft falloff lighting. "
+    "- Maintain this exact same clean studio background aesthetic across all cuts for complete visual harmony. "
+    "NATURAL BEAUTY RETOUCHING & SKIN ENHANCEMENT: "
+    "- Beautifully polish and refine facial skin texture: delicately remove blemishes, uneven spots, blemishes, redness, under-eye shadows, and shine. "
+    "- Apply a natural, radiant, healthy skin tone brightening effect (맑고 투명한 피부톤), while preserving genuine skin pore details and realistic depth without creating a plastic or fake mannequin texture. "
+    "- Slightly enhance natural facial radiance with soft studio lighting flattering the eyes, lips, and facial contours, making the subject look fresh, attractive, and photogenic. "
+    "IDENTITY & ATTIRE PRESERVATION: "
+    "- Preserve the original person's identity, distinct facial structure, eye shape, nose shape, mouth shape, smile, hairstyle, hair color, glasses, clothing, and natural pose faithfully. "
+    "- The person must clearly and unmistakably look like themselves, but professionally retouched and photographed in a high-end photo booth studio. "
+    "- Preserve the exact pose, hand gesture, body direction, and expression of the subject in the input shot. "
+    "NEGATIVE CONSTRAINTS: "
+    "No multi-split grids, no 4-subcuts inside one frame, no cluttered background, no dirty walls, no messy background objects, no extreme plastic smoothing, no facial distortion, no different person, no cartoon, no anime, no 3D illustration, no watermark. "
 )
 
 PROMPTS_BASIC = {
     0: (
         BASIC_CORE_BASE +
-        "FRAME SPECIFICATION - SHOT 1: Single portrait shot 1. Seamless clean soft neutral warm light grey studio backdrop, flattering bright skin tone, blemish cleanup, and soft beauty lighting while faithfully maintaining the original Shot 1 pose, gaze, and expression."
+        "CUT 1: First shot of the strip. Beautifully lit studio portrait on a clean solid pastel studio backdrop with refined skin texture, clear eyes, and flawless blemish removal."
     ),
     1: (
         BASIC_CORE_BASE +
-        "FRAME SPECIFICATION - SHOT 2: Single portrait shot 2. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching with Shot 1, faithfully preserving the original Shot 2 pose, hand gesture, and expression."
+        "CUT 2: Second shot of the strip. Consistent soft pastel studio lighting and background, glowing natural skin complexion, and faithful preservation of the subject's pose and smile."
     ),
     2: (
         BASIC_CORE_BASE +
-        "FRAME SPECIFICATION - SHOT 3: Single portrait shot 3. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching with all shots, faithfully preserving the original Shot 3 pose, hand gesture, and expression."
+        "CUT 3: Third shot of the strip. Harmonious studio lighting and pastel backdrop tone matching cut 1 & 2, clean blemish-free skin, preserving original attire and accessories."
     ),
     3: (
         BASIC_CORE_BASE +
-        "FRAME SPECIFICATION - SHOT 4: Single portrait shot 4. Maintain identical seamless soft neutral studio backdrop color, lighting temperature, and flattering skin retouching across the set, faithfully preserving the original Shot 4 pose, hand gesture, and expression."
+        "CUT 4: Final shot of the strip. Perfectly polished studio portrait finish with soft studio background, radiant skin tone, and complete visual consistency across the entire 4-cut strip."
     )
 }
+
 
 def transform_single_image_openai(
     image: Image.Image,
