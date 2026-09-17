@@ -12,7 +12,7 @@
   <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 
   <!-- 두들 & 네오브루탈리즘 스타일시트 -->
-  <link rel="stylesheet" href="/templates/style.css">
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
@@ -72,65 +72,71 @@
             <button id="btn-open-diagnostics" class="btn-mini-diag" title="현장 네트워크 & IoT 연동 상태 진단">⚙️</button>
           </div>
         </div>
-
-        <!-- ₩0 서울청년영등포센터 전용 혜택 배지 -->
-        <div class="service-free-badge" style="margin-top:8px;">
-          <div class="free-circle">₩0</div>
-          <div style="display:flex; flex-direction:column;">
-            <span style="font-size:12px; font-weight:800; color:var(--ink-black);">서울청년영등포센터 전용 무료 포토부스</span>
-            <span style="font-size:10px; color:#666;">청년 맞춤 AI 인생 4컷 즉시 인화 및 스마트폰 다운로드</span>
-          </div>
-        </div>
       </header>
 
       <!-- 홈 본문 콘텐츠 -->
       <main class="home-content">
-        <!-- 중앙 카메라 두들 일러스트 (stitch_4 4_1 레퍼런스 일치 및 로컬 영구 로드 보장) -->
-        <div class="home-illustration-wrap" style="display:flex; justify-content:center; align-items:center; margin: 8px 0 12px 0;">
-          <img src="/templates/camera_doodle.png" alt="Camera Doodle" class="camera-doodle-svg" style="width: 154px; height: 154px; object-fit: contain;">
-        </div>
-
-        <!-- 3단계 이용 가이드 카드 -->
-        <div class="home-guide-card">
-          <div class="guide-card-header">
-            <div class="guide-title-group">
-              <span class="q-mark-circle">?</span>
-              <h2 class="guide-header-title">청년 4컷 이용 방법</h2>
-            </div>
-            <span class="guide-time-tag">TOTAL: 90 SEC</span>
+        <!-- 좌측: 타이틀 & 일러스트 (태블릿에서 col 5) -->
+        <div class="home-left-col">
+          <span style="font-family:var(--font-hand); font-size:20px; color:var(--point-teal); font-weight:700;">추억을 담아드려요! ✨</span>
+          <h1 style="font-size:26px; font-weight:900; color:var(--ink-black); line-height:1.3;">청년 인생 4컷<br><span style="color:var(--point-red);">포토부스</span></h1>
+          <!-- 중앙 카메라 두들 일러스트 -->
+          <div class="home-illustration-wrap" style="display:flex; justify-content:center; align-items:center; margin: 8px 0 12px 0;">
+            <img src="./camera_doodle.png" alt="Camera Doodle" class="camera-doodle-svg" style="width: 154px; height: 154px; object-fit: contain;">
           </div>
-
-          <div class="guide-steps-list">
-            <div class="guide-step-item">
-              <span class="step-num-circle">1</span>
-              <div class="step-text-wrap">
-                <span class="step-item-title">컨셉 선택하기</span>
-                <span class="step-item-desc">기본 4컷(내추럴), 인생 사계절, 조선 4컷, 레트로 픽셀 4컷 중 원하는 테마 선택</span>
-              </div>
-            </div>
-            <div class="guide-step-item">
-              <span class="step-num-circle">2</span>
-              <div class="step-text-wrap">
-                <span class="step-item-title">카운트다운 후 4컷 연사 촬영</span>
-                <span class="step-item-desc">3초 간격 셔터 찰칵! 자동 포즈 힌트 & 비하인드 영상 동시 녹화</span>
-              </div>
-            </div>
-            <div class="guide-step-item">
-              <span class="step-num-circle active">3</span>
-              <div class="step-text-wrap">
-                <span class="step-item-title">이미지 변환 및 다운받기</span>
-                <span class="step-item-desc">나만의 4컷 완성 및 즉시 엽서 인쇄 / 모바일 QR 다운로드</span>
-              </div>
+          <!-- ₩0 서비스 소개 (태블릿에서 좌측 하단) -->
+          <div class="service-free-badge" style="margin-top:0;">
+            <div class="free-circle">₩0</div>
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-size:12px; font-weight:800; color:var(--ink-black);">영등포 청년들을 위한 무료 셀프 AI 즉석사진관</span>
             </div>
           </div>
         </div>
 
-        <!-- 메인 CTA 촬영 시작하기 버튼 -->
-        <button id="btn-start" class="doodle-btn btn-start-hero" type="button">
-          <span>📷</span>
-          <span>촬영 시작하기</span>
-          <span class="touch-badge">TOUCH</span>
-        </button>
+        <!-- 우측: 가이드 & CTA (태블릿에서 col 7) -->
+        <div class="home-right-col">
+          <!-- 3단계 이용 가이드 카드 -->
+          <div class="home-guide-card">
+            <div class="guide-card-header">
+              <div class="guide-title-group">
+                <span class="q-mark-circle">?</span>
+                <h2 class="guide-header-title">청년 4컷 이용 방법</h2>
+              </div>
+              <span class="guide-time-tag">TOTAL: 90 SEC</span>
+            </div>
+
+            <div class="guide-steps-list">
+              <div class="guide-step-item">
+                <span class="step-num-circle">1</span>
+                <div class="step-text-wrap">
+                  <span class="step-item-title">컨셉 선택하기</span>
+                  <span class="step-item-desc">다양한 청년 맞춤 AI 테마 및 프레임 선택</span>
+                </div>
+              </div>
+              <div class="guide-step-item">
+                <span class="step-num-circle">2</span>
+                <div class="step-text-wrap">
+                  <span class="step-item-title">카운트다운 후 4컷 연사 촬영</span>
+                  <span class="step-item-desc">3초 간격으로 셔터 찰칵! 자동 포즈 가이드 지원</span>
+                </div>
+              </div>
+              <div class="guide-step-item">
+                <span class="step-num-circle active">3</span>
+                <div class="step-text-wrap">
+                  <span class="step-item-title">이미지 변환 및 다운받기</span>
+                  <span class="step-item-desc">나만의 4컷 완성 및 즉시 인쇄 / 모바일 다운로드</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 메인 CTA 촬영 시작하기 버튼 -->
+          <button id="btn-start" class="doodle-btn btn-start-hero" type="button">
+            <span>📷</span>
+            <span>촬영 시작하기</span>
+            <span class="touch-badge">TOUCH</span>
+          </button>
+        </div>
       </main>
 
       <!-- 푸터 -->
@@ -154,9 +160,18 @@
               <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <div class="doodle-pill status-badge-online">
-            <span class="pulse-dot"></span>
-            <span>READY</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-header-back" type="button" onclick="handleGlobalBack('screen-filter')">
+              <span>‹ 뒤로</span>
+            </button>
+            <button id="btn-open-server-cfg" class="doodle-pill" style="cursor:pointer; background:#EFF6FF; border:1.5px solid var(--ink-black); font-size:11px; font-weight:800; display:flex; align-items:center; gap:4px; padding:4px 10px;">
+              <span>🌐</span>
+              <span id="header-conn-text">서버 연동</span>
+            </button>
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot"></span>
+              <span>READY</span>
+            </div>
           </div>
         </div>
 
@@ -257,22 +272,22 @@
             <div class="slide-photo-grid">
               <div class="photo-cell" style="background-color:#FEE2E2;">
                 <span class="cell-emoji">👑</span>
-                <span class="cell-label" style="color:#881337;">01 왕</span>
+                <span class="cell-label" style="color:#881337;">왕</span>
                 <span class="cell-sub" style="color:#B91C1C;">위엄 가득 곤룡포</span>
               </div>
               <div class="photo-cell" style="background-color:#E0F2FE;">
                 <span class="cell-emoji">📜</span>
-                <span class="cell-label" style="color:#0C4A6E;">02 양반</span>
+                <span class="cell-label" style="color:#0C4A6E;">양반</span>
                 <span class="cell-sub" style="color:#0369A1;">풍류 흑립과 도포</span>
               </div>
               <div class="photo-cell" style="background-color:#FEF3C7;">
                 <span class="cell-emoji">🎒</span>
-                <span class="cell-label" style="color:#78350F;">03 보부상</span>
+                <span class="cell-label" style="color:#78350F;">보부상</span>
                 <span class="cell-sub" style="color:#B45309;">팔도 패랭이 봇짐</span>
               </div>
               <div class="photo-cell" style="background-color:#F5F5F4;">
                 <span class="cell-emoji">🌾</span>
-                <span class="cell-label" style="color:#292524;">04 노비</span>
+                <span class="cell-label" style="color:#292524;">노비</span>
                 <span class="cell-sub" style="color:#57534E;">정겨운 삼베옷과 짚신</span>
               </div>
             </div>
@@ -294,22 +309,22 @@
             <div class="slide-photo-grid">
               <div class="photo-cell" style="background-color:#F5F3FF;">
                 <span class="cell-emoji">🕹️</span>
-                <span class="cell-label" style="color:#5B21B6;">01 픽셀 변환</span>
+                <span class="cell-label" style="color:#5B21B6;">픽셀 변환</span>
                 <span class="cell-sub" style="color:#7C3AED;">도트 스튜디오</span>
               </div>
               <div class="photo-cell" style="background-color:#FEF3C7;">
                 <span class="cell-emoji">🎆</span>
-                <span class="cell-label" style="color:#92400E;">02 불꽃축제</span>
+                <span class="cell-label" style="color:#92400E;">불꽃축제</span>
                 <span class="cell-sub" style="color:#B45309;">한강 불꽃 야경</span>
               </div>
               <div class="photo-cell" style="background-color:#DCFCE7;">
                 <span class="cell-emoji">📚</span>
-                <span class="cell-label" style="color:#166534;">03 청년센터내부</span>
+                <span class="cell-label" style="color:#166534;">청년센터내부</span>
                 <span class="cell-sub" style="color:#15803D;">서가 라운지 마루</span>
               </div>
               <div class="photo-cell" style="background-color:#CCFBF1;">
                 <span class="cell-emoji">🚪</span>
-                <span class="cell-label" style="color:#115E59;">04 청년센터외부</span>
+                <span class="cell-label" style="color:#115E59;">청년센터외부</span>
                 <span class="cell-sub" style="color:#0F766E;">시그니처 민트 로비</span>
               </div>
             </div>
@@ -331,22 +346,22 @@
             <div class="slide-photo-grid">
               <div class="photo-cell" style="background-color:#F8FAFC;">
                 <span class="cell-emoji">📷</span>
-                <span class="cell-label" style="color:#1E293B;">01 맑은 톤</span>
+                <span class="cell-label" style="color:#1E293B;">맑은 톤</span>
                 <span class="cell-sub" style="color:#64748B;">화이트밸런스 보정</span>
               </div>
               <div class="photo-cell" style="background-color:#F0FDF4;">
                 <span class="cell-emoji">✨</span>
-                <span class="cell-label" style="color:#166534;">02 생기 피부</span>
+                <span class="cell-label" style="color:#166534;">생기 피부</span>
                 <span class="cell-sub" style="color:#15803D;">자연스러운 피부결</span>
               </div>
               <div class="photo-cell" style="background-color:#EFF6FF;">
                 <span class="cell-emoji">🎞️</span>
-                <span class="cell-label" style="color:#1E40AF;">03 소프트 쉐도우</span>
+                <span class="cell-label" style="color:#1E40AF;">소프트 쉐도우</span>
                 <span class="cell-sub" style="color:#2563EB;">부드러운 명암비</span>
               </div>
               <div class="photo-cell" style="background-color:#FFFBEB;">
                 <span class="cell-emoji">💖</span>
-                <span class="cell-label" style="color:#92400E;">04 웜 톤 완성</span>
+                <span class="cell-label" style="color:#92400E;">웜 톤 완성</span>
                 <span class="cell-sub" style="color:#B45309;">스튜디오 인화 퀄리티</span>
               </div>
             </div>
@@ -397,9 +412,14 @@
               <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <div class="doodle-pill status-badge-online">
-            <span class="pulse-dot-red"></span>
-            <span>REC LIVE</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-header-back" type="button" onclick="handleGlobalBack('screen-shoot')">
+              <span>‹ 뒤로</span>
+            </button>
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot-red"></span>
+              <span>REC LIVE</span>
+            </div>
           </div>
         </div>
 
@@ -409,18 +429,20 @@
             <span class="step-tag-pill">STEP 2</span>
             <span class="step-banner-title">4컷 연사 촬영 중</span>
           </div>
-          <span class="step-banner-sub">| 3초 간격 셔터 찰칵!</span>
+          <span class="step-banner-sub" id="shoot-banner-timer-sub">| 7초 간격 셔터 찰칵!</span>
         </div>
       </header>
 
       <!-- 촬영 부스 메인 뷰 -->
       <main class="shoot-content">
+        <!-- 좌측: 라이브 뷰파인더 (태블릿에서 col-span-8) -->
+        <div class="shoot-left-col">
         <div class="viewfinder-outer-box">
           <!-- 뷰파인더 상단 메타 헤더 -->
           <div class="viewfinder-top-meta">
             <div class="cam-name-tag">
               <span class="cam-red-dot"></span>
-              <span>CAM 01 // EYE LEVEL</span>
+              <span>CAM // EYE LEVEL HIGH RESOLUTION</span>
             </div>
             <div id="shoot-current-theme-tag" class="current-theme-pill">
               👑 조선 4컷 (신분 변신)
@@ -447,10 +469,10 @@
               </div>
             </div>
 
-            <!-- 대형 3초 카운트다운 펄스 뱃지 -->
+            <!-- 대형 카운트다운 펄스 뱃지 (7초 / 10초) -->
             <div class="countdown-badge-wrap">
               <div class="countdown-circle">
-                <span id="countdown-display-num" class="countdown-num-text">3</span>
+                <span id="countdown-display-num" class="countdown-num-text">7</span>
               </div>
               <span id="countdown-hint-text" class="countdown-sub-hint">초 뒤 찰칵!</span>
             </div>
@@ -464,6 +486,19 @@
             <!-- 셔터 플래시 효과 레이어 -->
             <div id="flash-effect" class="flash-screen"></div>
           </div>
+        </div>
+        </div>
+
+        <!-- 우측: 진행도 + 팁 + 버튼 (태블릿에서 col-span-4) -->
+        <div class="shoot-right-col">
+          <!-- 촬영 타이머 선택 (7초 / 10초) -->
+          <div class="shoot-timer-selector-card">
+            <span class="shoot-timer-label">⏱️ 촬영 타이머</span>
+            <div class="shoot-timer-btn-group">
+              <button type="button" class="timer-opt-btn active" data-time="7" onclick="selectShootTimer(7)">7초 (권장)</button>
+              <button type="button" class="timer-opt-btn" data-time="10" onclick="selectShootTimer(10)">10초 (여유)</button>
+            </div>
+          </div>
 
           <!-- 4컷 진행도 비주얼 스트립 -->
           <div class="shot-progress-strip">
@@ -472,7 +507,7 @@
                 <span class="strip-count-title">촬영 진행도</span>
                 <span id="shoot-counter-badge" class="strip-count-highlight">(1 / 4 CUT)</span>
               </div>
-              <span id="shoot-cut-guide" class="strip-sub-text">각 컷마다 3초씩 여유롭게 촬영돼요!</span>
+              <span id="shoot-cut-guide" class="strip-sub-text">각 컷마다 7초씩 촬영돼요!</span>
             </div>
 
             <div class="strip-boxes-grid">
@@ -498,24 +533,26 @@
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- 포즈 & 카메라 꿀팁 스티커 노트 -->
-        <div class="tip-sticker-note">
-          <div class="tip-sticker-icon">👀</div>
-          <div class="tip-sticker-content">
-            <div class="tip-title-row">
-              <span>촬영 꿀팁</span>
-              <span class="tip-pill-tag">시선은 상단 렌즈로!</span>
+          <!-- 포즈 & 카메라 꿀팁 스티커 노트 -->
+          <div class="tip-sticker-note">
+            <div class="tip-sticker-icon">👀</div>
+            <div class="tip-sticker-content">
+              <div class="tip-title-row">
+                <span>촬영 꿀팁</span>
+                <span class="tip-pill-tag">시선은 상단 렌즈로!</span>
+              </div>
+              <p class="tip-desc-text">화면 가운데 렌즈를 바라보면 자연스러운 시선 처리가 완성됩니다.</p>
             </div>
-            <p class="tip-desc-text">화면 가운데 카메라 렌즈를 바라보시면 자연스러운 시선 처리가 완성됩니다.</p>
+          </div>
+
+          <!-- 하단 액션 버튼 -->
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <button id="btn-manual-trigger" class="doodle-btn doodle-btn-primary" style="width:100%; padding:14px; font-size:17px; font-weight:900;" type="button">
+              <span>📷 지금 바로 촬영 (수동 셔터)</span>
+            </button>
           </div>
         </div>
-
-        <!-- 하단 연사 시작 버튼 -->
-        <button id="btn-manual-trigger" class="doodle-btn doodle-btn-primary" style="width:100%; padding:14px; font-size:17px; font-weight:900;" type="button">
-          <span>🚀 4컷 연사 시작 (카운트다운 ON)</span>
-        </button>
       </main>
     </section>
 
@@ -533,9 +570,14 @@
               <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <div class="doodle-pill status-badge-online">
-            <span class="pulse-dot"></span>
-            <span>CHECK</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-header-back" type="button" onclick="handleGlobalBack('screen-select')">
+              <span>‹ 뒤로</span>
+            </button>
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot"></span>
+              <span>CHECK</span>
+            </div>
           </div>
         </div>
 
@@ -594,9 +636,14 @@
               <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <div class="doodle-pill status-badge-online">
-            <span class="pulse-dot"></span>
-            <span>COMPLETE</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-header-back" type="button" onclick="handleGlobalBack('screen-result')">
+              <span>‹ 뒤로</span>
+            </button>
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot"></span>
+              <span>COMPLETE</span>
+            </div>
           </div>
         </div>
 
@@ -610,64 +657,91 @@
       </header>
 
       <main class="result-content">
-        <!-- 탭 스위처 -->
-        <div class="result-tabs-row">
-          <button id="tab-ai-frame" class="result-tab-btn active" type="button">
-            <span>✨ AI 스타일 4컷</span>
-          </button>
-          <button id="tab-orig-frame" class="result-tab-btn" type="button">
-            <span>📷 원본 촬영 4컷</span>
-          </button>
+        <!-- 좌측 컬럼: 실물 4컷 사진 스트립 프리뷰 -->
+        <div class="result-left-col">
+          <article class="photo-strip-preview-card" id="photo-strip-card">
+            <!-- 실제 프레임 이미지 렌더링 영역 -->
+            <div class="strip-single-img-wrap">
+              <img id="ai-frame-preview" src="" alt="AI 4컷 프레임">
+              <img id="orig-frame-preview" src="" alt="원본 4컷 프레임" style="display:none;">
+            </div>
+
+            <!-- 스트립 하단 서명 푸터 -->
+            <footer class="strip-signature-footer">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                <span class="strip-sign-title" id="strip-brand-label">청년4컷 스튜디오</span>
+                <span style="font-family:var(--font-mono); font-size:9.5px; color:#555;" id="strip-date-label">2026.09.12</span>
+              </div>
+              <div class="barcode-simulation-row">
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:1.5px;"></span>
+                <span class="bar-line" style="width:4px;"></span>
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:4px;"></span>
+              </div>
+              <p class="strip-footer-sub">서울청년센터 영등포 × 놀면뭐AI</p>
+            </footer>
+          </article>
         </div>
 
-        <!-- 4-Cut Realistic Paper Strip 카드 프리뷰 -->
-        <article class="photo-strip-preview-card" id="photo-strip-card">
-          <div class="stamp-tag-top">최종 인화본 ✨</div>
-          <div class="stamp-seal-right">通</div>
+        <!-- 우측 컬럼: 스타일 선택, 프레임 커스텀, 하단 완료 버튼 바 -->
+        <div class="result-right-col">
+          <div class="result-control-top">
+            <!-- 가이드 배너 -->
+            <div class="result-guide-box" style="padding:14px 18px; background:#F8FAFC; border:2px solid var(--ink-black); border-radius:16px; box-shadow:var(--shadow-sm); margin-bottom:12px;">
+              <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; background:#FEF3C7; border:1.5px solid var(--ink-black); border-radius:9999px; font-size:11.5px; font-weight:800; margin-bottom:6px;">
+                <span>✨</span>
+                <span>STEP 3 출력 프레임 선택</span>
+              </div>
+              <h2 style="font-size:19px; font-weight:900; color:var(--ink-black); margin-bottom:4px;">원하시는 프레임을 선택해주세요</h2>
+              <p style="font-size:12.5px; color:#475569; font-weight:600; line-height:1.4;">
+                <strong>AI 스타일 변환 4컷</strong>과 <strong>원본 4컷</strong> 중 마음에 드는 버전을 터치해 확인하세요.
+              </p>
+            </div>
 
-          <!-- 실제 프레임 이미지 렌더링 영역 -->
-          <div class="strip-single-img-wrap">
-            <img id="ai-frame-preview" src="" alt="AI 4컷 프레임">
-            <img id="orig-frame-preview" src="" alt="원본 4컷 프레임" style="display:none;">
+            <!-- 스타일 선택 탭 버튼 행 -->
+            <div class="result-tabs-row" style="margin-bottom:12px;">
+              <button id="tab-ai-frame" class="result-tab-btn active" type="button" style="padding:12px 14px;">
+                <span style="font-size:18px;">✨</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+                  <span style="font-size:15px; font-weight:900;">AI 스타일 4컷</span>
+                  <span style="font-size:11px; opacity:0.85; font-weight:600;">스튜디오 뷰티 보정 & 테마</span>
+                </div>
+              </button>
+              <button id="tab-orig-frame" class="result-tab-btn" type="button" style="padding:12px 14px;">
+                <span style="font-size:18px;">📷</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+                  <span style="font-size:15px; font-weight:900;">원본 촬영 4컷</span>
+                  <span style="font-size:11px; opacity:0.85; font-weight:600;">촬영 원본 그대로 인화</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- 프레임 컬러 변경 팔레트 -->
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 16px; background:#FFFFFF; border:2px solid var(--ink-black); border-radius:14px; box-shadow:var(--shadow-sm);">
+              <span style="font-size:13px; font-weight:800; color:#1E232A;">프레임 테두리:</span>
+              <button class="doodle-pill frame-color-btn active" style="padding:6px 14px; background-color:#FFFFFF; border:2px solid #1E232A; box-shadow:2px 2px 0px #1E232A; font-size:12px; font-weight:900; cursor:pointer;" onclick="changeStripColor('#FFFFFF', '#1E232A', this)" title="화이트">
+                ⚪ 클래식 화이트 (기본)
+              </button>
+            </div>
           </div>
 
-          <!-- 스트립 하단 서명 푸터 -->
-          <footer class="strip-signature-footer">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-              <span class="strip-sign-title" id="strip-brand-label">청년4컷 스튜디오</span>
-              <span style="font-family:var(--font-mono); font-size:9.5px; color:#555;" id="strip-date-label">2026.09.12</span>
-            </div>
-            <div class="barcode-simulation-row">
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:1.5px;"></span>
-              <span class="bar-line" style="width:4px;"></span>
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:4px;"></span>
-            </div>
-            <p class="strip-footer-sub">서울청년센터 영등포 × 놀면뭐AI</p>
-          </footer>
-        </article>
-
-        <!-- 프레임 컬러 변경 팔레트 -->
-        <div style="display:flex; justify-content:center; align-items:center; gap:10px; margin-top:4px;">
-          <span style="font-size:12px; font-weight:800; color:#1E232A;">프레임 테두리:</span>
-          <button class="doodle-pill frame-color-btn active" style="width:24px; height:24px; background-color:#FFFDF9; border:2.5px solid #1E232A; box-shadow:0 0 0 2.5px #1E232A; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#FFFDF9', '#1E232A', this)" title="클래식 크림"></button>
-          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#222222; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#222222', '#FFFFFF', this)" title="먹물 블랙"></button>
-          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#8F291D; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#8F291D', '#FFFFFF', this)" title="단청 레드"></button>
-          <button class="doodle-pill frame-color-btn" style="width:24px; height:24px; background-color:#152E55; border:2px solid #555; cursor:pointer; transition:all 0.15s;" onclick="changeStripColor('#152E55', '#FFFFFF', this)" title="클래식 네이비"></button>
+          <!-- 하단 QR코드 다운로드 진행 바 (항상 완벽히 표시) -->
+          <div class="result-bottom-cta-wrap" style="margin-top:auto; padding-top:10px;">
+            <button id="btn-to-finish" class="doodle-btn doodle-btn-primary" style="width:100%; padding:16px; font-size:17px; font-weight:900; border-radius:16px; display:flex; align-items:center; justify-content:center; gap:8px;" type="button">
+              <span>선택 완료 (QR 모바일 저장 & 인화) ➔</span>
+            </button>
+          </div>
         </div>
-
-        <button id="btn-to-finish" class="doodle-btn doodle-btn-primary" style="width:100%; padding:13px; font-size:15px; font-weight:900;" type="button">
-          <span>선택 완료 (QR 모바일 저장 & 인화) ➔</span>
-        </button>
       </main>
+
     </section>
 
     <!-- ==========================================
@@ -684,9 +758,14 @@
               <span class="brand-sub-mono">AI SYSTEM</span>
             </div>
           </div>
-          <div class="doodle-pill status-badge-online">
-            <span class="pulse-dot"></span>
-            <span>COMPLETE</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <button class="btn-header-back" type="button" onclick="handleGlobalBack('screen-finish')">
+              <span>‹ 뒤로</span>
+            </button>
+            <div class="doodle-pill status-badge-online">
+              <span class="pulse-dot"></span>
+              <span>COMPLETE</span>
+            </div>
           </div>
         </div>
 
@@ -700,60 +779,78 @@
       </header>
 
       <main class="finish-content">
-        <!-- 2열 미디어 (사진 + 2배속 비하인드 동영상) -->
-        <div class="finish-media-grid">
-          <div class="finish-media-box" id="btn-thumb-preview-card" title="클릭하면 큰 화면으로 다시 봅니다">
-            <div class="finish-box-header">
-              <span>📸 4컷 완성본</span>
-              <span style="font-size:9.5px; color:#008B74;">(크게보기 🔍)</span>
+        <!-- 좌측: 미디어 프리뷰 (태블릿에서 col 5) -->
+        <div class="finish-left-col">
+          <!-- 2열 미디어 (사진 + 2배속 비하인드 동영상) -->
+          <div class="finish-media-grid">
+            <div class="finish-media-box" id="btn-thumb-preview-card" title="클릭하면 큰 화면으로 다시 봅니다">
+              <div class="finish-box-header">
+                <span>📸 4컷 완성본</span>
+                <span style="font-size:9.5px; color:#008B74;">(크게보기 🔍)</span>
+              </div>
+              <div class="thumb-crop-box">
+                <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
+              </div>
             </div>
-            <div class="thumb-crop-box">
-              <img id="kiosk-finish-thumb" src="" alt="4컷 완성본">
-            </div>
-          </div>
 
-          <div class="finish-media-box">
-            <div class="finish-box-header">
-              <span>⚡ 2배속 비하인드</span>
-              <span style="font-size:9.5px; color:#B93826;">REC</span>
-            </div>
-            <div class="thumb-crop-box">
-              <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
-                <source id="kiosk-video-source" src="" type="video/mp4">
-              </video>
+            <div class="finish-media-box">
+              <div class="finish-box-header">
+                <span>⚡ 2배속 비하인드</span>
+                <span style="font-size:9.5px; color:#B93826;">REC</span>
+              </div>
+              <div class="thumb-crop-box">
+                <video id="kiosk-behind-video" controls loop autoplay muted playsinline preload="auto">
+                  <source id="kiosk-video-source" src="" type="video/mp4">
+                </video>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- 모바일 즉시 다운로드 QR 카드 -->
-        <div class="qr-mobile-download-card">
-          <span class="qr-top-del-tag">다운로드 즉시 파기 (미다운로드 시 24h)</span>
-          <div class="qr-frame-box">
-            <img id="qr-code-img" src="" alt="모바일 다운로드 QR 코드">
+        <!-- 우측: QR 다운로드 & 완료 (태블릿에서 col 7) -->
+        <div class="finish-right-col">
+          <!-- 완료 타이틀 -->
+          <div>
+            <div style="display:inline-flex; align-items:center; gap:6px; padding:4px 12px; background:#FEF3C7; border:2px solid var(--ink-black); border-radius:9999px; font-size:12px; font-weight:800; box-shadow:var(--shadow-sm); margin-bottom:8px;">
+              <span>🎉</span>
+              <span>영등포 청년 포토부스 AI 생성 완료</span>
+            </div>
+            <h2 style="font-size:22px; font-weight:900; color:var(--ink-black); line-height:1.35;">나만의 특별한 <span style="color:var(--point-red); text-decoration:underline wavy var(--point-yellow); text-underline-offset:4px;">4컷</span>이 성공적으로 완성되었습니다! ✨</h2>
           </div>
-          <div class="qr-desc-col">
-            <h3 class="qr-headline">📱 모바일 즉시 다운로드</h3>
-            <p class="qr-body-text">
-              스마트폰 기본 카메라로 <strong>QR 코드를 비추면</strong><br>
-              <strong>고화질 4컷 사진</strong>과 <strong>2배속 영상</strong>을 즉시 무료로 소장하실 수 있습니다.<br>
-              <span style="font-size:0.75rem; color:#64748B;">🔒 다운로드 즉시 클라우드 및 서버에서 안전하게 영구 파기됩니다.</span>
-            </p>
-          </div>
-        </div>
 
-        <!-- 하단 액션 버튼들 -->
-        <div class="finish-action-panel">
-          <div class="finish-dual-row">
-            <button id="btn-back-to-result" class="doodle-btn doodle-btn-secondary btn-finish-dual" type="button">
-              <span>◀ 4컷 다시보기</span>
-            </button>
-            <button id="btn-print-modal" class="doodle-btn doodle-btn-primary btn-finish-dual" type="button">
-              <span>🖨️ 엽서 인화 출력</span>
+          <!-- 모바일 즉시 다운로드 QR 카드 -->
+          <div class="qr-mobile-download-card">
+            <span class="qr-top-del-tag">24시간 후 자동 영구 삭제</span>
+            <div class="qr-frame-box">
+              <img id="qr-code-img" src="" alt="모바일 다운로드 QR 코드">
+            </div>
+            <div class="qr-desc-col">
+              <h3 class="qr-headline">📱 모바일 즉시 다운로드</h3>
+              <p class="qr-body-text">
+                스마트폰의 <strong>기본 카메라 앱</strong>을 켜서 QR코드를 비추면
+                <strong>고화질 원본 사진(JPG)</strong>과 <strong>움직이는 숏폼 GIF</strong>를 휴대폰에 즉시 무료로 저장할 수 있습니다.
+              </p>
+              <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;">
+                <span style="padding:2px 8px; background:#F0FDF4; color:#166534; font-size:11px; font-weight:700; border-radius:4px; border:1px solid #BBF7D0;">4컷 분할본 & 개별컷</span>
+                <span style="padding:2px 8px; background:#EFF6FF; color:#1E40AF; font-size:11px; font-weight:700; border-radius:4px; border:1px solid #BFDBFE;">움직이는 GIF 영상</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 하단 액션 버튼들 -->
+          <div class="finish-action-panel">
+            <div class="finish-dual-row">
+              <button id="btn-back-to-result" class="doodle-btn doodle-btn-secondary btn-finish-dual" type="button">
+                <span>◀ 4컷 다시보기</span>
+              </button>
+              <button id="btn-print-modal" class="doodle-btn doodle-btn-primary btn-finish-dual" type="button">
+                <span>🖨️ 엽서 인화 출력</span>
+              </button>
+            </div>
+            <button id="btn-reset-home" class="doodle-btn btn-finish-home" type="button">
+              <span>🔄 완료하고 처음으로 돌아가기</span>
             </button>
           </div>
-          <button id="btn-reset-home" class="doodle-btn btn-finish-home" type="button">
-            <span>🏠 처음으로 (새로운 촬영 시작)</span>
-          </button>
         </div>
       </main>
     </section>
@@ -833,6 +930,21 @@
         </div>
 
         <div class="diag-items-list">
+          <!-- 0. 백엔드 서버 연동 (ngrok / 로컬) -->
+          <div class="diag-item-box" style="background:#F0FDF4; border:2px solid #16A34A;">
+            <div class="diag-item-header">
+              <span style="font-weight:800; color:#166534;">🌐 백엔드 API 서버 연동</span>
+              <span id="diag-backend-badge" class="doodle-pill" style="background:#DCFCE7; color:#166534; font-size:9.5px; padding:1px 6px;">ngrok HTTPS</span>
+            </div>
+            <div style="margin-top:6px;">
+              <input type="text" id="diag-backend-url-input" class="config-input" style="width:100%; box-sizing:border-box; padding:7px 10px; border:1.5px solid var(--ink-black); border-radius:8px; font-size:11px; font-family:monospace;" placeholder="https://xxxx.ngrok-free.dev 또는 http://192.168.X.X:8000">
+              <div style="display:flex; gap:6px; margin-top:6px;">
+                <button id="btn-save-backend-url" class="doodle-btn" style="flex:1; padding:6px; font-size:11px; background:#22C55E; color:#fff;">💾 저장 및 연결</button>
+                <button id="btn-reset-backend-url" class="doodle-btn" style="padding:6px 12px; font-size:11px; background:#F1F5F9; color:#334155;">기본값</button>
+              </div>
+            </div>
+          </div>
+
           <!-- 1. Wi-Fi & 네트워크 -->
           <div class="diag-item-box">
             <div class="diag-item-header">
@@ -911,6 +1023,37 @@
        자바스크립트 비즈니스 로직 & 인터랙션
        ========================================== -->
   <script>
+    // ==========================================
+    // API 백엔드 URL 및 헤더 헬퍼 함수 (Vercel 전용)
+    // ==========================================
+    const DEFAULT_BACKEND_URL = 'https://seducing-issue-overflow.ngrok-free.dev';
+
+    function getApiBaseUrl() {
+      return localStorage.getItem('fourcuts_backend_url') || DEFAULT_BACKEND_URL;
+    }
+
+    function setApiBaseUrl(url) {
+      localStorage.setItem('fourcuts_backend_url', url);
+    }
+
+    function getApiHeaders(extra = {}) {
+      return {
+        'ngrok-skip-browser-warning': 'true',
+        ...extra
+      };
+    }
+
+    // 상대 URL을 ngrok 백엔드 절대 URL로 변환
+    function resolveMediaUrl(url) {
+      if (!url) return '';
+      // 이미 절대 URL(http/https/data:)이면 그대로 반환
+      if (url.startsWith('http') || url.startsWith('data:') || url.startsWith('blob:')) return url;
+      // 상대 URL이면 백엔드 기본 URL을 붙여서 절대 URL로 변환
+      const base = getApiBaseUrl().replace(/\/$/, '');
+      const path = url.startsWith('/') ? url : '/' + url;
+      return base + path;
+    }
+
     // 전역 상태 변수
     let currentScreen = 'screen-home';
     let selectedStyle = 'time_travel'; // 기본값: 인생 사계절 (연령 변환)
@@ -923,6 +1066,10 @@
     let isHighQuality = true; // 기본 모델: gpt-image-2 탑재
     let sessionId = "";
     let selectedFrameChoice = 'ai';
+    let shootCountdownSeconds = 7; // 기본 7초 (7초 / 10초 선택 가능)
+    let isShootingCancelled = false;
+    let activeCountdownInterval = null;
+    let savedAiFrameUrl = ''; // AI 변환 프레임 이미지 캐시 (테두리 변경 시 유실 방지)
 
     const conceptList = [
       { style: 'time_travel', sub: '', name: '인생 사계절 (인생 4컷)', badge: '⏳ 인생 4컷' },
@@ -947,6 +1094,54 @@
         target.scrollTop = 0;
         currentScreen = screenId;
       }
+    }
+
+    // 전역 뒤로가기 핸들러
+    function handleGlobalBack(fromScreen) {
+      if (fromScreen === 'screen-filter') {
+        navigateTo('screen-home');
+      } else if (fromScreen === 'screen-shoot') {
+        // 촬영 중지 및 웹캠 리소스 안전 정리
+        isShootingCancelled = true;
+        if (activeCountdownInterval) {
+          clearInterval(activeCountdownInterval);
+          activeCountdownInterval = null;
+        }
+        if (mediaRecorder && mediaRecorder.state === 'recording') {
+          try { mediaRecorder.stop(); } catch(e) {}
+        }
+        if (mediaStream) {
+          mediaStream.getTracks().forEach(t => t.stop());
+          mediaStream = null;
+        }
+        navigateTo('screen-filter');
+      } else if (fromScreen === 'screen-select') {
+        navigateTo('screen-filter');
+      } else if (fromScreen === 'screen-result') {
+        navigateTo('screen-select');
+      } else if (fromScreen === 'screen-finish') {
+        navigateTo('screen-result');
+      } else {
+        navigateTo('screen-home');
+      }
+    }
+
+    // 촬영 타이머 선택 (7초 / 10초)
+    function selectShootTimer(sec) {
+      shootCountdownSeconds = sec;
+      document.querySelectorAll('.timer-opt-btn').forEach(btn => {
+        if (parseInt(btn.dataset.time) === sec) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+      const numEl = document.getElementById('countdown-display-num');
+      if (numEl) numEl.innerText = sec;
+      const subEl = document.getElementById('shoot-banner-timer-sub');
+      if (subEl) subEl.innerText = `| ${sec}초 간격 셔터 찰칵!`;
+      const cutGuide = document.getElementById('shoot-cut-guide');
+      if (cutGuide) cutGuide.innerText = `각 컷마다 ${sec}초씩 촬영돼요!`;
     }
 
     // 토스트 알림 표시
@@ -1170,6 +1365,7 @@
     async function startShootingSequence() {
       capturedBlobs = [];
       sessionId = Math.random().toString(36).substring(2, 10);
+      isShootingCancelled = false;
 
       if (mediaRecorder && mediaRecorder.state === 'inactive') {
         mediaRecorder.start();
@@ -1178,16 +1374,18 @@
       const isJoseon = selectedSubTheme === 'joseon' || selectedStyle === 'joseon';
       const isPixel = selectedSubTheme === 'pixel' || selectedStyle === 'pixel';
       const isBasic = selectedSubTheme === 'basic' || selectedStyle === 'basic';
-      let cutNames = ['1컷: 유년기 (어린 시절)', '2컷: 학창시절 (교복 감성)', '3컷: 현재모습 (빛나는 청춘)', '4컷: 노년기 (온화한 미래)'];
+      let cutNames = ['유년기 (어린 시절)', '학창시절 (교복 감성)', '현재모습 (빛나는 청춘)', '노년기 (온화한 미래)'];
       if (isJoseon) {
-        cutNames = ['1컷: 왕 (위엄 가득 곤룡포)', '2컷: 양반 (풍류 흑립과 도포)', '3컷: 보부상 (팔도 패랭이 봇짐)', '4컷: 노비 (정겨운 삼베옷과 짚신)'];
+        cutNames = ['왕 (위엄 가득 곤룡포)', '양반 (풍류 흑립과 도포)', '보부상 (팔도 패랭이 봇짐)', '노비 (정겨운 삼베옷과 짚신)'];
       } else if (isPixel) {
-        cutNames = ['1컷: 레트로 픽셀 (도트 스튜디오)', '2컷: 영등포 불꽃축제 (한강 야경)', '3컷: 청년센터 내부 (서가 라운지)', '4컷: 청년센터 외부 (시그니처 민트 로비)'];
+        cutNames = ['레트로 픽셀 (도트 스튜디오)', '영등포 불꽃축제 (한강 야경)', '청년센터 내부 (서가 라운지)', '청년센터 외부 (시그니처 민트 로비)'];
       } else if (isBasic) {
-        cutNames = ['1컷: 맑은 화이트밸런스 (내추럴)', '2컷: 생기 있는 피부톤 (원본 보존)', '3컷: 부드러운 명암비 (소프트 톤)', '4컷: 따뜻한 스튜디오 감성 (포토부스)'];
+        cutNames = ['맑은 화이트밸런스 (내추럴)', '생기 있는 피부톤 (원본 보존)', '부드러운 명암비 (소프트 톤)', '따뜻한 스튜디오 감성 (포토부스)'];
       }
 
       for (let cut = 1; cut <= 4; cut++) {
+        if (isShootingCancelled) return;
+
         // 현재 컷 박스 active
         for (let i = 1; i <= 4; i++) {
           const box = document.getElementById(`cut-box-${i}`);
@@ -1210,13 +1408,15 @@
         if (counterBadge) counterBadge.innerText = `(${cut} / 4 CUT)`;
 
         const cutGuide = document.getElementById('shoot-cut-guide');
-        if (cutGuide) cutGuide.innerText = `📸 ${cutNames[cut-1]} 준비 중!`;
+        if (cutGuide) cutGuide.innerText = `📸 ${cutNames[cut-1]} 준비 중! (${shootCountdownSeconds}초)`;
 
-        // 3초 카운트다운
-        await runDoodleCountdown(3);
+        // 선택된 시간(7초 또는 10초)으로 카운트다운 실행
+        const ok = await runDoodleCountdown(shootCountdownSeconds);
+        if (!ok || isShootingCancelled) return;
 
         // 셔터 캡처
         const blob = await captureWebcamFrame();
+        if (isShootingCancelled) return;
 
         // 셔터 플래시
         const flash = document.getElementById('flash-effect');
@@ -1234,11 +1434,14 @@
         formData.append('sub_theme', selectedSubTheme);
         formData.append('is_high_quality', isHighQuality ? "true" : "false");
 
-        fetch('/api/transform_single', {
+        fetch(`${getApiBaseUrl()}/api/transform_single`, {
           method: 'POST',
+          headers: getApiHeaders(),
           body: formData
         }).catch(err => console.error('Single cut upload error:', err));
       }
+
+      if (isShootingCancelled) return;
 
       // 모든 컷 완료 처리
       for (let i = 1; i <= 4; i++) {
@@ -1249,11 +1452,12 @@
       }
 
       if (mediaRecorder && mediaRecorder.state === 'recording') {
-        mediaRecorder.stop();
+        try { mediaRecorder.stop(); } catch(e) {}
       }
 
       if (mediaStream) {
         mediaStream.getTracks().forEach(t => t.stop());
+        mediaStream = null;
       }
 
       // 4컷 확인 화면으로 이동
@@ -1270,15 +1474,27 @@
         if (numEl) numEl.innerText = count;
         if (hintEl) hintEl.innerText = '초 뒤 찰칵!';
 
-        const timer = setInterval(() => {
+        if (activeCountdownInterval) {
+          clearInterval(activeCountdownInterval);
+          activeCountdownInterval = null;
+        }
+
+        activeCountdownInterval = setInterval(() => {
+          if (isShootingCancelled) {
+            clearInterval(activeCountdownInterval);
+            activeCountdownInterval = null;
+            resolve(false);
+            return;
+          }
           count--;
           if (count > 0) {
             if (numEl) numEl.innerText = count;
           } else {
-            clearInterval(timer);
+            clearInterval(activeCountdownInterval);
+            activeCountdownInterval = null;
             if (numEl) numEl.innerText = '📸';
             if (hintEl) hintEl.innerText = '찰칵!';
-            setTimeout(resolve, 300);
+            setTimeout(() => resolve(true), 300);
           }
         }, 1000);
       });
@@ -1348,7 +1564,9 @@
         let stepMsg = "";
 
         try {
-          const r = await fetch(`/api/transform_status/${sId}`);
+          const r = await fetch(`${getApiBaseUrl()}/api/transform_status/${sId}`, {
+            headers: getApiHeaders()
+          });
           if (r.ok) {
             const data = await r.json();
             serverProg = data.progress || 10;
@@ -1407,8 +1625,9 @@
       }
 
       try {
-        const res = await fetch('/api/transform', {
+        const res = await fetch(`${getApiBaseUrl()}/api/transform`, {
           method: 'POST',
+          headers: getApiHeaders(),
           body: formData
         });
         const data = await res.json();
@@ -1429,8 +1648,12 @@
           const origPreview = document.getElementById('orig-frame-preview');
           const qrImg = document.getElementById('qr-code-img');
 
-          if (aiPreview) aiPreview.src = data.ai_frame_base64 || data.ai_frame_url;
-          if (origPreview) origPreview.src = data.orig_frame_base64 || data.orig_frame_url;
+          if (aiPreview) {
+            const aiSrc = data.ai_frame_base64 || resolveMediaUrl(data.ai_frame_url);
+            aiPreview.src = aiSrc;
+            savedAiFrameUrl = aiSrc;
+          }
+          if (origPreview) origPreview.src = data.orig_frame_base64 || resolveMediaUrl(data.orig_frame_url);
           if (qrImg) qrImg.src = data.qr_code_base64;
 
           // 날짜 바인딩
@@ -1463,12 +1686,25 @@
     const aiPreviewEl = document.getElementById('ai-frame-preview');
     const origPreviewEl = document.getElementById('orig-frame-preview');
 
+    // AI 이미지 오류 발생 시 안전 캐시로 자동 복구
+    if (aiPreviewEl) {
+      aiPreviewEl.addEventListener('error', () => {
+        if (savedAiFrameUrl && aiPreviewEl.src !== savedAiFrameUrl) {
+          console.warn('[Optimization] AI 프리뷰 로드 실패 감지 -> 캐시된 AI 프레임으로 안전 복구');
+          aiPreviewEl.src = savedAiFrameUrl;
+        }
+      });
+    }
+
     if (tabAi && tabOrig) {
       tabAi.addEventListener('click', () => {
         selectedFrameChoice = 'ai';
         tabAi.classList.add('active');
         tabOrig.classList.remove('active');
-        if (aiPreviewEl) aiPreviewEl.style.display = 'block';
+        if (aiPreviewEl) {
+          aiPreviewEl.style.display = 'block';
+          if (!aiPreviewEl.src && savedAiFrameUrl) aiPreviewEl.src = savedAiFrameUrl;
+        }
         if (origPreviewEl) origPreviewEl.style.display = 'none';
       });
 
@@ -1481,7 +1717,7 @@
       });
     }
 
-    let currentFrameBg = '#FFFDF9';
+    let currentFrameBg = '#FFFFFF';
     let currentFrameText = '#1E232A';
 
     function changeStripColor(bgColor, textColor, btnEl) {
@@ -1506,14 +1742,18 @@
         btnEl.classList.add('active');
         btnEl.style.boxShadow = '0 0 0 2.5px #1E232A';
         btnEl.style.borderColor = '#1E232A';
-        btnEl.style.transform = 'scale(1.15)';
+        btnEl.style.transform = 'scale(1.05)';
       }
 
-      // 3. 백엔드에서 1번 프리뷰 스타일의 고해상도 프레임 실시간 재생성 요청
+      // 3. AI 변환 프레임 보존 및 백엔드 프레임 갱신
+      if (aiPreviewEl && aiPreviewEl.src && !aiPreviewEl.src.includes('data:image/svg')) {
+        savedAiFrameUrl = aiPreviewEl.src;
+      }
+
       if (transformResult && transformResult.session_id) {
-        fetch('/api/update-frame-color', {
+        fetch(`${getApiBaseUrl()}/api/update-frame-color`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getApiHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             session_id: transformResult.session_id,
             frame_type: selectedFrameChoice || 'ai',
@@ -1523,9 +1763,13 @@
         }).then(r => r.json()).then(data => {
           if (data && data.success && data.frame_url) {
             const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
-            if (activeImg) activeImg.src = data.frame_url + '?t=' + Date.now();
+            if (activeImg) {
+              const newSrc = resolveMediaUrl(data.frame_url) + '?t=' + Date.now();
+              activeImg.src = newSrc;
+              if (selectedFrameChoice === 'ai') savedAiFrameUrl = newSrc;
+            }
             const finishThumb = document.getElementById('kiosk-finish-thumb');
-            if (finishThumb) finishThumb.src = data.frame_url + '?t=' + Date.now();
+            if (finishThumb) finishThumb.src = resolveMediaUrl(data.frame_url) + '?t=' + Date.now();
             if (data.qr_code_base64) {
               const qrImg = document.getElementById('qr-code-img');
               if (qrImg) qrImg.src = data.qr_code_base64;
@@ -1535,7 +1779,93 @@
               }
             }
           }
-        }).catch(e => console.log('Update frame color error:', e));
+        }).catch(e => {
+          console.log('[Optimization] 테두리 변경 알림 (캐시된 AI 프레임 유지):', e);
+          if (selectedFrameChoice === 'ai' && aiPreviewEl && savedAiFrameUrl) {
+            aiPreviewEl.src = savedAiFrameUrl;
+          }
+        });
+      }
+    }
+
+    // 2배속 비하인드 동영상 안전 프리뷰 로더 (ngrok 경고 페이지 완전 우회 & 로컬 Blob 즉시 재생)
+    async function loadKioskBehindVideo() {
+      const vid = document.getElementById('kiosk-behind-video');
+      const src = document.getElementById('kiosk-video-source');
+      if (!vid) return;
+
+      // 이미 정상 로드된 Blob 영상이 재생 가능한 상태이면 재생만 재개
+      if (vid.src && vid.src.startsWith('blob:') && vid.readyState >= 2 && !vid.error) {
+        vid.play().catch(() => {});
+        return;
+      }
+
+      let localBlobUrl = null;
+
+
+      // 1) [즉시 프리뷰] 태블릿 브라우저 메모리에 녹화된 원본 영상이 있으면 0초 즉시 재생
+      if (recordedChunks && recordedChunks.length > 0) {
+        try {
+          const type = recordedChunks[0]?.type || 'video/webm';
+          const localBlob = new Blob(recordedChunks, { type });
+          localBlobUrl = URL.createObjectURL(localBlob);
+          vid.src = localBlobUrl;
+          if (src) src.src = localBlobUrl;
+          vid.load();
+          vid.play().catch(e => console.log('[Video Preview] 로컬 프리뷰 자동재생:', e));
+          console.log('[Video Preview] ✅ 촬영 녹화 영상 즉시 프리뷰 연결 완료');
+        } catch (localErr) {
+          console.warn('[Video Preview] 로컬 Blob 생성 실패:', localErr);
+        }
+      }
+
+      // 비디오 태그 에러 발생 시 로컬 Blob으로 자동 복구 핸들러
+      vid.onerror = (e) => {
+        console.warn('[Video Preview] ⚠️ 비디오 로드 오류 감지 -> 로컬 녹화본으로 안전 롤백', e);
+        if (localBlobUrl && vid.src !== localBlobUrl) {
+          vid.src = localBlobUrl;
+          if (src) src.src = localBlobUrl;
+          vid.load();
+          vid.play().catch(() => {});
+        }
+      };
+
+      // 2) [서버 2배속 MP4 교체] ngrok 브라우저 경고 페이지를 우회하기 위해 fetch(Blob) 스트림 수신
+      if (transformResult && transformResult.video_url) {
+        const fullVideoUrl = resolveMediaUrl(transformResult.video_url);
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const res = await fetch(fullVideoUrl, {
+            signal: controller.signal,
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const blob = await res.blob();
+            // HTML이 아닌 정상적인 비디오 Blob인지 확인 (ngrok 경고 페이지는 text/html)
+            if (blob.size > 500 && !blob.type.includes('html')) {
+              const serverBlobUrl = URL.createObjectURL(blob);
+              vid.src = serverBlobUrl;
+              if (src) src.src = serverBlobUrl;
+              vid.load();
+              vid.play().catch(e => console.log('[Video Preview] 서버 2배속 재생:', e));
+              console.log('[Video Preview] ✅ 서버 2배속 인코딩 MP4 Blob 변환 교체 성공');
+              return;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('[Video Preview] 서버 비디오 fetch 불가, 로컬 녹화본 유지:', fetchErr);
+        }
+      }
+
+      // 3) [Google Drive CDN Fallback] 로컬 및 ngrok 모두 실패 시 클라우드 CDN 활용
+      if (transformResult && transformResult.video_file_id && (!localBlobUrl || vid.error)) {
+        const cdnUrl = `https://lh3.googleusercontent.com/d/${transformResult.video_file_id}`;
+        vid.src = cdnUrl;
+        if (src) src.src = cdnUrl;
+        vid.load();
       }
     }
 
@@ -1545,19 +1875,12 @@
       const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
       if (thumb && activeImg) thumb.src = activeImg.src;
 
-      if (transformResult && transformResult.video_url) {
-        const vid = document.getElementById('kiosk-behind-video');
-        const src = document.getElementById('kiosk-video-source');
-        if (vid && src) {
-          vid.src = transformResult.video_url;
-          src.src = transformResult.video_url;
-          vid.load();
-          vid.play().catch(e => console.log('Autoplay:', e));
-        }
-      }
+      // 2배속 비하인드 동영상 안전 프리뷰 로드 실행
+      loadKioskBehindVideo();
 
       navigateTo('screen-finish');
     });
+
 
     // 4컷 다시보기 (이미지 즉시 복원 보장)
     function restoreResultPreview() {
@@ -1572,7 +1895,7 @@
             } else if (selectedFrameChoice === 'orig' && transformResult.orig_frame_base64) {
               activeImg.src = transformResult.orig_frame_base64;
             } else if (transformResult.ai_frame_url) {
-              activeImg.src = transformResult.ai_frame_url + '?t=' + Date.now();
+              activeImg.src = resolveMediaUrl(transformResult.ai_frame_url) + '?t=' + Date.now();
             }
           }
         }
@@ -1637,9 +1960,9 @@
       }
 
       // 백엔드 인쇄 호출 (사용자가 선택한 frame_color 및 text_color 전송)
-      fetch('/api/print', {
+      fetch(`${getApiBaseUrl()}/api/print`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           session_id: transformResult.session_id,
           frame_type: selectedFrameChoice || 'ai',
@@ -1733,7 +2056,9 @@
     async function checkHealth(manual = false) {
       const start = performance.now();
       try {
-        const res = await fetch('/api/diagnostics/health');
+        const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/health`, {
+          headers: getApiHeaders()
+        });
         const lat = Math.round(performance.now() - start);
         if (!res.ok) throw new Error();
         const data = await res.json();
@@ -1767,8 +2092,50 @@
       }
     }
 
+    const btnOpenServerCfg = document.getElementById('btn-open-server-cfg');
+    const inputBackendUrl = document.getElementById('diag-backend-url-input');
+    const btnSaveBackend = document.getElementById('btn-save-backend-url');
+    const btnResetBackend = document.getElementById('btn-reset-backend-url');
+
+    function syncBackendInput() {
+      if (inputBackendUrl) {
+        inputBackendUrl.value = getApiBaseUrl();
+      }
+    }
+
+    if (btnOpenServerCfg) {
+      btnOpenServerCfg.addEventListener('click', () => {
+        syncBackendInput();
+        diagModal.classList.add('active');
+        checkHealth(false);
+      });
+    }
+
+    if (btnSaveBackend) {
+      btnSaveBackend.addEventListener('click', () => {
+        const val = inputBackendUrl.value.trim();
+        if (!val) {
+          showToast('백엔드 주소를 입력해주세요.');
+          return;
+        }
+        setApiBaseUrl(val);
+        showToast('✅ 백엔드 서버 주소가 저장되었습니다.');
+        checkHealth(true);
+      });
+    }
+
+    if (btnResetBackend) {
+      btnResetBackend.addEventListener('click', () => {
+        localStorage.removeItem('fourcuts_backend_url');
+        syncBackendInput();
+        showToast('기본 ngrok 주소로 초기화되었습니다.');
+        checkHealth(true);
+      });
+    }
+
     if (btnOpenDiag) {
       btnOpenDiag.addEventListener('click', () => {
+        syncBackendInput();
         diagModal.classList.add('active');
         checkHealth(false);
       });
@@ -1797,7 +2164,10 @@
         btnTestPrint.disabled = true;
         btnTestPrint.innerText = '인화 전송 중...';
         try {
-          const res = await fetch('/api/diagnostics/test-print', { method: 'POST' });
+          const res = await fetch(`${getApiBaseUrl()}/api/diagnostics/test-print`, {
+            method: 'POST',
+            headers: getApiHeaders()
+          });
           const data = await res.json();
           if (res.ok && data.status === 'success') {
             showToast('🖨️ 테스트 엽서 인쇄 요청이 전송되었습니다.');

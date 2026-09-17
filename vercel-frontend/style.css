@@ -1421,6 +1421,15 @@ input:checked + .slider:before {
   gap: 8px;
 }
 
+.result-left-col,
+.result-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+
 .result-tabs-row {
   display: flex;
   gap: 8px;
@@ -2435,14 +2444,16 @@ input:checked + .slider:before {
     border-radius: 16px;
   }
 
-  /* --- 화면 5: 변환 결과 (좌우 분할) --- */
+  /* --- 화면 5: 변환 결과 (좌5:우7 분할 & 하단 CTA 바 100% 노출 보장) --- */
   .result-content {
     flex: 1;
     display: grid;
     grid-template-columns: 5fr 7fr;
     grid-template-rows: 1fr;
-    gap: 24px;
-    padding: 12px 28px;
+    gap: 28px;
+    padding: 10px 28px 16px 28px;
+    max-height: calc(100vh - 75px);
+    box-sizing: border-box;
     overflow: hidden;
   }
 
@@ -2451,49 +2462,104 @@ input:checked + .slider:before {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 12px;
+    height: 100%;
+    max-height: calc(100vh - 95px);
+    overflow: hidden;
   }
 
   .result-right-col {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    height: 100%;
+    max-height: calc(100vh - 95px);
+    padding: 4px 0;
+    box-sizing: border-box;
+  }
+
+  .result-control-top {
+    display: flex;
+    flex-direction: column;
     gap: 12px;
   }
 
   .result-tabs-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 
   .result-tab-btn {
-    padding: 10px;
+    padding: 12px 14px;
     font-size: 14px;
     border-radius: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.2s ease;
   }
 
   .photo-strip-preview-card {
-    width: 280px;
+    width: auto;
+    max-width: 320px;
+    max-height: calc(100vh - 120px);
     margin: 0 auto;
     transform: rotate(0deg);
     border-radius: 20px;
-    padding: 12px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
   }
 
   .strip-single-img-wrap {
-    min-height: 300px;
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100vh - 200px);
     border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .strip-single-img-wrap img {
+    max-height: calc(100vh - 205px);
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  .strip-signature-footer {
+    margin-top: 6px;
+    padding-top: 4px;
   }
 
   #screen-result .frame-color-btn {
-    width: 32px !important;
-    height: 32px !important;
+    min-width: 32px;
+    height: 32px;
+  }
+
+  .result-bottom-cta-wrap {
+    margin-top: auto;
+    padding-top: 8px;
   }
 
   #btn-to-finish {
-    padding: 16px !important;
+    padding: 16px 20px !important;
     font-size: 17px !important;
+    font-weight: 900 !important;
     border-radius: 16px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15), var(--shadow-sm);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
   }
+
+  #btn-to-finish:active {
+    transform: translateY(2px);
+    box-shadow: var(--shadow-sm);
+  }
+
 
   /* --- 화면 6: 완료/QR (좌5:우7 분할) --- */
   .finish-content {

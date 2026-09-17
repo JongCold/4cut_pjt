@@ -657,60 +657,91 @@
       </header>
 
       <main class="result-content">
-        <!-- 탭 스위처 -->
-        <div class="result-tabs-row">
-          <button id="tab-ai-frame" class="result-tab-btn active" type="button">
-            <span>✨ AI 스타일 4컷</span>
-          </button>
-          <button id="tab-orig-frame" class="result-tab-btn" type="button">
-            <span>📷 원본 촬영 4컷</span>
-          </button>
+        <!-- 좌측 컬럼: 실물 4컷 사진 스트립 프리뷰 -->
+        <div class="result-left-col">
+          <article class="photo-strip-preview-card" id="photo-strip-card">
+            <!-- 실제 프레임 이미지 렌더링 영역 -->
+            <div class="strip-single-img-wrap">
+              <img id="ai-frame-preview" src="" alt="AI 4컷 프레임">
+              <img id="orig-frame-preview" src="" alt="원본 4컷 프레임" style="display:none;">
+            </div>
+
+            <!-- 스트립 하단 서명 푸터 -->
+            <footer class="strip-signature-footer">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                <span class="strip-sign-title" id="strip-brand-label">청년4컷 스튜디오</span>
+                <span style="font-family:var(--font-mono); font-size:9.5px; color:#555;" id="strip-date-label">2026.09.12</span>
+              </div>
+              <div class="barcode-simulation-row">
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:1.5px;"></span>
+                <span class="bar-line" style="width:4px;"></span>
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:1px;"></span>
+                <span class="bar-line" style="width:3px;"></span>
+                <span class="bar-line" style="width:2px;"></span>
+                <span class="bar-line" style="width:4px;"></span>
+              </div>
+              <p class="strip-footer-sub">서울청년센터 영등포 × 놀면뭐AI</p>
+            </footer>
+          </article>
         </div>
 
-        <!-- 4-Cut Realistic Paper Strip 카드 프리뷰 -->
-        <article class="photo-strip-preview-card" id="photo-strip-card">
-          <!-- 실제 프레임 이미지 렌더링 영역 -->
-          <div class="strip-single-img-wrap">
-            <img id="ai-frame-preview" src="" alt="AI 4컷 프레임">
-            <img id="orig-frame-preview" src="" alt="원본 4컷 프레임" style="display:none;">
+        <!-- 우측 컬럼: 스타일 선택, 프레임 커스텀, 하단 완료 버튼 바 -->
+        <div class="result-right-col">
+          <div class="result-control-top">
+            <!-- 가이드 배너 -->
+            <div class="result-guide-box" style="padding:14px 18px; background:#F8FAFC; border:2px solid var(--ink-black); border-radius:16px; box-shadow:var(--shadow-sm); margin-bottom:12px;">
+              <div style="display:inline-flex; align-items:center; gap:6px; padding:3px 10px; background:#FEF3C7; border:1.5px solid var(--ink-black); border-radius:9999px; font-size:11.5px; font-weight:800; margin-bottom:6px;">
+                <span>✨</span>
+                <span>STEP 3 출력 프레임 선택</span>
+              </div>
+              <h2 style="font-size:19px; font-weight:900; color:var(--ink-black); margin-bottom:4px;">원하시는 프레임을 선택해주세요</h2>
+              <p style="font-size:12.5px; color:#475569; font-weight:600; line-height:1.4;">
+                <strong>AI 스타일 변환 4컷</strong>과 <strong>원본 4컷</strong> 중 마음에 드는 버전을 터치해 확인하세요.
+              </p>
+            </div>
+
+            <!-- 스타일 선택 탭 버튼 행 -->
+            <div class="result-tabs-row" style="margin-bottom:12px;">
+              <button id="tab-ai-frame" class="result-tab-btn active" type="button" style="padding:12px 14px;">
+                <span style="font-size:18px;">✨</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+                  <span style="font-size:15px; font-weight:900;">AI 스타일 4컷</span>
+                  <span style="font-size:11px; opacity:0.85; font-weight:600;">스튜디오 뷰티 보정 & 테마</span>
+                </div>
+              </button>
+              <button id="tab-orig-frame" class="result-tab-btn" type="button" style="padding:12px 14px;">
+                <span style="font-size:18px;">📷</span>
+                <div style="display:flex; flex-direction:column; align-items:flex-start; text-align:left;">
+                  <span style="font-size:15px; font-weight:900;">원본 촬영 4컷</span>
+                  <span style="font-size:11px; opacity:0.85; font-weight:600;">촬영 원본 그대로 인화</span>
+                </div>
+              </button>
+            </div>
+
+            <!-- 프레임 컬러 변경 팔레트 -->
+            <div style="display:flex; align-items:center; gap:10px; padding:10px 16px; background:#FFFFFF; border:2px solid var(--ink-black); border-radius:14px; box-shadow:var(--shadow-sm);">
+              <span style="font-size:13px; font-weight:800; color:#1E232A;">프레임 테두리:</span>
+              <button class="doodle-pill frame-color-btn active" style="padding:6px 14px; background-color:#FFFFFF; border:2px solid #1E232A; box-shadow:2px 2px 0px #1E232A; font-size:12px; font-weight:900; cursor:pointer;" onclick="changeStripColor('#FFFFFF', '#1E232A', this)" title="화이트">
+                ⚪ 클래식 화이트 (기본)
+              </button>
+            </div>
           </div>
 
-          <!-- 스트립 하단 서명 푸터 -->
-          <footer class="strip-signature-footer">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-              <span class="strip-sign-title" id="strip-brand-label">청년4컷 스튜디오</span>
-              <span style="font-family:var(--font-mono); font-size:9.5px; color:#555;" id="strip-date-label">2026.09.12</span>
-            </div>
-            <div class="barcode-simulation-row">
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:1.5px;"></span>
-              <span class="bar-line" style="width:4px;"></span>
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:1px;"></span>
-              <span class="bar-line" style="width:3px;"></span>
-              <span class="bar-line" style="width:2px;"></span>
-              <span class="bar-line" style="width:4px;"></span>
-            </div>
-            <p class="strip-footer-sub">서울청년센터 영등포 × 놀면뭐AI</p>
-          </footer>
-        </article>
-
-        <!-- 프레임 컬러 변경 팔레트 (화이트 단일) -->
-        <div style="display:flex; justify-content:center; align-items:center; gap:8px; margin-top:4px;">
-          <span style="font-size:12px; font-weight:800; color:#1E232A;">프레임 테두리:</span>
-          <button class="doodle-pill frame-color-btn active" style="padding:4px 12px; background-color:#FFFFFF; border:2px solid #1E232A; box-shadow:2px 2px 0px #1E232A; font-size:11.5px; font-weight:900; cursor:pointer;" onclick="changeStripColor('#FFFFFF', '#1E232A', this)" title="화이트">
-            ⚪ 화이트 (기본)
-          </button>
+          <!-- 하단 QR코드 다운로드 진행 바 (항상 완벽히 표시) -->
+          <div class="result-bottom-cta-wrap" style="margin-top:auto; padding-top:10px;">
+            <button id="btn-to-finish" class="doodle-btn doodle-btn-primary" style="width:100%; padding:16px; font-size:17px; font-weight:900; border-radius:16px; display:flex; align-items:center; justify-content:center; gap:8px;" type="button">
+              <span>선택 완료 (QR 모바일 저장 & 인화) ➔</span>
+            </button>
+          </div>
         </div>
-
-        <button id="btn-to-finish" class="doodle-btn doodle-btn-primary" style="width:100%; padding:13px; font-size:15px; font-weight:900;" type="button">
-          <span>선택 완료 (QR 모바일 저장 & 인화) ➔</span>
-        </button>
       </main>
+
     </section>
 
     <!-- ==========================================
@@ -1757,25 +1788,99 @@
       }
     }
 
+    // 2배속 비하인드 동영상 안전 프리뷰 로더 (ngrok 경고 페이지 완전 우회 & 로컬 Blob 즉시 재생)
+    async function loadKioskBehindVideo() {
+      const vid = document.getElementById('kiosk-behind-video');
+      const src = document.getElementById('kiosk-video-source');
+      if (!vid) return;
+
+      // 이미 정상 로드된 Blob 영상이 재생 가능한 상태이면 재생만 재개
+      if (vid.src && vid.src.startsWith('blob:') && vid.readyState >= 2 && !vid.error) {
+        vid.play().catch(() => {});
+        return;
+      }
+
+      let localBlobUrl = null;
+
+
+      // 1) [즉시 프리뷰] 태블릿 브라우저 메모리에 녹화된 원본 영상이 있으면 0초 즉시 재생
+      if (recordedChunks && recordedChunks.length > 0) {
+        try {
+          const type = recordedChunks[0]?.type || 'video/webm';
+          const localBlob = new Blob(recordedChunks, { type });
+          localBlobUrl = URL.createObjectURL(localBlob);
+          vid.src = localBlobUrl;
+          if (src) src.src = localBlobUrl;
+          vid.load();
+          vid.play().catch(e => console.log('[Video Preview] 로컬 프리뷰 자동재생:', e));
+          console.log('[Video Preview] ✅ 촬영 녹화 영상 즉시 프리뷰 연결 완료');
+        } catch (localErr) {
+          console.warn('[Video Preview] 로컬 Blob 생성 실패:', localErr);
+        }
+      }
+
+      // 비디오 태그 에러 발생 시 로컬 Blob으로 자동 복구 핸들러
+      vid.onerror = (e) => {
+        console.warn('[Video Preview] ⚠️ 비디오 로드 오류 감지 -> 로컬 녹화본으로 안전 롤백', e);
+        if (localBlobUrl && vid.src !== localBlobUrl) {
+          vid.src = localBlobUrl;
+          if (src) src.src = localBlobUrl;
+          vid.load();
+          vid.play().catch(() => {});
+        }
+      };
+
+      // 2) [서버 2배속 MP4 교체] ngrok 브라우저 경고 페이지를 우회하기 위해 fetch(Blob) 스트림 수신
+      if (transformResult && transformResult.video_url) {
+        const fullVideoUrl = resolveMediaUrl(transformResult.video_url);
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 3500);
+          const res = await fetch(fullVideoUrl, {
+            signal: controller.signal,
+            headers: { 'ngrok-skip-browser-warning': 'true' }
+          });
+          clearTimeout(timeoutId);
+
+          if (res.ok) {
+            const blob = await res.blob();
+            // HTML이 아닌 정상적인 비디오 Blob인지 확인 (ngrok 경고 페이지는 text/html)
+            if (blob.size > 500 && !blob.type.includes('html')) {
+              const serverBlobUrl = URL.createObjectURL(blob);
+              vid.src = serverBlobUrl;
+              if (src) src.src = serverBlobUrl;
+              vid.load();
+              vid.play().catch(e => console.log('[Video Preview] 서버 2배속 재생:', e));
+              console.log('[Video Preview] ✅ 서버 2배속 인코딩 MP4 Blob 변환 교체 성공');
+              return;
+            }
+          }
+        } catch (fetchErr) {
+          console.warn('[Video Preview] 서버 비디오 fetch 불가, 로컬 녹화본 유지:', fetchErr);
+        }
+      }
+
+      // 3) [Google Drive CDN Fallback] 로컬 및 ngrok 모두 실패 시 클라우드 CDN 활용
+      if (transformResult && transformResult.video_file_id && (!localBlobUrl || vid.error)) {
+        const cdnUrl = `https://lh3.googleusercontent.com/d/${transformResult.video_file_id}`;
+        vid.src = cdnUrl;
+        if (src) src.src = cdnUrl;
+        vid.load();
+      }
+    }
+
     // 결과 -> Finish (QR 화면)
     document.getElementById('btn-to-finish').addEventListener('click', () => {
       const thumb = document.getElementById('kiosk-finish-thumb');
       const activeImg = selectedFrameChoice === 'ai' ? aiPreviewEl : origPreviewEl;
       if (thumb && activeImg) thumb.src = activeImg.src;
 
-      if (transformResult && transformResult.video_url) {
-        const vid = document.getElementById('kiosk-behind-video');
-        const src = document.getElementById('kiosk-video-source');
-        if (vid && src) {
-          vid.src = resolveMediaUrl(transformResult.video_url);
-          src.src = resolveMediaUrl(transformResult.video_url);
-          vid.load();
-          vid.play().catch(e => console.log('Autoplay:', e));
-        }
-      }
+      // 2배속 비하인드 동영상 안전 프리뷰 로드 실행
+      loadKioskBehindVideo();
 
       navigateTo('screen-finish');
     });
+
 
     // 4컷 다시보기 (이미지 즉시 복원 보장)
     function restoreResultPreview() {
